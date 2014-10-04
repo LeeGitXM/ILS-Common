@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="package" author="true" 
+        	classpath="/Users/chuckc/Development/ils/repo/ignition/lib/ignition-common.jar:/Users/chuckc/Development/ils/repo/external/lib/log4j-1.2.16.jar:/Users/chuckc/Development/ils/repo/external/lib/gson-2.2.2.jar" 
+        	destdir="doc" doctitle="ILS Common Library" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="com.ils.common.collector,com.ils.common" source="1.6" sourcepath="src" splitindex="true" use="true" version="true"/>
+    </target>
+</project>
