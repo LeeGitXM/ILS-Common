@@ -71,7 +71,7 @@ public class WatchdogTimer implements Runnable   {
 	 */
 	public synchronized void removeWatchdog(final Watchdog dog) {
 		if( dog!=null) {
-			log.infof("%s: Removing dog %s",TAG,dog.toString());
+			log.debugf("%s: Removing dog %s",TAG,dog.toString());
 			int index = dogs.indexOf(dog);
 			if( index>=0 ) {
 				dogs.remove(index);
@@ -95,7 +95,7 @@ public class WatchdogTimer implements Runnable   {
 	 */
 	public synchronized void updateWatchdog(final Watchdog dog) {
 		if( dog==null ) return;
-		log.infof("%s: Updating (pet) dog %s",TAG,dog.toString());
+		log.debugf("%s: Updating (pet) dog %s",TAG,dog.toString());
 		int index = dogs.indexOf(dog);
 		if( index>=0 ) {
 			dogs.remove(index);
@@ -136,7 +136,7 @@ public class WatchdogTimer implements Runnable   {
 		}
 		else {
 			Watchdog dog = dogs.pop();
-			log.infof("%s.fireWatchdog: %s ",TAG,dog.toString());
+			log.debugf("%s.fireWatchdog: %s ",TAG,dog.toString());
 			dog.setActive(false);
 			threadPool.execute(new WatchdogExpirationTask(dog));
 		}
