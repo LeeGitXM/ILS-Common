@@ -76,7 +76,34 @@ public class CircularRealBuffer implements RandomAccess {
 		return values;
 	}
 	
-	
+	/**
+	 * @return an array of all members, in chronological order
+	 */
+	public synchronized double[] getLastNValues(int n) {
+		double[] values = new double[n];
+		int i = wrapIndex(leader-n);
+		int index = 0;
+		while(i != leader){
+			//log.trace(String.format("%s getValues %f at %d", TAG,buf[i],i));
+			values[index] = buf[i];
+			index++;
+			i = wrapIndex(++i);
+		}
+		return values;
+	}
+
+	/** Get the most recently added  value */
+	public synchronized double getLastValue() {
+		if(size == 0) throw new IllegalArgumentException("Empty buffer");
+		return buf[wrapIndex(leader-1)];
+	}
+
+	/** Get the next most recently added  value */
+	public synchronized double getNextToLastValue() {
+		if(size < 2) throw new IllegalArgumentException("Empty buffer");
+		return buf[wrapIndex(leader-2)];
+	}
+
 	/**
 	 * @return the current number of observations in the history
 	 */
