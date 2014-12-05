@@ -79,9 +79,9 @@ public class CircularRealBuffer implements RandomAccess {
 	/**
 	 * @return an array of all members, in chronological order
 	 */
-	public synchronized double[] getLastNValues(int n) {
-		double[] values = new double[n];
-		int i = wrapIndex(leader-n);
+	public synchronized double[] getLastNValues(int count) {
+		double[] values = new double[count];
+		int i = wrapIndex(leader-count);
 		int index = 0;
 		while(i != leader){
 			//log.trace(String.format("%s getValues %f at %d", TAG,buf[i],i));
