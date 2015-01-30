@@ -19,7 +19,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  *  Interested entities register as TimeoutObservers. 
  */
 public class WatchdogTimer implements Runnable   {
-	private final static String TAG = "WatchdogTimer: ";
+	private final static String TAG = "WatchdogTimer";
 	private final static int IDLE_DELAY = 60000;    // One minute
 	private static int THREAD_POOL_SIZE = 20;       // Evaluate threads
 	private final LoggerEx log;
@@ -81,7 +81,7 @@ public class WatchdogTimer implements Runnable   {
 				}
 			}
 			else {
-				log.warnf("%s.removeWatchdog: Unrecognized watchdog (%s)",TAG,dog.toString());
+				log.debugf("%s.removeWatchdog: Unrecognized watchdog (%s)",TAG,dog.toString());
 			}
 		}
 	}
