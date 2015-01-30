@@ -34,7 +34,7 @@ public class Cloner {
 					Object value = table.get(key);
 					if( value==null) {
 						// Simply don't propagate a null parameter
-						log.debug(TAG+"tableToPyDictionary: key "+key+"= null, ignored");
+						log.debug(TAG+"clone: key "+key+"= null, ignored");
 					}
 					// "Simple datatypes"
 					else if( value instanceof String ||

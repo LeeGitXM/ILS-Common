@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.python.core.PyDictionary;
 import org.python.core.PyList;
+import org.python.core.PyObject;
 
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
@@ -21,6 +22,20 @@ public class JavaToPython {
 	private static final String TAG = "JavaToPython";
 	private static LoggerEx log = LogUtil.getLogger(JavaToPython.class.getPackage().getName());
 	
+	public PyObject objectToPy(Object obj) {
+		PyObject result = null;
+		if( obj instanceof Hashtable<?,?> ) {
+			tableToPyDictionary((Hashtable<String,?>)obj);
+		}
+		else if (obj instanceof List<?> ) {
+			log.tracef("%s: listToPyList: embedded list ...",TAG);
+			result = listToPyList((List<?>)obj);
+		}
+		else {
+			result = (PyObject)obj;
+		}
+		return result;
+	}
 	/**
 	 * Assuming the contents of the Java list are simple types or PyDictionary objects, recursively
 	 * convert to a PyLists. If Hashtables, they are guaranteed to have string keys.
