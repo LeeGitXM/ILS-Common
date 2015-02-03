@@ -7,9 +7,13 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 
+import org.python.core.PyBoolean;
 import org.python.core.PyDictionary;
+import org.python.core.PyFloat;
+import org.python.core.PyInteger;
 import org.python.core.PyList;
 import org.python.core.PyObject;
+import org.python.core.PyString;
 
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
@@ -24,7 +28,25 @@ public class JavaToPython {
 	
 	public PyObject objectToPy(Object obj) {
 		PyObject result = null;
-		if( obj instanceof Hashtable<?,?> ) {
+		
+		// "Simple datatypes" 
+		if( obj instanceof String ) {
+			result = new PyString(obj.toString());
+		}
+		else if( obj instanceof Integer ) {
+			result = new PyInteger(((Integer)obj).intValue());
+		}
+		else if( obj instanceof Double ) {
+			result = new PyFloat(((Double)obj).doubleValue());
+		}
+		else if( obj instanceof Float ) {
+			result = new PyFloat(((Float)obj).floatValue());
+		}
+		else if( obj instanceof Boolean ) {
+			result = new PyBoolean(((Boolean)obj).booleanValue());
+		}
+		// Lists and tables
+		else if( obj instanceof Hashtable<?,?> ) {
 			tableToPyDictionary((Hashtable<String,?>)obj);
 		}
 		else if (obj instanceof List<?> ) {
@@ -32,7 +54,7 @@ public class JavaToPython {
 			result = listToPyList((List<?>)obj);
 		}
 		else {
-			result = (PyObject)obj;
+			log.infof("%s.objectToPy: Error: %s (unknown datatype, ignored)",TAG,obj.getClass().getName());
 		}
 		return result;
 	}
