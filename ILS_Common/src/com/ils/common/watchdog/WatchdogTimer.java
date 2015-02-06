@@ -1,5 +1,5 @@
 /**
- *   (c) 2013  ILS Automation. All rights reserved.
+ *   (c) 2013-2025  ILS Automation. All rights reserved.
  */
 package com.ils.common.watchdog;
 
@@ -28,6 +28,7 @@ public class WatchdogTimer implements Runnable   {
 	private final ExecutorService threadPool;
 	private Thread watchdogThread = null;
 	private final Watchdog idleDog;
+	private double factor = 1.0;    // Clock speedup factor
 
 	/**
 	 * Constructor: Creates a timeout timer. The timer thread is started and
@@ -60,6 +61,17 @@ public class WatchdogTimer implements Runnable   {
 	public void addWatchdog(final Watchdog dog) {
 		if(dog==null)  return;   // Ignore
 		 insert(dog);
+	}
+	/**
+	 * Set the clock speed execution factor. For production
+	 * the value should ALWAYS be 1.0. This feature is a 
+	 * test speedup capability. NOTE: the time-increment 
+	 * fact actually used by this function is the reciprical
+	 * of the value given here.
+	 * @param fact
+	 */
+	public void setFactor(double fact) {
+		if( fact>0.0 ) factor = 1.0/fact;
 	}
 
 	/**
@@ -164,7 +176,7 @@ public class WatchdogTimer implements Runnable   {
 		while( !stopped  ) {
 			long now = System.nanoTime()/1000000;   // Work in milliseconds
 			Watchdog head = dogs.getFirst();
-			long waitTime = head.getExpiration()-now;
+			long waitTime = (long)((head.getExpiration()-now)*factor);
 			try {
 				if( waitTime>0 ) {
 					log.tracef("%s.run: WAIT for %d ms",TAG,waitTime);
