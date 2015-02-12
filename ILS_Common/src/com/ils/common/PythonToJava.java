@@ -4,6 +4,7 @@
 package com.ils.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -230,6 +231,63 @@ public class PythonToJava {
 				}
 				else {
 					log.warnf("%s: pyDictionaryToTable: Error: key not a string (%s), ignored",TAG,key.getClass().getName());
+				}
+			}
+		}
+		return result;
+	}
+	/**
+	 * Assuming the contents of the PyDictionary are either simple objects, other PyDictionary objects, 
+	 * or PyLists, recursively convert the PyDictionary to a Hashtable. The key is always taken to be a string. If
+	 * the value is not a simple datatype, a PyDictionary or PyList, then it is taken to be a string.
+	 */
+	public synchronized HashMap<String,?> pyDictionaryToMap(PyDictionary dict) {
+		HashMap<String,Object> result = new HashMap<String,Object>();
+		log.tracef("%s: pyDictionaryToMap: Analyzing map ...",TAG);
+		if(dict!=null ) {
+			@SuppressWarnings("rawtypes")
+			Set keys = dict.keySet();
+			for(Object key:keys ) {
+				if( key instanceof String ) {
+					Object value = dict.get(key);
+					if( value==null) {
+						// Simply don't propogate a null parameter
+						log.debug(TAG+"pyDictionaryToTable: "+key+"= null, ignored");
+					}
+					// The "simple" datatypes come through as standard Java, not Python
+					// thanks to Jython
+					else if( value instanceof String  ||
+							 value instanceof Float   ||
+							 value instanceof Double  ||
+							 value instanceof Integer ||
+							 value instanceof Boolean    ) {
+						result.put(key.toString(),value);
+					}
+					// Embedded dictionary
+					else if( value instanceof PyDictionary ) {
+						log.tracef(TAG+"%s: pyDictionaryToMap: key %s = embedded dictionary ...",TAG,key);
+						HashMap<String,?> map = pyDictionaryToMap((PyDictionary)value);
+						result.put(key.toString(), map);
+					}
+					// Embedded List -- why does the instanceof fail?
+					else if( (value instanceof org.python.core.PyList) || value.getClass().getName().equalsIgnoreCase("org.python.core.PyList") ) {
+						log.tracef(TAG+"%s: pyDictionaryToMap: key %s = embedded list ...",TAG,key);
+						List<?> list = pyListToArrayList((PyList)value);
+						result.put(key.toString(), list);
+					}
+					// Embedded array
+					else if( (value instanceof org.python.core.PyTuple)  ) {
+						List<?> list = pyTupleToArrayList((PyTuple)value);
+						result.put(key.toString(), list);
+					}
+					// Unknown, unhandled type
+					else {
+						log.warnf("%s: pyDictionaryToMap: %s = %s (unhandled hashtable type)",TAG,key,value.getClass().getName());
+						log.tracef("%s: pyDictionaryToMap: value isPyList: %s",TAG,(value instanceof org.python.core.PyList?"true":"false"));
+					}	
+				}
+				else {
+					log.warnf("%s: pyDictionaryToMap: Error: key not a string (%s), ignored",TAG,key.getClass().getName());
 				}
 			}
 		}
