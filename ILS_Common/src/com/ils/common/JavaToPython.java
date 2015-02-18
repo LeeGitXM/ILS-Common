@@ -27,6 +27,7 @@ public class JavaToPython {
 	private static final String TAG = "JavaToPython";
 	private static LoggerEx log = LogUtil.getLogger(JavaToPython.class.getPackage().getName());
 	
+	@SuppressWarnings("unchecked")
 	public PyObject objectToPy(Object obj) {
 		PyObject result = null;
 		
@@ -48,7 +49,10 @@ public class JavaToPython {
 		}
 		// Lists and tables
 		else if( obj instanceof Hashtable<?,?> ) {
-			tableToPyDictionary((Hashtable<String,?>)obj);
+			result = tableToPyDictionary((Hashtable<String,?>)obj);
+		}
+		else if( obj instanceof HashMap<?,?> ) {
+			result = tableToPyDictionary((HashMap<String,?>)obj);
 		}
 		else if (obj instanceof List<?> ) {
 			log.tracef("%s: listToPyList: embedded list ...",TAG);
