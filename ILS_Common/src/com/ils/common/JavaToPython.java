@@ -48,10 +48,10 @@ public class JavaToPython {
 			result = new PyBoolean(((Boolean)obj).booleanValue());
 		}
 		// Lists and tables
-		else if( obj instanceof Hashtable<?,?> ) {
+		else if( obj instanceof java.util.Hashtable ) {
 			result = tableToPyDictionary((Hashtable<String,?>)obj);
 		}
-		else if( obj instanceof HashMap<?,?> ) {
+		else if( obj instanceof java.util.HashMap ) {
 			result = tableToPyDictionary((HashMap<String,?>)obj);
 		}
 		else if (obj instanceof List<?> ) {

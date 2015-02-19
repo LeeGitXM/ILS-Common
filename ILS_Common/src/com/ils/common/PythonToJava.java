@@ -293,4 +293,62 @@ public class PythonToJava {
 		}
 		return result;
 	}
+	
+	/**
+	 * Update the contents of the map with the contents of the dictionary.
+	 * The keys of both are guaranteed to be Strings. This is used when
+	 * updating a map argument with a script result, so it is important
+	 * to update the original object, not a copy.
+	 * @param map
+	 * @param dict
+	 */
+	public void updateMapFromDictionary(HashMap<String,Object> map, PyDictionary dict) {
+		if(dict!=null ) {
+			@SuppressWarnings("rawtypes")
+			Set keys = dict.keySet();
+			for(Object key:keys ) {
+				if( key instanceof String ) {
+					Object value = dict.get(key);
+					if( value==null) {
+						// Simply don't propogate a null parameter
+						log.debug(TAG+"updateMapFromDictionary: "+key+"= null, ignored");
+					}
+					// The "simple" datatypes come through as standard Java, not Python
+					// thanks to Jython
+					else if( value instanceof String  ||
+							 value instanceof Float   ||
+							 value instanceof Double  ||
+							 value instanceof Integer ||
+							 value instanceof Boolean    ) {
+						map.put(key.toString(),value);
+					}
+					// Embedded dictionary
+					else if( value instanceof PyDictionary ) {
+						log.tracef(TAG+"%s: updateMapFromDictionary: key %s = embedded dictionary ...",TAG,key);
+						HashMap<String,?> maparg = pyDictionaryToMap((PyDictionary)value);
+						map.put(key.toString(), maparg);
+					}
+					// Embedded List -- why does the instanceof fail?
+					else if( (value instanceof org.python.core.PyList) || value.getClass().getName().equalsIgnoreCase("org.python.core.PyList") ) {
+						log.tracef(TAG+"%s: updateMapFromDictionary: key %s = embedded list ...",TAG,key);
+						List<?> list = pyListToArrayList((PyList)value);
+						map.put(key.toString(), list);
+					}
+					// Embedded array
+					else if( (value instanceof org.python.core.PyTuple)  ) {
+						List<?> list = pyTupleToArrayList((PyTuple)value);
+						map.put(key.toString(), list);
+					}
+					// Unknown, unhandled type
+					else {
+						log.warnf("%s.updateMapFromDictionary: %s = %s (unhandled hashtable type)",TAG,key,value.getClass().getName());
+						log.tracef("%s.updateMapFromDictionary: value isPyList: %s",TAG,(value instanceof org.python.core.PyList?"true":"false"));
+					}	
+				}
+				else {
+					log.warnf("%s.updateMapFromDictionary: Error: key not a string (%s), ignored",TAG,key.getClass().getName());
+				}
+			}
+		}
+	}
 }
