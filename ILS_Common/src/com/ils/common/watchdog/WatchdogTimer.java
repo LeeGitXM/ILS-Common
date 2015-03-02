@@ -154,18 +154,34 @@ public class WatchdogTimer implements Runnable   {
 		}
 	}
 
+	/**
+	 * This is for a restart. Use a new thread.
+	 */
+	public synchronized void start() {
+		if( stopped ) {
+			dogs.clear();
+			dogs.push(idleDog);
+			stopped = false;
+			watchdogThread = new Thread(this, "WatchdogTimer");
+			watchdogThread.setDaemon(true);
+			watchdogThread.start();
+			log.infof("%s.RESTART watchdog thread %s (%d)",TAG,watchdogThread.getName(),watchdogThread.hashCode());
+		}
+	}
 
 	/**
 	 * On stop, set all the dogs to inactive.
 	 */
 	public synchronized void stop() {
-		for(Watchdog wd:dogs ) {
-			wd.setActive(false);
-		}
-		log.debug(TAG+"STOPPED");
-		stopped = true;
-		if(watchdogThread!=null) {
-			watchdogThread.interrupt();
+		if( !stopped ) {
+			for(Watchdog wd:dogs ) {
+				wd.setActive(false);
+			}
+			log.debug(TAG+"STOPPED");
+			stopped = true;
+			if(watchdogThread!=null) {
+				watchdogThread.interrupt();
+			}
 		}
 	}
 	
