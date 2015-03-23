@@ -29,14 +29,23 @@ public class WatchdogTimer implements Runnable   {
 	private Thread watchdogThread = null;
 	private final Watchdog idleDog;
 	private double factor = 1.0;    // Clock speedup factor
+	private String name = TAG;
 
+	/**
+	 * Constructor: This version of the constructor supplies a name.
+	 * @param timer name
+	 */
+	public WatchdogTimer(String tname)  {
+		this();
+		this.name = tname;
+	}
+	
 	/**
 	 * Constructor: Creates a timeout timer. The timer thread is started and
 	 *              runs continuously until a stop is issued. If no other
 	 *              watchdogs are active, the idle dog is used.
 	 *              The dogs hold their absolute expiration times and are
 	 *              sorted accordingly.
-	 * @param timeout
 	 */
 	public WatchdogTimer()  {
 		log = LogUtil.getLogger(getClass().getPackage().getName());
@@ -49,7 +58,7 @@ public class WatchdogTimer implements Runnable   {
 		watchdogThread = new Thread(this, "WatchdogTimer");
 		watchdogThread.setDaemon(true);
 		watchdogThread.start();
-		log.infof("%s.START watchdog thread %s (%d)",TAG,watchdogThread.getName(),watchdogThread.hashCode());
+		log.infof("%s.START watchdog thread %s (%d)",name,watchdogThread.getName(),watchdogThread.hashCode());
 
 	}
 
@@ -63,10 +72,14 @@ public class WatchdogTimer implements Runnable   {
 		 insert(dog);
 	}
 	/**
+	 * @return the reciprocal of the time factor. Yt's the speedup factor.
+	 */
+	public double getFactor() { return 1.0/factor; }
+	/**
 	 * Set the clock speed execution factor. For production
 	 * the value should ALWAYS be 1.0. This feature is a 
 	 * test speedup capability. NOTE: the time-increment 
-	 * fact actually used by this function is the reciprical
+	 * fact actually used by this function is the reciprocal
 	 * of the value given here.
 	 * @param fact
 	 */
@@ -83,7 +96,7 @@ public class WatchdogTimer implements Runnable   {
 	 */
 	public synchronized void removeWatchdog(final Watchdog dog) {
 		if( dog!=null) {
-			log.debugf("%s: Removing dog %s",TAG,dog.toString());
+			log.debugf("%s: Removing dog %s",name,dog.toString());
 			int index = dogs.indexOf(dog);
 			if( index>=0 ) {
 				dogs.remove(index);
@@ -93,7 +106,7 @@ public class WatchdogTimer implements Runnable   {
 				}
 			}
 			else {
-				log.debugf("%s.removeWatchdog: Unrecognized watchdog (%s)",TAG,dog.toString());
+				log.debugf("%s.removeWatchdog: Unrecognized watchdog (%s)",name,dog.toString());
 			}
 		}
 	}
@@ -107,7 +120,7 @@ public class WatchdogTimer implements Runnable   {
 	 */
 	public synchronized void updateWatchdog(final Watchdog dog) {
 		if( dog==null ) return;
-		log.debugf("%s: Updating (pet) dog %s",TAG,dog.toString());
+		log.debugf("%s: Updating (pet) dog %s",name,dog.toString());
 		int index = dogs.indexOf(dog);
 		if( index>=0 ) {
 			dogs.remove(index);
