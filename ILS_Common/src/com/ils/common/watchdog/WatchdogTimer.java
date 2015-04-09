@@ -14,7 +14,8 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  *  The watchdog timer manages a collection of "watchdogs". The dogs
  *  are sorted by expiration time. "petting" the dogs resets the timeout
  *  perhaps indefinitely. Once the petting stops, the dog's "evaluate"
- *  method is invoked.
+ *  method is invoked. There is always, at least one dog present in
+ *  the list, the IDLE dog.
  *  
  *  Interested entities register as TimeoutObservers. 
  */
@@ -75,6 +76,7 @@ public class WatchdogTimer implements Runnable   {
 	 * @return the reciprocal of the time factor. Yt's the speedup factor.
 	 */
 	public double getFactor() { return 1.0/factor; }
+	public String getName()   { return this.name; }
 	/**
 	 * Set the clock speed execution factor. For production
 	 * the value should ALWAYS be 1.0. This feature is a 
@@ -149,21 +151,28 @@ public class WatchdogTimer implements Runnable   {
 	}
 
 	/**
-	 * If the top dog is the IDLE dog, then simply "pet" it.
+	 * If the only dog is the IDLE dog, then simply "pet" it.
 	 * Otherwise pop the top dog and inform its observer of the expiration. 
 	 * Run the observer in its own thread. 
 	 */
 	protected final void fireWatchdog() {
 		Watchdog head = dogs.getFirst();
-		if( head.equals(idleDog) ) {
+		if( head.equals(idleDog) && dogs.size() == 1 ) {
 			idleDog.setDelay(IDLE_DELAY);
-			updateWatchdog(idleDog);
 		}
 		else {
 			Watchdog dog = dogs.pop();
-			log.debugf("%s.fireWatchdog: %s ",TAG,dog.toString());
-			dog.setActive(false);
-			threadPool.execute(new WatchdogExpirationTask(dog));
+			if( dog.equals(idleDog)) {
+				// Add the idle dog to the end of the list
+				Watchdog tail = dogs.getLast();
+				idleDog.setExpiration(tail.getExpiration()+IDLE_DELAY);
+				dogs.addLast(idleDog);
+			}
+			else {
+				log.debugf("%s.fireWatchdog: %s ",name,dog.toString());
+				dog.setActive(false);
+				threadPool.execute(new WatchdogExpirationTask(dog));
+			}
 		}
 	}
 
@@ -190,7 +199,7 @@ public class WatchdogTimer implements Runnable   {
 			for(Watchdog wd:dogs ) {
 				wd.setActive(false);
 			}
-			log.debug(TAG+"STOPPED");
+			log.debug(getName()+":STOPPED");
 			stopped = true;
 			if(watchdogThread!=null) {
 				watchdogThread.interrupt();
@@ -208,20 +217,20 @@ public class WatchdogTimer implements Runnable   {
 			long waitTime = (long)((head.getExpiration()-now)*factor);
 			try {
 				if( waitTime>0 ) {
-					log.tracef("%s.run: WAIT for %d ms",TAG,waitTime);
+					log.tracef("%s.run: WAIT for %d ms",getName(),waitTime);
 					wait(waitTime);
 				}
-				log.tracef("%s.run: wait complete ---",TAG);
+				log.tracef("%s.run: wait complete ---",getName());
 				if (!stopped) fireWatchdog();
 			} 
 			// An interruption merely shortcuts firing the expiration
 			catch (InterruptedException e) {
-				log.tracef("%s.run: wait interrupted ---",TAG);
+				log.tracef("%s.run: wait interrupted ---",getName());
 			}
 			catch( Exception ex ) {
-				log.errorf(TAG+": Exception during timeout processing ("+ex.getLocalizedMessage()+")",ex);  // Prints stack trace
+				log.errorf(getName()+".Exception during timeout processing ("+ex.getLocalizedMessage()+")",ex);  // Prints stack trace
 			} 
 		}
-		log.infof("%s.run: END watchdog thread %s (%d)",TAG,watchdogThread.getName(),watchdogThread.hashCode());
+		log.infof("%s.run: END watchdog thread %s (%d)",getName(),watchdogThread.getName(),watchdogThread.hashCode());
 	}
 }

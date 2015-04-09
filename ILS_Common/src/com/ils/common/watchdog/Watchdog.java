@@ -46,6 +46,11 @@ public class Watchdog  {
 	 */
 	public long getExpiration() { return expiration;}
 	/**
+	 * Set the expiration of the timer in absolute terms ~msecs.
+	 * @param time, e.g. now is System.nanoTime()/1000000
+	 */
+	public void setExpiration(long time) { this.expiration = time; }
+	/**
 	 * Set the number of millisecs into the future for this dog to expire.
 	 * @param delay ~ msecs
 	 */
