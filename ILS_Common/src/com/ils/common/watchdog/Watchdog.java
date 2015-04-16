@@ -45,17 +45,29 @@ public class Watchdog  {
 	 * @return watchdog expiration time ~ msecs.
 	 */
 	public long getExpiration() { return expiration;}
+	
 	/**
-	 * Set the expiration of the timer in absolute terms ~msecs.
+	 * Scale the expiration by a supplied time factor. It is imperative
+	 * that this be called exactly once per execution immediately
+	 * on being added to the execution queue. Note that this is
+	 * NOT invoked by the production watchdog timer.
+	 * 
 	 * @param time, e.g. now is System.nanoTime()/1000000
 	 */
-	public void setExpiration(long time) { this.expiration = time; }
+	public void scaleExpiration(double fact) { 
+		long now = System.nanoTime()/1000000;
+		double deltatime =  expiration - now;
+		expiration = now + (long)(deltatime*fact);
+	}
 	/**
 	 * Set the number of millisecs into the future for this dog to expire.
+	 * If we've already "executed in the future" due to speedup, then 
+	 * use that time as the threshold.
 	 * @param delay ~ msecs
 	 */
 	public void setDelay(long delay) {
-		this.expiration = delay+System.nanoTime()/1000000; 
+		long now = System.nanoTime()/1000000;
+		this.expiration = delay+ now; 
 	}
 	/**
 	 * Set the number of secs into the future for this dog to expire.
@@ -64,7 +76,8 @@ public class Watchdog  {
 	 * @param delay ~ secs
 	 */
 	public void setSecondsDelay(double delay) {
-		this.expiration = (long)(delay*1000)+System.nanoTime()/1000000; 
+		setDelay((long)(delay*1000)); 
+ 
 	}
 	public void decrementExpiration(long delta) { this.expiration = expiration-delta; if( expiration<0) expiration=0;}
 	public UUID getUUID() { return uuid; }
@@ -75,10 +88,10 @@ public class Watchdog  {
 	public void expire() {
 		if(observer!=null) observer.evaluate();
 	}
+	
 	/**
 	 * Two watchdogs are equal if their Ids are equal
 	 */
-	
 	@Override
 	public boolean equals(Object object){
 		if(object instanceof Watchdog && ((Watchdog)object).getUUID() == this.uuid){

@@ -17,20 +17,22 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  *  method is invoked. There is always, at least one dog present in
  *  the list, the IDLE dog.
  *  
+ *  This is the production version of the timer. It does not allow
+ *  for alteration of the time-scale.
+ *  
  *  Interested entities register as TimeoutObservers. 
  */
 public class WatchdogTimer implements Runnable   {
-	private final static String TAG = "WatchdogTimer";
-	private final static int IDLE_DELAY = 60000;    // One minute
-	private static int THREAD_POOL_SIZE = 20;       // Evaluate threads
-	private final LoggerEx log;
-	private final LinkedList<Watchdog> dogs;
-	private boolean stopped = true;
-	private final ExecutorService threadPool;
-	private Thread watchdogThread = null;
-	private final Watchdog idleDog;
-	private double factor = 1.0;    // Clock speedup factor
-	private String name = TAG;
+	protected final static String TAG = "WatchdogTimer";
+	protected final static int IDLE_DELAY = 60000;    // One minute
+	protected static int THREAD_POOL_SIZE = 20;       // Evaluate threads
+	protected final LoggerEx log;
+	protected final LinkedList<Watchdog> dogs;
+	protected boolean stopped = true;
+	protected final ExecutorService threadPool;
+	protected Thread watchdogThread = null;
+	protected final Watchdog idleDog;
+	protected String name = TAG;
 
 	/**
 	 * Constructor: This version of the constructor supplies a name.
@@ -72,22 +74,7 @@ public class WatchdogTimer implements Runnable   {
 		if(dog==null)  return;   // Ignore
 		 insert(dog);
 	}
-	/**
-	 * @return the reciprocal of the time factor. Yt's the speedup factor.
-	 */
-	public double getFactor() { return 1.0/factor; }
 	public String getName()   { return this.name; }
-	/**
-	 * Set the clock speed execution factor. For production
-	 * the value should ALWAYS be 1.0. This feature is a 
-	 * test speedup capability. NOTE: the time-increment 
-	 * fact actually used by this function is the reciprocal
-	 * of the value given here.
-	 * @param fact
-	 */
-	public void setFactor(double fact) {
-		if( fact>0.0 ) factor = 1.0/fact;
-	}
 
 	/**
 	 * Remove the specified watchdog from the list.
@@ -99,10 +86,10 @@ public class WatchdogTimer implements Runnable   {
 	public synchronized void removeWatchdog(final Watchdog dog) {
 		if( dog!=null) {
 			log.debugf("%s: Removing dog %s",name,dog.toString());
+			dog.setActive(false);
 			int index = dogs.indexOf(dog);
 			if( index>=0 ) {
 				dogs.remove(index);
-				dog.setActive(false);
 				if( index==0) {   // We popped the top
 					watchdogThread.interrupt();
 				}
@@ -136,7 +123,7 @@ public class WatchdogTimer implements Runnable   {
 	 * Insert a new dog into the list in order.
 	 * This list is assumed never to be empty
 	 */
-	private void insert(Watchdog dog) {
+	protected void insert(Watchdog dog) {
 		int index=0;
 		dog.setActive(true);
 		for(Watchdog wd:dogs ) {
@@ -151,28 +138,20 @@ public class WatchdogTimer implements Runnable   {
 	}
 
 	/**
-	 * If the only dog is the IDLE dog, then simply "pet" it.
+	 * If top dog is the IDLE dog, then simply "pet" it.
 	 * Otherwise pop the top dog and inform its observer of the expiration. 
 	 * Run the observer in its own thread. 
 	 */
-	protected final void fireWatchdog() {
-		Watchdog head = dogs.getFirst();
-		if( head.equals(idleDog) && dogs.size() == 1 ) {
+	protected void fireWatchdog() {
+		Watchdog dog = dogs.pop();
+		if( dog.equals(idleDog) ) {
 			idleDog.setDelay(IDLE_DELAY);
+			updateWatchdog(idleDog);
 		}
 		else {
-			Watchdog dog = dogs.pop();
-			if( dog.equals(idleDog)) {
-				// Add the idle dog to the end of the list
-				Watchdog tail = dogs.getLast();
-				idleDog.setExpiration(tail.getExpiration()+IDLE_DELAY);
-				dogs.addLast(idleDog);
-			}
-			else {
-				log.debugf("%s.fireWatchdog: %s ",name,dog.toString());
-				dog.setActive(false);
-				threadPool.execute(new WatchdogExpirationTask(dog));
-			}
+			log.debugf("%s.fireWatchdog: %s ",name,dog.toString());
+			dog.setActive(false);
+			threadPool.execute(new WatchdogExpirationTask(dog));
 		}
 	}
 
@@ -214,7 +193,7 @@ public class WatchdogTimer implements Runnable   {
 		while( !stopped  ) {
 			long now = System.nanoTime()/1000000;   // Work in milliseconds
 			Watchdog head = dogs.getFirst();
-			long waitTime = (long)((head.getExpiration()-now)*factor);
+			long waitTime = (long)(head.getExpiration()-now);
 			try {
 				if( waitTime>0 ) {
 					log.tracef("%s.run: WAIT for %d ms",getName(),waitTime);
@@ -223,7 +202,7 @@ public class WatchdogTimer implements Runnable   {
 				log.tracef("%s.run: wait complete ---",getName());
 				if (!stopped) fireWatchdog();
 			} 
-			// An interruption merely shortcuts firing the expiration
+			// An interruption allows a recognition of re-ordering the queue
 			catch (InterruptedException e) {
 				log.tracef("%s.run: wait interrupted ---",getName());
 			}
