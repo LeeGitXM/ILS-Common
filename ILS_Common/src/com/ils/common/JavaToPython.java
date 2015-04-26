@@ -120,6 +120,7 @@ public class JavaToPython {
 					else if( value instanceof String ||
 							value instanceof Integer||
 							value instanceof Double ||
+							value instanceof Long ||
 							value instanceof Float||
 							value instanceof Boolean) {
 						log.tracef("%s: tableToPyDictionary: key %s = %s",TAG,key,value.getClass().getName());
@@ -172,6 +173,7 @@ public class JavaToPython {
 					else if( value instanceof String ||
 							value instanceof Integer||
 							value instanceof Double ||
+							value instanceof Long ||
 							value instanceof Float||
 							value instanceof Boolean) {
 						log.tracef("%s: tableToPyDictionary: key %s = %s",TAG,key,value.getClass().getName());
