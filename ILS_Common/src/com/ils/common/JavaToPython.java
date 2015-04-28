@@ -6,6 +6,7 @@ package com.ils.common;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.python.core.PyBoolean;
@@ -55,8 +56,12 @@ public class JavaToPython {
 			result = tableToPyDictionary((HashMap<String,?>)obj);
 		}
 		else if (obj instanceof List<?> ) {
-			log.tracef("%s: listToPyList: embedded list ...",TAG);
+			log.tracef("%s: objectToPy: embedded list ...",TAG);
 			result = listToPyList((List<?>)obj);
+		}
+		else if (obj instanceof GeneralPurposeDataContainer ) {
+			log.tracef("%s: objectToPy: GeneralPurposeDataContainer ...",TAG);
+			result = dataContainerToPy((GeneralPurposeDataContainer)obj);
 		}
 		else {
 			log.infof("%s.objectToPy: Error: %s (unknown datatype, ignored)",TAG,obj.getClass().getName());
@@ -94,6 +99,54 @@ public class JavaToPython {
 					log.infof("%s: listToPyList: Error: %s (unknown datatype, ignored)",TAG,obj.getClass().getName());
 				}
 			}
+		}
+		return result;
+	}
+	/**
+	 * The data container has, potentially three embedded structures. The container itself is
+	 * a list of the following dictionaries:
+	 * properties: string keys, string values
+	 * lists     : string keys, values are lists of strings
+	 * maplists  : string keys, values are lists of dictionaries
+	 * 
+	 * We guarantee the presence of all three. Some may be empty
+	 */
+	public synchronized PyList dataContainerToPy(GeneralPurposeDataContainer container) {
+		PyList result = new PyList();
+		log.tracef("%s: dataContainerToPy: Analyzing container ...",TAG);
+		if( container!=null ) {
+			if( container.getProperties() !=null ) {
+				@SuppressWarnings("unchecked")
+				PyDictionary dict = tableToPyDictionary(container.getProperties());
+				result.add(dict);
+			}
+			else {
+				result.add(new PyDictionary());
+			}
+			PyDictionary lists = new PyDictionary();
+			if( container.getLists()!=null ) {
+				 for(String key:container.getLists().keySet()) {
+					 List<String> list = container.getLists().get(key);
+					 PyList pylist = listToPyList(list);
+					 lists.put(key,pylist);
+				 }
+			}
+			result.add(lists);
+			
+			PyDictionary maplists = new PyDictionary();
+			if( container.getMapLists()!=null ) {
+				 for(String key:container.getMapLists().keySet()) {
+					 List<Map<String,String>> maplist = container.getMapLists().get(key);
+					 PyList pymaplist = new PyList();
+					 for(Map<String,String> map:maplist) {
+						 PyDictionary pymap = tableToPyDictionary(map);
+						 pymaplist.add(pymap);
+					 }
+					 maplists.put(key,pymaplist);
+				 }
+			}
+			result.add(maplists);
+
 		}
 		return result;
 	}
@@ -156,7 +209,7 @@ public class JavaToPython {
 	 * recursively convert to a PyDictionary from a HashMap. The key is always taken to be a string. If
 	 * the value is not a PyDictionary, then it is taken to be a string.
 	 */
-	public synchronized PyDictionary tableToPyDictionary(HashMap<String,?> table) {
+	public synchronized PyDictionary tableToPyDictionary(Map<String,?> table) {
 		PyDictionary result = new PyDictionary();
 		log.tracef("%s: tableToPyDictionary: Analyzing map ...",TAG);
 		if( table!=null ) {

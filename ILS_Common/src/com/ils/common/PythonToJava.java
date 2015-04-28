@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.python.core.PyDictionary;
@@ -302,7 +303,7 @@ public class PythonToJava {
 	 * @param map
 	 * @param dict
 	 */
-	public void updateMapFromDictionary(HashMap<String,Object> map, PyDictionary dict) {
+	public void updateMapFromDictionary(Map<String,Object> map, PyDictionary dict) {
 		if(dict!=null ) {
 			@SuppressWarnings("rawtypes")
 			Set keys = dict.keySet();
@@ -347,6 +348,150 @@ public class PythonToJava {
 				}
 				else {
 					log.warnf("%s.updateMapFromDictionary: Error: key not a string (%s), ignored",TAG,key.getClass().getName());
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Update the contents of the supplied datacontainer with the contents of the list.
+	 * We expect a fixed structure of dictionaries and lists in the Python designed to match
+	 * the container structure. Keys and data everywhere are guaranteed to be Strings. This is
+	 * used when updating the container with a script result, so it is important to update the
+	 * original object, not a copy. This does not clear existing values in the container.
+	 * 
+	 * We expect the Python list to hold 3 dictionaries: properties, lists, maplists
+	 * @param container
+	 * @param pylist
+	 */
+	@SuppressWarnings("rawtypes")
+	public void updateDataContainerFromPython(GeneralPurposeDataContainer container, PyList pylist) {
+		if(pylist!=null ) {
+			int index = 0;
+			for( Object pyobj: pylist ) {
+				index++;
+				if( index==1 ) {
+					// Properties
+					if( pyobj instanceof PyDictionary ) {
+						PyDictionary pyprops = (PyDictionary)pyobj;
+						Map<String,String> properties = container.getProperties();
+						if( properties==null ) {
+							properties = new HashMap<>();
+							container.setProperties(properties);
+						}
+						Set keys = pyprops.keySet();
+						for(Object key:keys ) {
+							// Both key and value must be strings
+							if( key instanceof String ) {
+								Object value = pyprops.get(key);
+								if( value==null) {
+									// Simply don't propogate a null parameter
+									log.infof("%s.updateDataContainerFromPython: %s= null, ignored",TAG,value);
+								}
+								else if( value instanceof String ) {
+									properties.put(key.toString(), value.toString());
+								}
+								else {
+									log.infof("%s.updateDataContainerFromPython: %s = %s, not a String, ignored",TAG,value.getClass().getName());
+								}
+							}
+							else {
+								log.infof("%s.updateDataContainerFromPython: key %s not a String, ignored",TAG,key.getClass().getName());
+							}
+						}
+					}
+					else {
+						log.warnf("%s.updateDataContainerFromPython: Error: properties not a dictionary (%s), ignored",TAG,pyobj.getClass().getName());
+					}
+				}
+				else if( index==2 ) {
+					// Lists
+					if( pyobj instanceof PyDictionary ) {
+						PyDictionary pyprops = (PyDictionary)pyobj;
+						Map<String,List<String>> lists = container.getLists();
+						if( lists==null ) {
+							lists = new HashMap<>();
+							container.setLists(lists);
+						}
+						Set keys = pyprops.keySet();
+						for(Object key:keys ) {
+							// Both key and value must be strings
+							if( key instanceof String ) {
+								Object value = pyprops.get(key);
+								if( value==null) {
+									// Simply don't propogate a null parameter
+									log.infof("%s.updateDataContainerFromPython: %s= null, ignored",TAG,value);
+								}
+								else if( value instanceof org.python.core.PyList ) {
+									List<String> list = (List<String>)pyListToArrayList((PyList)value);
+									lists.put(key.toString(), list);
+								}
+								else if( value instanceof org.python.core.PyTuple ) {
+									List<String> list = (List<String>)pyTupleToArrayList((PyTuple)value);
+									lists.put(key.toString(), list);
+								}
+								else {
+									log.infof("%s.updateDataContainerFromPython: %s = %s, not a String, ignored",TAG,value.getClass().getName());
+								}
+							}
+							else {
+								log.infof("%s.updateDataContainerFromPython: key %s not a String, ignored",TAG,key.getClass().getName());
+							}
+						}
+					}
+					else {
+						log.warnf("%s.updateDataContainerFromPython: Error: properties not a dictionary (%s), ignored",TAG,pyobj.getClass().getName());
+					}
+				}				
+				else if( index==3 ) {
+					// Maplists
+					if( pyobj instanceof PyDictionary ) {
+						PyDictionary pyprops = (PyDictionary)pyobj;
+						Map<String,List<Map<String,String>>> maplists = container.getMapLists();
+						if( maplists==null ) {
+							maplists = new HashMap<>();
+							container.setMapLists(maplists);
+						}
+						Set keys = pyprops.keySet();
+						for(Object key:keys ) {
+							// Both key and value must be strings
+							if( key instanceof String ) {
+								Object value = pyprops.get(key);
+								if( value==null) {
+									// Simply don't propogate a null parameter
+									log.infof("%s.updateDataContainerFromPython: %s= null, ignored",TAG,value);
+								}
+								// The lists contain dictionaries
+								else if( value instanceof org.python.core.PyList ) {
+									List list = pyListToArrayList((PyList)value);
+									List<Map<String,String>> maplist = new ArrayList<>();
+									for(Object obj:list) {
+										//TODO
+										log.infof("%s.updateDataContainerFromPython: maplist map is %s",TAG,obj.getClass().getName());
+									}
+									maplists.put(key.toString(), list);
+								}
+								else if( value instanceof org.python.core.PyTuple ) {
+									List list = pyTupleToArrayList((PyTuple)value);
+									List<Map<String,String>> maplist = new ArrayList<>();
+									for(Object obj:list) {
+										// TODO
+										log.infof("%s.updateDataContainerFromPython: maplist map is %s",TAG,obj.getClass().getName());
+									}
+									maplists.put(key.toString(), list);
+								}
+								else {
+									log.infof("%s.updateDataContainerFromPython: %s = %s, not a String, ignored",TAG,value.getClass().getName());
+								}
+							}
+							else {
+								log.infof("%s.updateDataContainerFromPython: key %s not a String, ignored",TAG,key.getClass().getName());
+							}
+						}
+					}
+					else {
+						log.warnf("%s.updateDataContainerFromPython: Error: properties not a dictionary (%s), ignored",TAG,pyobj.getClass().getName());
+					}
 				}
 			}
 		}
