@@ -1,5 +1,5 @@
 /**
- *   (c) 2013  ILS Automation. All rights reserved.
+ *   (c) 2013-2015  ILS Automation. All rights reserved.
  */
 package com.ils.common;
 
@@ -59,12 +59,12 @@ public class JavaToPython {
 			log.tracef("%s: objectToPy: embedded list ...",TAG);
 			result = listToPyList((List<?>)obj);
 		}
-		else if (obj instanceof GeneralPurposeDataContainer ) {
+		else if (obj instanceof com.ils.common.GeneralPurposeDataContainer ) {
 			log.tracef("%s: objectToPy: GeneralPurposeDataContainer ...",TAG);
 			result = dataContainerToPy((GeneralPurposeDataContainer)obj);
 		}
 		else {
-			log.infof("%s.objectToPy: Error: %s (unknown datatype, ignored)",TAG,obj.getClass().getName());
+			log.infof("%s.objectToPy: Error: %s (unknown datatype) ... returning NULL",TAG,obj.getClass().getName());
 		}
 		return result;
 	}
@@ -86,6 +86,10 @@ public class JavaToPython {
 					log.tracef("%s: listToPyList: embedded list ...",TAG);
 					PyList embeddedlist = listToPyList((List<?>)obj);
 					result.add(embeddedlist);
+				}
+				else if (obj instanceof com.ils.common.GeneralPurposeDataContainer ) {
+					log.tracef("%s: listToPyList: GeneralPurposeDataContainer ...",TAG);
+					result.add(dataContainerToPy((GeneralPurposeDataContainer)obj));
 				}
 				// "Simple datatypes" - let Jython take care of the conversions
 				else if( obj instanceof String ||
@@ -192,6 +196,10 @@ public class JavaToPython {
 						PyList list = listToPyList((List<?>)value);
 						result.put(key.toString(), list);
 					}
+					else if (value instanceof com.ils.common.GeneralPurposeDataContainer ) {
+						log.tracef("%s: tableToPyDictionary: GeneralPurposeDataContainer ...",TAG);
+						result.put(key.toString(),dataContainerToPy((GeneralPurposeDataContainer)value));
+					}
 					// Unknown, unhandled type
 					else {
 						log.infof("%s: tableToPyDictionary: key %s = %s (unhandled type)",TAG,key,value.getClass().getName());
@@ -244,6 +252,10 @@ public class JavaToPython {
 						log.tracef("%s: tableToPyDictionary: key %s = embedded list ...",TAG,key);
 						PyList list = listToPyList((List<?>)value);
 						result.put(key.toString(), list);
+					}
+					else if (value instanceof com.ils.common.GeneralPurposeDataContainer ) {
+						log.tracef("%s: tableToPyDictionary: GeneralPurposeDataContainer ...",TAG);
+						result.put(key.toString(),dataContainerToPy((GeneralPurposeDataContainer)value));
 					}
 					// Unknown, unhandled type
 					else {
