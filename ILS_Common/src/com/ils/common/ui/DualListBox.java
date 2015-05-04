@@ -7,6 +7,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -20,107 +21,146 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 
 public class DualListBox extends JPanel{
+
+	private static final long serialVersionUID = 7655516252196772688L;
 	private static final Insets EMPTY_INSETS = new Insets(0,0,0,0);
 	private static final String DEFAULT_SOURCE_CHOICE_LABEL = "Available Choices";
 	private static final String DEFAULT_DEST_CHOICE_LABEL = "Your Choices";
 	private static Icon addIcon = new ImageIcon(DualListBox.class.getResource("/images/arrow_right_blue.png"));
 	private static Icon removeIcon = new ImageIcon(DualListBox.class.getResource("/images/arrow_left_blue.png"));
 	private JLabel sourceLabel;
-	private JList sourceList;
-	private SortedListModel sourceListModel;
+	private JList<String> sourceList;
+	private SortedListModel<String> sourceListModel;
 	private JLabel destLabel;
-	private JList destList;
-	private SortedListModel destListModel;
+	private JList<String> destList;
+	private SortedListModel<String> destListModel;
+	
 	private JButton addButton;
+	
 	private JButton removeButton;
 	
 	public DualListBox(){
 		initScreen();
 	}
 	
+	public void addDestinationElements(List<String> newValue){
+		fillListModel(destListModel, newValue);
+	}
+	
+	public void addDestinationElements(ListModel<String> newValue){
+		fillListModel(destListModel, newValue);
+	}
+	
+	public void addDestinationElements(String newValue[]){
+		fillListModel(destListModel, newValue);
+	}
+	
+	public void addSourceElements(List<String> newValue){
+		fillListModel(sourceListModel, newValue);
+	}
+	
+	public void addSourceElements(ListModel<String> newValue){
+		fillListModel(sourceListModel, newValue);
+	}
+
+	public void addSourceElements(String newValue[]){
+		fillListModel(sourceListModel, newValue);
+	}
+	
+	public void clearDestinationListModel(){
+		destListModel.clear();
+	}	
+
+	
+	public void clearSourceListModel(){
+		sourceListModel.clear();
+	}
+
+	public Iterator<String> destinationIterator(){
+		return destListModel.iterator();
+	}
+	
+	public ListCellRenderer<? super String> getDestinationCellRenderer(){
+		return destList.getCellRenderer();
+	}
+	
+	public String getDestinationChoicesTitle(){
+		return destLabel.getText();
+	}
+	public Color getSelectionBackground(){
+		return sourceList.getSelectionBackground();
+	}
+	
+	public Color getSelectionForeground(){
+		return sourceList.getSelectionForeground();
+	}
+
+	public ListCellRenderer<? super String> getSourceCellRenderer(){
+		return sourceList.getCellRenderer();
+	}
+
 	public String getSourceChoicesTitle(){
 		return sourceLabel.getText();
+	}
+	
+	public int getVisibleRowCount() {
+		return sourceList.getVisibleRowCount();
+	}
+	
+	public void setDestinationCellRenderer(ListCellRenderer<String> newValue){
+		destList.setCellRenderer(newValue);
+	}
+	
+	public void setDestinationChoicesTitle(String newValue){
+		destLabel.setText(newValue);
+	}
+	public void setDestinationElements(List<String> values){
+		clearDestinationListModel();
+		String[] valueArray = new String[values.size()];
+		int index=0;
+		for(String val:values) {
+			valueArray[index] = val;
+			index++;
+		}
+		addDestinationElements(valueArray);
+	}
+	public void setSelectionBackground(Color newValue){
+		sourceList.setSelectionBackground(newValue);
+		destList.setSelectionBackground(newValue);
+	}
+
+	public void setSelectionForeground(Color newValue){
+		sourceList.setSelectionForeground(newValue);
+		destList.setSelectionForeground(newValue);
+	}
+
+	public void setSourceCellRenderer(ListCellRenderer<String> newValue){
+		sourceList.setCellRenderer(newValue);
 	}
 	
 	public void setSourceChoicesTitle(String newValue){
 		sourceLabel.setText(newValue);
 	}
 	
-	public String getDestinationChoicesTitle(){
-		return destLabel.getText();
-	}
-	
-	public void setDestinationChoicesTitle(String newValue){
-		destLabel.setText(newValue);
-	}
-	
-	public void clearSourceListModel(){
-		sourceListModel.clear();
-	}
-
-	public void clearDestinationListModel(){
-		destListModel.clear();
-	}
-	
-	public void addSourceElements(ListModel newValue){
-		fillListModel(sourceListModel, newValue);
-	}	
-	
-	public void setSourceElements(ListModel newValue){
+	public void setSourceElements(List<String> values){
 		clearSourceListModel();
-		addSourceElements(newValue);
-	}
-	
-	public void addDestinationElements(ListModel newValue){
-		fillListModel(destListModel, newValue);
-	}	
-	
-	private void fillListModel(SortedListModel model, ListModel newValues){
-		int size = newValues.getSize();
-		for (int i=0; i<size; i++) {
-			model.add(newValues.getElementAt(i));
+		String[] valueArray = new String[values.size()];
+		int index=0;
+		for(String val:values) {
+			valueArray[index] = val;
+			index++;
 		}
+		addSourceElements(valueArray);
 	}
-
-	public void addSourceElements(Object newValue[]){
-		fillListModel(sourceListModel, newValue);
-	}
-
-	public void setSourceElements(Object newValue[]){
+	
+	public void setSourceElements(ListModel<String> newValue){
 		clearSourceListModel();
 		addSourceElements(newValue);
 	}
-
-	public void addDestinationElements(Object newValue[]){
-		fillListModel(destListModel, newValue);
-	}
-
-	private void fillListModel(SortedListModel model, Object newValues[]){
-		model.addAll(newValues);
-	}
 	
-	public Iterator sourceIterator(){
-		return sourceListModel.iterator();
-	}
-	
-	public Iterator destinationIterator(){
-		return destListModel.iterator();
-	}
-	
-	public void setSourceCellRenderer(ListCellRenderer newValue){
-		sourceList.setCellRenderer(newValue);
-	}
-
-	public ListCellRenderer getSourceCellRenderer(){
-		return sourceList.getCellRenderer();
-	}
-
-	public void setDestinationCellRenderer(ListCellRenderer newValue){
-		destList.setCellRenderer(newValue);
-	}
-
-	public ListCellRenderer getDestinationCellRenderer(){
-		return destList.getCellRenderer();
+	public void setSourceElements(String newValue[]){
+		clearSourceListModel();
+		addSourceElements(newValue);
 	}
 	
 	public void setVisibleRowCount(int newValue){
@@ -128,50 +168,49 @@ public class DualListBox extends JPanel{
 		destList.setVisibleRowCount(newValue);
 	}
 	
-	public int getVisibleRowCount() {
-		return sourceList.getVisibleRowCount();
-	}
-	
-	public void setSelectionBackground(Color newValue){
-		sourceList.setSelectionBackground(newValue);
-		destList.setSelectionBackground(newValue);
-	}
-	
-	public Color getSelectionBackground(){
-		return sourceList.getSelectionBackground();
-	}
-	
-	public void setSelectionForeground(Color newValue){
-		sourceList.setSelectionForeground(newValue);
-		destList.setSelectionForeground(newValue);
-	}
-	
-	public Color getSelectionForeground(){
-		return sourceList.getSelectionForeground();
-	}
-	
-	private void clearSourceSelected(){
-		Object selected[] = sourceList.getSelectedValues();
-		for (int i=selected.length-1; i >= 0; --i){
-			sourceListModel.removeElement(selected[i]);
-		}
-		sourceList.getSelectionModel().clearSelection();
+	public Iterator<String> sourceIterator(){
+		return sourceListModel.iterator();
 	}
 	
 	private void clearDestinationSelected(){
-		Object selected[] = destList.getSelectedValues();
-		for (int i=selected.length-1; i >= 0; --i){
-			destListModel.removeElement(selected[i]);
+		List<String> selectedList = destList.getSelectedValuesList();
+		for (String sel:selectedList){
+			destListModel.removeElement(sel);
 		}
 		destList.getSelectionModel().clearSelection();
 	}
 	
+	private void clearSourceSelected(){
+		List<String> selectedList = sourceList.getSelectedValuesList();
+		for (String sel:selectedList){
+			sourceListModel.removeElement(sel);
+		}
+		sourceList.getSelectionModel().clearSelection();
+	}
+	
+	private void fillListModel(SortedListModel<String> model, List<String> newValues){
+		for (String val:newValues) {
+			model.add(val);
+		}
+	}
+	
+	private void fillListModel(SortedListModel<String> model, ListModel<String> newValues){
+		int size = newValues.getSize();
+		for (int i=0; i<size; i++) {
+			model.add(newValues.getElementAt(i));
+		}
+	}
+	
+	private void fillListModel(SortedListModel<String> model, String newValues[]){
+		model.addAll(newValues);
+	}
+
 	private void initScreen(){
 		setBorder(BorderFactory.createEtchedBorder());
 		setLayout(new GridBagLayout());
 		sourceLabel = new JLabel(DEFAULT_SOURCE_CHOICE_LABEL);
-		sourceListModel = new SortedListModel();
-		sourceList = new JList(sourceListModel);
+		sourceListModel = new SortedListModel<String>();
+		sourceList = new JList<String>(sourceListModel);
 		add(sourceLabel,
 				new GridBagConstraints(0,0,1,1,0,0,GridBagConstraints.CENTER, 
 						GridBagConstraints.NONE, EMPTY_INSETS,0,0));
@@ -194,8 +233,8 @@ public class DualListBox extends JPanel{
 		removeButton.addActionListener(new RemoveListener());
 		
 		destLabel = new JLabel(DEFAULT_DEST_CHOICE_LABEL);
-		destListModel = new SortedListModel();
-		destList = new JList(destListModel);
+		destListModel = new SortedListModel<String>();
+		destList = new JList<String>(destListModel);
 		add(destLabel,
 				new GridBagConstraints(2,0,1,1,0,0,GridBagConstraints.CENTER, 
 						GridBagConstraints.NONE, EMPTY_INSETS,0,0));
@@ -204,20 +243,19 @@ public class DualListBox extends JPanel{
 						GridBagConstraints.BOTH, EMPTY_INSETS,0,0));
 	}
 	
+	
 	private class AddListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-			Object selected[] = sourceList.getSelectedValues();
+			List<String> selected = sourceList.getSelectedValuesList();
 			addDestinationElements(selected);
 			clearSourceSelected();
 		}
 	}
-
 	private class RemoveListener implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
-			Object selected[] = destList.getSelectedValues();
+			List<String> selected = destList.getSelectedValuesList();
 			addSourceElements(selected);
 			clearDestinationSelected();
 		}
 	}
-	
 }

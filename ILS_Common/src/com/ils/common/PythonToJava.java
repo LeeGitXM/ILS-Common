@@ -364,7 +364,7 @@ public class PythonToJava {
 	 * @param container
 	 * @param pylist
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void updateDataContainerFromPython(GeneralPurposeDataContainer container, PyList pylist) {
 		if(pylist!=null ) {
 			int index = 0;
@@ -385,14 +385,20 @@ public class PythonToJava {
 							if( key instanceof String ) {
 								Object value = pyprops.get(key);
 								if( value==null) {
-									// Simply don't propogate a null parameter
+									// Simply don't propagate a null parameter
 									log.infof("%s.updateDataContainerFromPython: %s= null, ignored",TAG,value);
 								}
 								else if( value instanceof String ) {
 									properties.put(key.toString(), value.toString());
 								}
+								else if( value instanceof Double ) {
+									properties.put(key.toString(), value.toString());
+								}
+								else if( value instanceof Integer ) {
+									properties.put(key.toString(), value.toString());
+								}
 								else {
-									log.infof("%s.updateDataContainerFromPython: %s = %s, not a String, ignored",TAG,value.getClass().getName());
+									log.infof("%s.updateDataContainerFromPython: %s, not a String, ignored",TAG,value.getClass().getName());
 								}
 							}
 							else {
@@ -466,17 +472,37 @@ public class PythonToJava {
 									List list = pyListToArrayList((PyList)value);
 									List<Map<String,String>> maplist = new ArrayList<>();
 									for(Object obj:list) {
-										//TODO
-										log.infof("%s.updateDataContainerFromPython: maplist map is %s",TAG,obj.getClass().getName());
+										// NOTE: Hashtable implements the map interface
+										if( obj instanceof Hashtable ) {
+											Map<String,String>map = new HashMap<String,String>((Map<String,String>)obj);
+											maplist.add(map);
+										}
+										else if( obj instanceof Map ) {
+											Map<String,String>map = new HashMap<String,String>((Map<String,String>)obj);
+											maplist.add(map);
+										}
+										else {
+											log.infof("%s.updateDataContainerFromPython: maplist map is %s",TAG,obj.getClass().getName());
+										}
 									}
-									maplists.put(key.toString(), list);
+									maplists.put(key.toString(), maplist);
 								}
 								else if( value instanceof org.python.core.PyTuple ) {
 									List list = pyTupleToArrayList((PyTuple)value);
 									List<Map<String,String>> maplist = new ArrayList<>();
 									for(Object obj:list) {
-										// TODO
-										log.infof("%s.updateDataContainerFromPython: maplist map is %s",TAG,obj.getClass().getName());
+										/// NOTE: Hashtable implements the map interface
+										if( obj instanceof Hashtable ) {
+											Map<String,String>map = new HashMap<String,String>((Map<String,String>)obj);
+											maplist.add(map);
+										}
+										else if( obj instanceof Map ) {
+											Map<String,String>map = new HashMap<String,String>((Map<String,String>)obj);
+											maplist.add(map);
+										}
+										else {
+											log.infof("%s.updateDataContainerFromPython: maplist map is %s",TAG,obj.getClass().getName());
+										}
 									}
 									maplists.put(key.toString(), list);
 								}

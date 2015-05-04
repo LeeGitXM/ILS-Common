@@ -120,7 +120,6 @@ public class JavaToPython {
 		log.tracef("%s: dataContainerToPy: Analyzing container ...",TAG);
 		if( container!=null ) {
 			if( container.getProperties() !=null ) {
-				@SuppressWarnings("unchecked")
 				PyDictionary dict = tableToPyDictionary(container.getProperties());
 				result.add(dict);
 			}
