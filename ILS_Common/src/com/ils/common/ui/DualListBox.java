@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -83,9 +84,15 @@ public class DualListBox extends JPanel{
 	public ListCellRenderer<? super String> getDestinationCellRenderer(){
 		return destList.getCellRenderer();
 	}
-	
 	public String getDestinationChoicesTitle(){
 		return destLabel.getText();
+	}
+	public List<String> getDestinations(){
+		List<String> list = new ArrayList<>();
+		for( String val:destListModel.model) {
+			list.add(val);
+		}
+		return list;
 	}
 	public Color getSelectionBackground(){
 		return sourceList.getSelectionBackground();
