@@ -21,6 +21,7 @@ public class SortedListModel<E> extends AbstractListModel<E> {
 		return model.size();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public E getElementAt(int index) {
 		return (E)model.toArray()[index];
 	}
