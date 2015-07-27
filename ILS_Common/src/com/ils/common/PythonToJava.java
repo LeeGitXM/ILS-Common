@@ -326,7 +326,7 @@ public class PythonToJava {
 					// Embedded dictionary
 					else if( value instanceof PyDictionary ) {
 						log.tracef(TAG+"%s: updateMapFromDictionary: key %s = embedded dictionary ...",TAG,key);
-						HashMap<String,?> maparg = pyDictionaryToMap((PyDictionary)value);
+						Map<String,?> maparg = pyDictionaryToMap((PyDictionary)value);
 						map.put(key.toString(), maparg);
 					}
 					// Embedded List -- why does the instanceof fail?

@@ -77,7 +77,12 @@ public class JavaToPython {
 		log.tracef("%s: listToPyList: Analyzing list ...",TAG);
 		if( list!=null ) {
 			for(Object obj : list) {
-				if( obj instanceof Hashtable<?,?> ) {
+				if( obj instanceof HashMap<?,?> ) {
+					@SuppressWarnings("unchecked")
+					PyDictionary dict = tableToPyDictionary((HashMap<String,?>)obj);
+					result.add(dict);
+				}
+				else if( obj instanceof Hashtable<?,?> ) {
 					@SuppressWarnings("unchecked")
 					PyDictionary dict = tableToPyDictionary((Hashtable<String,?>)obj);
 					result.add(dict);
@@ -183,6 +188,12 @@ public class JavaToPython {
 						result.put(key.toString(),value);
 					}
 					// Embedded dictionary
+					else if( value instanceof HashMap<?,?> ) {
+						log.tracef("%s: tableToPyDictionary: key %s = embedded dictionary ...",TAG,key);
+						@SuppressWarnings("unchecked")
+						PyDictionary dict = tableToPyDictionary((HashMap<String,?>)value);
+						result.put(key.toString(), dict);
+					}
 					else if( value instanceof Hashtable<?,?> ) {
 						log.tracef("%s: tableToPyDictionary: key %s = embedded dictionary ...",TAG,key);
 						@SuppressWarnings("unchecked")
@@ -240,6 +251,12 @@ public class JavaToPython {
 						result.put(key.toString(),value);
 					}
 					// Embedded dictionary
+					else if( value instanceof HashMap<?,?> ) {
+						log.tracef("%s: tableToPyDictionary: key %s = embedded dictionary ...",TAG,key);
+						@SuppressWarnings("unchecked")
+						PyDictionary dict = tableToPyDictionary((HashMap<String,?>)value);
+						result.put(key.toString(), dict);
+					}
 					else if( value instanceof Hashtable<?,?> ) {
 						log.tracef("%s: tableToPyDictionary: key %s = embedded dictionary ...",TAG,key);
 						@SuppressWarnings("unchecked")

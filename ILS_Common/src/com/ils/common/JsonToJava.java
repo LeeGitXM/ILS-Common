@@ -4,6 +4,8 @@
 package com.ils.common;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -47,28 +49,58 @@ public class JsonToJava {
 		catch (IOException ioe) {
 			log.warn(TAG+".jsonToObject: io exception("+ioe.getLocalizedMessage()+")",ioe);
 		}
+		catch (Exception ue) {
+			log.warn(TAG+".jsonToObject: Unknown exception("+ue.getLocalizedMessage()+")",ue);
+		}
 		return result;
 	}
-	
 	/**
 	 * Deserialize to a Map<String,String>. This is pretty restrictive.
 	 * 
 	 * @param json the incoming Json document
 	 * @return the equivalent object a Map
 	 */
-	public synchronized Map<String,String> jsonToMap(String json) {
-		Map<String,String> result = null;
+	public synchronized List<Map<String,?>> jsonToListOfMaps(String json) {
+		List<Map<String,?>> result = null;
 		try {
-			result = mapper.readValue(json,new TypeReference<Map<String,String>>() { });
+			result = mapper.readValue(json,new TypeReference<List<Map<String,?>>>() { });
 		} 
 		catch (JsonParseException jpe) {
-			log.warn(TAG+".jsonToObject: parsing exception ("+jpe.getLocalizedMessage()+")",jpe);
+			log.warn(TAG+".jsonToListOfMaps: parsing exception ("+jpe.getLocalizedMessage()+")",jpe);
 		} 
 		catch (JsonMappingException jme) {
-			log.warn(TAG+".jsonToObject: mapping exception("+jme.getLocalizedMessage()+")",jme);
+			log.warn(TAG+".jsonToListOfMaps: mapping exception("+jme.getLocalizedMessage()+")",jme);
 		} 
 		catch (IOException ioe) {
-			log.warn(TAG+".jsonToObject: io exception("+ioe.getLocalizedMessage()+")",ioe);
+			log.warn(TAG+".jsonToListOfMaps: io exception("+ioe.getLocalizedMessage()+")",ioe);
+		}
+		catch (Exception ue) {
+			log.warn(TAG+".jsonToListOfMaps: Unknown exception("+ue.getLocalizedMessage()+")",ue);
+		}
+		return result;
+	}
+	/**
+	 * Deserialize to a Map<String,String>. This is pretty restrictive.
+	 * 
+	 * @param json the incoming Json document
+	 * @return the equivalent object a Map
+	 */
+	public synchronized Map<String,?> jsonToMap(String json) {
+		Map<String,String> result = null;
+		try {
+			result = mapper.readValue(json,new TypeReference<HashMap<String,?>>() { });
+		} 
+		catch (JsonParseException jpe) {
+			log.warn(TAG+".jsonToMap: parsing exception ("+jpe.getLocalizedMessage()+")",jpe);
+		} 
+		catch (JsonMappingException jme) {
+			log.warn(TAG+".jsonToMap: mapping exception("+jme.getLocalizedMessage()+")",jme);
+		} 
+		catch (IOException ioe) {
+			log.warn(TAG+".jsonToMap: io exception("+ioe.getLocalizedMessage()+")",ioe);
+		}
+		catch (Exception ue) {
+			log.warn(TAG+".jsonToMap: Unknown exception("+ue.getLocalizedMessage()+")",ue);
 		}
 		return result;
 	}
