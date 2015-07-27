@@ -49,6 +49,12 @@ public class Cloner {
 						result.put(key.toString(),val);
 					}
 					// Embedded dictionary
+					else if( value instanceof Map<?,?> ) {
+						log.debug(TAG+"clone: key "+key+"= embedded map ...");
+						@SuppressWarnings("unchecked")
+						Map<String,?> dict = clone((Map<String,?>)value);
+						result.put(key.toString(), dict);
+					}
 					else if( value instanceof Hashtable<?,?> ) {
 						log.debug(TAG+"clone: key "+key+"= embedded table ...");
 						@SuppressWarnings("unchecked")
@@ -63,8 +69,8 @@ public class Cloner {
 					}
 					// Unknown, unhandled type
 					else {
-						log.debugf("%s: clone: key %s (Unhandled type)",TAG,key,value.getClass().getName());
-					}	
+						log.infof("%s.clone hashtable: Unhandled type (%s)",TAG,value.getClass().getName());
+					}
 				}
 				else {
 					log.info(TAG+"clone: Error: "+key.getClass().getName()+" key not a string, ignored");
@@ -104,7 +110,7 @@ public class Cloner {
 					}
 					// Embedded dictionary
 					else if( value instanceof Map<?,?> ) {
-						log.debug(TAG+"clone: key "+key+"= embedded table ...");
+						log.debug(TAG+"clone: key "+key+"= embedded map ...");
 						@SuppressWarnings("unchecked")
 						Map<String,?> dict = clone((Map<String,?>)value);
 						result.put(key.toString(), dict);
@@ -123,7 +129,7 @@ public class Cloner {
 					}
 					// Unknown, unhandled type
 					else {
-						log.debugf("%s: clone: key %s (Unhandled type)",TAG,key,value.getClass().getName());
+						log.infof("%s.clone map: Unhandled type (%s)",TAG,value.getClass().getName());
 					}	
 				}
 				else {
@@ -156,6 +162,12 @@ public class Cloner {
 					result.add(val);
 				}
 				// Embedded dictionary
+				else if( obj instanceof Map<?,?> ) {
+					log.debug(TAG+"clone:  embedded table ...");
+					@SuppressWarnings("unchecked")
+					Map<String,?> map = clone((Map<String,?>)obj);
+					result.add(map);
+				}
 				else if( obj instanceof Hashtable<?,?> ) {
 					log.debug(TAG+"clone:  embedded table ...");
 					@SuppressWarnings("unchecked")
@@ -170,7 +182,7 @@ public class Cloner {
 				}
 				// Unknown, unhandled type
 				else {
-					log.info(TAG+"clone: ="+obj.getClass().getName()+" (Unhandled type)");
+					log.infof("%s.clone array: Unhandled type (%s)",TAG,obj.getClass().getName());
 				}	
 			}
 		}
