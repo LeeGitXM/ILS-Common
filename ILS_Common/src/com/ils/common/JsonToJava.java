@@ -54,8 +54,7 @@ public class JsonToJava {
 	 * Deserialize to a Map<String,String>. This is pretty restrictive.
 	 * 
 	 * @param json the incoming Json document
-	 * @param clss the expected class of the object
-	 * @return the equivalent object
+	 * @return the equivalent object a Map
 	 */
 	public synchronized Map<String,String> jsonToMap(String json) {
 		Map<String,String> result = null;

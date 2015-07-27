@@ -53,7 +53,7 @@ public class PythonToJava {
 				}
 				// Embedded table
 				else if( obj instanceof PyDictionary ) {
-					Hashtable<String,?> table = pyDictionaryToTable((PyDictionary)obj);
+					Map<String,?> table = pyDictionaryToMap((PyDictionary)obj);
 					result.add(table);
 				}
 				// Embedded List
@@ -109,7 +109,7 @@ public class PythonToJava {
 				}
 				// Embedded table
 				else if( obj instanceof PyDictionary ) {
-					Hashtable<String,?> table = pyDictionaryToTable((PyDictionary)obj);
+					Map<String,?> table = pyDictionaryToMap((PyDictionary)obj);
 					result.add(table);
 				}
 				// Embedded List
@@ -242,7 +242,7 @@ public class PythonToJava {
 	 * or PyLists, recursively convert the PyDictionary to a Hashtable. The key is always taken to be a string. If
 	 * the value is not a simple datatype, a PyDictionary or PyList, then it is taken to be a string.
 	 */
-	public synchronized HashMap<String,?> pyDictionaryToMap(PyDictionary dict) {
+	public synchronized Map<String,?> pyDictionaryToMap(PyDictionary dict) {
 		HashMap<String,Object> result = new HashMap<String,Object>();
 		log.tracef("%s: pyDictionaryToMap: Analyzing map ...",TAG);
 		if(dict!=null ) {
@@ -267,7 +267,7 @@ public class PythonToJava {
 					// Embedded dictionary
 					else if( value instanceof PyDictionary ) {
 						log.tracef(TAG+"%s: pyDictionaryToMap: key %s = embedded dictionary ...",TAG,key);
-						HashMap<String,?> map = pyDictionaryToMap((PyDictionary)value);
+						Map<String,?> map = pyDictionaryToMap((PyDictionary)value);
 						result.put(key.toString(), map);
 					}
 					// Embedded List -- why does the instanceof fail?

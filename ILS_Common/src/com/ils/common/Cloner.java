@@ -4,7 +4,9 @@
 package com.ils.common;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 
 import com.inductiveautomation.ignition.common.util.LogUtil;
@@ -47,6 +49,66 @@ public class Cloner {
 						result.put(key.toString(),val);
 					}
 					// Embedded dictionary
+					else if( value instanceof Hashtable<?,?> ) {
+						log.debug(TAG+"clone: key "+key+"= embedded table ...");
+						@SuppressWarnings("unchecked")
+						Hashtable<String,?> dict = clone((Hashtable<String,?>)value);
+						result.put(key.toString(), dict);
+					}
+					// Embedded list
+					else if( value instanceof ArrayList<?> ) {
+						log.debug(TAG+"clone: key "+key+"= embedded list ...");
+						ArrayList<?> list = clone((ArrayList<?>)value);
+						result.put(key.toString(), list);
+					}
+					// Unknown, unhandled type
+					else {
+						log.debugf("%s: clone: key %s (Unhandled type)",TAG,key,value.getClass().getName());
+					}	
+				}
+				else {
+					log.info(TAG+"clone: Error: "+key.getClass().getName()+" key not a string, ignored");
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Assuming the contents of the hashtable are either simple objects, other hashtables objects, 
+	 * or arraylists, clone recursively. Hashtable keys are always taken to be a string. If
+	 * the value is not a hashtable or arraylist, then it is taken to be a string.
+	 */
+	public synchronized Map<String,?> clone(Map<String,?> table) {
+		Map<String,Object> result = new HashMap<String,Object>();
+		log.tracef("%s: clone: Analyzing map ...",TAG);
+		if( table!=null ) {
+			@SuppressWarnings("rawtypes")
+			Set keys = table.keySet();
+			for(Object key:keys ) {
+				if( key instanceof String ) {
+					Object value = table.get(key);
+					if( value==null) {
+						// Simply don't propagate a null parameter
+						log.debug(TAG+"clone: key "+key+"= null, ignored");
+					}
+					// "Simple datatypes"
+					else if( value instanceof String ||
+							value instanceof Integer||
+							value instanceof Double ||
+							value instanceof Boolean) {
+						log.trace(TAG+"clone: key "+key+"="+value.getClass().getName());
+
+						String val = value.toString();
+						result.put(key.toString(),val);
+					}
+					// Embedded dictionary
+					else if( value instanceof Map<?,?> ) {
+						log.debug(TAG+"clone: key "+key+"= embedded table ...");
+						@SuppressWarnings("unchecked")
+						Map<String,?> dict = clone((Map<String,?>)value);
+						result.put(key.toString(), dict);
+					}
 					else if( value instanceof Hashtable<?,?> ) {
 						log.debug(TAG+"clone: key "+key+"= embedded table ...");
 						@SuppressWarnings("unchecked")
