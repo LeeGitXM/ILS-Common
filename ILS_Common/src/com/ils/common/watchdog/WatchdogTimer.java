@@ -32,6 +32,7 @@ public class WatchdogTimer implements Runnable   {
 	protected final ExecutorService threadPool;
 	protected Thread watchdogThread = null;
 	protected final Watchdog idleDog;
+	protected long currentTime = 0;
 	protected String name = TAG;
 
 	/**
@@ -200,6 +201,7 @@ public class WatchdogTimer implements Runnable   {
 					wait(waitTime);
 				}
 				log.tracef("%s.run: wait complete ---",getName());
+				currentTime = head.getExpiration();
 				if (!stopped) fireWatchdog();
 			} 
 			// An interruption allows a recognition of re-ordering the queue

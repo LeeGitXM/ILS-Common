@@ -14,7 +14,7 @@ package com.ils.common.watchdog;
  */
 public class AcceleratedWatchdogTimer extends WatchdogTimer implements Runnable   {
 	private double factor = 1.0;    // Clock speedup factor
-	private long simulatedtime = 0;
+	private long testTimeOffset = 0;
 
 	/**
 	 * Constructor: This version of the constructor supplies a name.
@@ -24,9 +24,25 @@ public class AcceleratedWatchdogTimer extends WatchdogTimer implements Runnable 
 		super(tname);
 	}
 	/**
-	 * @return the reciprocal of the time factor. Yt's the speedup factor.
+	 * @return the reciprocal of the time factor. It's the speedup factor.
 	 */
 	public double getFactor() { return 1.0/factor; }
+	/**
+	 * @return the current test time. The time is updated
+	 *         each time a timer expires and offset by the
+	 *         specified offset.
+	 */
+	public long getTestTime() { return (long)((currentTime-testTimeOffset)*factor); }
+	/**
+	 * Specify the current time as known to a  test.
+	 * Convert this into a millisec offset used to
+	 * compute test time.
+	 * @param testTime in msecs from the start of the unix epoch
+	 */
+	public void setTestTimeOffset(long testTime) { 
+		long now = System.nanoTime()/1000000;   // Work in milliseconds
+		this.testTimeOffset = now - testTime; 
+	}
 	/**
 	 * Set the clock speed execution factor. For production
 	 * the value should ALWAYS be 1.0. This feature is a 
