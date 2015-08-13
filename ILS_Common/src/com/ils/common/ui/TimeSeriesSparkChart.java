@@ -124,6 +124,5 @@ public class TimeSeriesSparkChart extends ApplicationFrame implements Notificati
 			this.timeSeriesCollection.getSeries(0).add(millisec,datum.getValue());  
 			this.timeSeriesCollection.getSeries(1).add(millisec,datum.getAverage());   
 		}
-
 	}  
 }
