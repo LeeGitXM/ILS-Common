@@ -3,6 +3,9 @@
  */
 package com.ils.common.watchdog;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 /**
  *  The accelerated watchdog timer is designed for use during testing where
@@ -13,6 +16,8 @@ package com.ils.common.watchdog;
  *  Interested entities register as TimeoutObservers. 
  */
 public class AcceleratedWatchdogTimer extends WatchdogTimer implements Runnable   {
+	protected final static String DATETIME_FORMAT = "yyyy/MM/dd hh:mm:ss";
+	private final SimpleDateFormat formatter = new SimpleDateFormat(DATETIME_FORMAT);
 	private double factor = 1.0;    // Clock speedup factor
 	private long testTimeOffset = 0;
 
@@ -32,16 +37,22 @@ public class AcceleratedWatchdogTimer extends WatchdogTimer implements Runnable 
 	 *         each time a timer expires and offset by the
 	 *         specified offset.
 	 */
-	public long getTestTime() { return (long)((currentTime-testTimeOffset)*factor); }
+	public long getTestTime() {
+		long now = System.nanoTime()/1000000;   // Work in milliseconds
+		return (long)((now-testTimeOffset)); 
+	}
 	/**
-	 * Specify the current time as known to a  test.
-	 * Convert this into a millisec offset used to
-	 * compute test time.
+	 * Specify the current time as known to a test as an offset from now
+	 * expressed in secs since the start of the epoch. Then convert to system time.
+	 * Convert this into a millisec offset used to compute 
+	 * the test time equivalent of a .
 	 * @param testTime in msecs from the start of the unix epoch
 	 */
-	public void setTestTimeOffset(long testTime) { 
+	public void setTestTimeOffset(long offset) { 
+		long testTime = System.currentTimeMillis() - offset;
 		long now = System.nanoTime()/1000000;   // Work in milliseconds
 		this.testTimeOffset = now - testTime; 
+		log.infof("%s.setTestTimeOffset: current time is %s",TAG,formatter.format(new Date(testTime)));
 	}
 	/**
 	 * Set the clock speed execution factor. For production

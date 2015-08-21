@@ -67,7 +67,7 @@ public class Watchdog  {
 	 */
 	public void setDelay(long delay) {
 		long now = System.nanoTime()/1000000;
-		this.expiration = delay+ now; 
+		this.expiration = delay + now; 
 	}
 	/**
 	 * Set the number of secs into the future for this dog to expire.

@@ -6,6 +6,7 @@ import java.util.Date;
 
 import javax.management.Notification;
 import javax.management.NotificationListener;
+import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -16,7 +17,6 @@ import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.ui.ApplicationFrame;
 
 /* ===========================================================
  * JFreeChart : a free chart library for the Java(tm) platform
@@ -45,7 +45,7 @@ import org.jfree.ui.ApplicationFrame;
  * Other names may be trademarks of their respective owners.]
  *
  * -------------------------
- * TimeSeriesChartDemo1.java
+ * TimeSeriesChartDemo.java
  * -------------------------
  * (C) Copyright 2003-2014, by Object Refinery Limited and Contributors.
  *
@@ -55,7 +55,8 @@ import org.jfree.ui.ApplicationFrame;
  * Create a chart for the quick display of time-series data. The chart must 
  * update live as new values are presented.
  */
-public class TimeSeriesSparkChart extends ApplicationFrame implements NotificationListener {
+public class TimeSeriesSparkChart extends JPanel implements NotificationListener {
+	private static final long serialVersionUID = 8598531428961307855L;
 	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data  
 	private XYDataset xyDataset;                              // Dataset that will be used for the chart  
 	private TimeSeries rawSeries;                               // raw series data
@@ -69,7 +70,6 @@ public class TimeSeriesSparkChart extends ApplicationFrame implements Notificati
 	 * @param ylabel
 	 */
 	public TimeSeriesSparkChart(String title, String ylabel ) {  
-		super(title); 
 		this.yAxisLabel = ylabel; 
 
 		timeSeriesCollection = new TimeSeriesCollection();  
@@ -83,8 +83,7 @@ public class TimeSeriesSparkChart extends ApplicationFrame implements Notificati
 		chartPanel = new ChartPanel(chart);  
 		chartPanel.setFillZoomRectangle(true);  
 		//chartPanel.setMouseWheelEnabled(false); 
-		chartPanel.setPreferredSize(new Dimension(1000,500));  
-		setContentPane(chartPanel);  
+		chartPanel.setPreferredSize(new Dimension(1000,500));    
 	}  
 
 	public void setPreferredSize(Dimension dimension) {chartPanel.setPreferredSize(dimension);}
