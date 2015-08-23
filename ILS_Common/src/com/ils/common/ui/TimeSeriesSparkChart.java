@@ -53,9 +53,10 @@ import org.jfree.data.xy.XYDataset;
 */
 /**
  * Create a chart for the quick display of time-series data. The chart must 
- * update live as new values are presented.
+ * update live as new values are presented. To display in a dialog, the component
+ * to add is: getChartPanel(().
  */
-public class TimeSeriesSparkChart extends JPanel implements NotificationListener {
+public class TimeSeriesSparkChart implements NotificationListener {
 	private static final long serialVersionUID = 8598531428961307855L;
 	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data  
 	private XYDataset xyDataset;                              // Dataset that will be used for the chart  
@@ -81,11 +82,11 @@ public class TimeSeriesSparkChart extends JPanel implements NotificationListener
 
 		JFreeChart chart = createChart(title,yAxisLabel,timeSeriesCollection);  
 		chartPanel = new ChartPanel(chart);  
-		chartPanel.setFillZoomRectangle(true);  
-		//chartPanel.setMouseWheelEnabled(false); 
-		chartPanel.setPreferredSize(new Dimension(1000,500));    
+		chartPanel.setFillZoomRectangle(true);     
 	}  
 
+	public ChartPanel getChartPanel() { return this.chartPanel; }
+	
 	public void setPreferredSize(Dimension dimension) {chartPanel.setPreferredSize(dimension);}
 
 	private JFreeChart createChart(String title,String label,TimeSeriesCollection tsCollection) {  
