@@ -33,10 +33,11 @@ public class DBUtility {
 	/**
 	 * Execute a sql statement against the named datasource.
 	 * The statement may be DDL (e.g. create table())
-	 * @param source the named datasource
+	 *
 	 * @param sql command to execute
+	 * @param source a named data-source
 	 */
-	public void executeSQL(String source,String sql) {
+	public void executeSQL(String sql,String source) {
 		Connection cxn = getConnection(source);
 		if( cxn!=null ) {
 			try {
@@ -126,5 +127,31 @@ public class DBUtility {
 		}
 		return columns;
 	}
-	
+	/**
+	 * Execute a sql query against the named datasource.
+	 * The query is expected to return exactly one value.
+	 *
+	 * @param sql command to execute
+	 * @param source a named datasource
+	 */
+	public String runScalarQuery(String sql,String source) {
+		Connection cxn = getConnection(source);
+		String result = "";
+		if( cxn!=null ) {
+			try {
+				Statement stmt = cxn.createStatement();
+				ResultSet rs = stmt.executeQuery(sql);
+				if( rs.getMetaData().getColumnCount()>0 ) {
+					result = rs.getString(0);
+				}
+			}
+			catch(SQLException sqle) {
+				log.warnf("%s.runScalarQuery: Exception executing %s (%s)",TAG,sql,sqle.getMessage());
+			}
+		}
+		else {
+			log.warnf("%s.runScalarQuery: Datasource %s not found",TAG,source);
+		}
+		return result;
+	}
 }
