@@ -19,6 +19,12 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 /**
  * This class is a collection of utilities for database access in the gateway.
  * Unlike in the client, we can execute DDL and query structure.
+ * 
+ * The execute and query functions operate in two modes. If the connection
+ * parameter is null, then the functions open (and close) a connection.
+ * Alternatively for better performance, the calling method can supply a connection.
+ * In this case the connection is simply used. It is then up to the caller to
+ * close. Failure to do so will very quickly lead a resource exhaustion.
  */
 public class DBUtility {
 	private final static String TAG = "TestFrameGatewayRpcDispatcher";
@@ -29,16 +35,30 @@ public class DBUtility {
 		this.context = ctx;
 		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
+	/** 
+	 * Anytime a connection is "gotten", it should be closed.
+	 * @param cxn
+	 */
+	public void closeConnection(Connection cxn) {
+		try {
+			cxn.close();
+		}
+		catch(SQLException sqle) {
+			log.warnf("%s.closeConnection: Exception closing connection (%s)",TAG,sqle.getMessage());
+		}
 
+	}
 	/**
 	 * Execute a sql statement against the named datasource.
 	 * The statement may be DDL (e.g. create table())
 	 *
 	 * @param sql command to execute
 	 * @param source a named data-source
+	 * @param suppliedConnection a database connection. If null the method will manage.
 	 */
-	public void executeSQL(String sql,String source) {
-		Connection cxn = getConnection(source);
+	public void executeSQL(String sql,String source,Connection suppliedConnection) {
+		Connection cxn = suppliedConnection;
+		if( cxn==null ) cxn = getConnection(source);
 		if( cxn!=null ) {
 			try {
 				Statement stmt = cxn.createStatement();
@@ -46,6 +66,9 @@ public class DBUtility {
 			}
 			catch(SQLException sqle) {
 				log.warnf("%s.executeSQL: Exception executing %s (%s)",TAG,sql,sqle.getMessage());
+			}
+			finally {
+				if( suppliedConnection==null ) closeConnection(cxn);
 			}
 		}
 		else {
@@ -58,7 +81,11 @@ public class DBUtility {
 		Datasource ds = context.getDatasourceManager().getDatasource(name);
 		if( ds!=null ) {
 			try {
+				log.infof("%s.getConnection: Status is %s (%d of %d busy)",TAG,ds.getStatus().name(),
+						ds.getActiveConnections(),ds.getMaxConnections());
 				cxn = ds.getConnection();
+				cxn.setAutoCommit(true);
+				cxn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			}
 			catch(SQLException sqle) {
 				log.warnf("%s.getConnection: Exception finding connection %s (%s)",TAG,name,sqle.getMessage());
@@ -94,9 +121,13 @@ public class DBUtility {
 				while (rs.next()) {
 					  tables.add(rs.getString("TABLE_NAME"));  // column 3
 				}
+				rs.close();
 			}
 			catch(SQLException sqle) {
 				log.warnf("%s.getTableNames: Exception finding metadata for %s (%s)",TAG,source,sqle.getMessage());
+			}
+			finally {
+				closeConnection(cxn);
 			}
 		}
 		else {
@@ -117,9 +148,13 @@ public class DBUtility {
 				while (rs.next()) {
 					  columns.add(rs.getString("COLUMN_NAME"));  // See also "TYPE_NAME"
 				}
+				rs.close();
 			}
 			catch(SQLException sqle) {
 				log.warnf("%s.getTableNames: Exception finding metadata for %s (%s)",TAG,source,sqle.getMessage());
+			}
+			finally {
+				closeConnection(cxn);
 			}
 		}
 		else {
@@ -133,20 +168,29 @@ public class DBUtility {
 	 *
 	 * @param sql command to execute
 	 * @param source a named datasource
+	 * @param suppliedConnection a database connection. If null the method will manage.
 	 */
-	public String runScalarQuery(String sql,String source) {
-		Connection cxn = getConnection(source);
+	public String runScalarQuery(String sql,String source,Connection suppliedConnection) {
+		Connection cxn = suppliedConnection;
+		if( cxn==null ) cxn = getConnection(source);
 		String result = "";
 		if( cxn!=null ) {
 			try {
 				Statement stmt = cxn.createStatement();
 				ResultSet rs = stmt.executeQuery(sql);
-				if( rs.getMetaData().getColumnCount()>0 ) {
-					result = rs.getString(0);
+				while( rs.next() ) {
+					if( rs.getMetaData().getColumnCount()>0 ) {
+						result = rs.getString(1);
+						break;
+					}
 				}
+				rs.close();
 			}
 			catch(SQLException sqle) {
 				log.warnf("%s.runScalarQuery: Exception executing %s (%s)",TAG,sql,sqle.getMessage());
+			}
+			finally {
+				if(suppliedConnection==null ) closeConnection(cxn);
 			}
 		}
 		else {
