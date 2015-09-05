@@ -8,11 +8,12 @@ import java.io.Serializable;
  * Notification event.
  */
 public class TimeSeriesDatum implements Serializable {
-	private static final long serialVersionUID = 1415210930147352035L;
-	private final long timestamp;
-	private final double average;
-	private final double value;
+	private static final long serialVersionUID = -1415210930147352035L;
+	private long timestamp;
+	private double average;
+	private double value;
 
+	
 	/** 
 	 * Constructor: Sets all attributes.
 	 */
@@ -25,12 +26,21 @@ public class TimeSeriesDatum implements Serializable {
 	 * Constructor: No arg version so we're Serializable
 	 */
 	public TimeSeriesDatum() {
-		this.average = 0.0;
-		this.value = 0.0;
-		this.timestamp = 0;
+		this(0.0,0.0,0);
 	}
+	
 	public double getAverage() {return this.average;}
 	public long getTimestamp() {return this.timestamp;}
 	public double getValue() {return this.value;}
+	
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+	public void setAverage(double average) {
+		this.average = average;
+	}
+	public void setValue(double value) {
+		this.value = value;
+	}
 	
 }
