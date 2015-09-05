@@ -8,7 +8,7 @@ import java.io.Serializable;
  * Notification event.
  */
 public class TimeSeriesDatum implements Serializable {
-	private static final String TAG = "TimeSeriesDatum";
+	private static final long serialVersionUID = 1415210930147352035L;
 	private final long timestamp;
 	private final double average;
 	private final double value;
