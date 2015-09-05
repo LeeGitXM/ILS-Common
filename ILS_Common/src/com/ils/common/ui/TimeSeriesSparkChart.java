@@ -110,9 +110,14 @@ public class TimeSeriesSparkChart implements NotificationListener {
 		return chart;  
 	}
 	
+	public void addDatum(TimeSeriesDatum datum) {
+		Millisecond millisec = new Millisecond(new Date(datum.getTimestamp()));
+		this.timeSeriesCollection.getSeries(0).add(millisec,datum.getValue());  
+		this.timeSeriesCollection.getSeries(1).add(millisec,datum.getAverage()); 
+	}
 	// ============================== Listener Interface =======================
 	/**
-	 * The user-data inside the notificaton is expected to be a TimeSeriesDatum.
+	 * The user-data inside the notification is expected to be a TimeSeriesDatum.
 	 * @param event
 	 * @param handback
 	 */
@@ -120,9 +125,7 @@ public class TimeSeriesSparkChart implements NotificationListener {
 	public synchronized void handleNotification(Notification event,Object handback) {  
 		if( event.getUserData() instanceof TimeSeriesDatum ) {
 			TimeSeriesDatum datum = (TimeSeriesDatum)event.getUserData();
-			Millisecond millisec = new Millisecond(new Date(datum.getTimestamp()));
-			this.timeSeriesCollection.getSeries(0).add(millisec,datum.getValue());  
-			this.timeSeriesCollection.getSeries(1).add(millisec,datum.getAverage());   
+			addDatum(datum); 
 		}
-	}  
+	}
 }

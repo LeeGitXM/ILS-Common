@@ -1,11 +1,13 @@
 package com.ils.common.ui;
 
+import java.io.Serializable;
+
 /**
  * Hold a new data point to be added to a TimeSeriesSparkChart.
  * The plot expects these to arrive as "user data" inside a
  * Notification event.
  */
-public class TimeSeriesDatum {
+public class TimeSeriesDatum implements Serializable {
 	private static final String TAG = "TimeSeriesDatum";
 	private final long timestamp;
 	private final double average;
@@ -19,9 +21,16 @@ public class TimeSeriesDatum {
 		this.value = val;
 		this.timestamp = time;
 	}
-	
-	public double getAverage() {return average;}
-	public long getTimestamp() {return timestamp;}
-	public double getValue() {return value;}
+	/** 
+	 * Constructor: No arg version so we're Serializable
+	 */
+	public TimeSeriesDatum() {
+		this.average = 0.0;
+		this.value = 0.0;
+		this.timestamp = 0;
+	}
+	public double getAverage() {return this.average;}
+	public long getTimestamp() {return this.timestamp;}
+	public double getValue() {return this.value;}
 	
 }
