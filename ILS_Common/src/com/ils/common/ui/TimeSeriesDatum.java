@@ -48,7 +48,9 @@ public class TimeSeriesDatum implements Serializable {
 	public void setTimestamp(long time) {this.timestamp=time;}
 	public void setValue(double val)    {this.value=val;}
 	
-	
+	public String toString() {
+		return String.format("%s: %5.3f,  %5.3f at %d sec",TAG,value,average,timestamp/1000);
+	}
 	/**
 	 * Deserialize from a Json string 
 	 * @param json

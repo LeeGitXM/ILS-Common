@@ -6,17 +6,19 @@ import java.util.Date;
 
 import javax.management.Notification;
 import javax.management.NotificationListener;
-import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.time.Millisecond;
+import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
+
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /* ===========================================================
  * JFreeChart : a free chart library for the Java(tm) platform
@@ -57,6 +59,7 @@ import org.jfree.data.xy.XYDataset;
  * to add is: getChartPanel(().
  */
 public class TimeSeriesSparkChart implements NotificationListener {
+	private static final String TAG = "TimeSeriesSparkChart";
 	private static final long serialVersionUID = 8598531428961307855L;
 	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data  
 	private XYDataset xyDataset;                              // Dataset that will be used for the chart  
@@ -64,6 +67,7 @@ public class TimeSeriesSparkChart implements NotificationListener {
 	private TimeSeries meanSeries;                              // mean series data
 	private final ChartPanel chartPanel;
 	private final String yAxisLabel;
+	private final LoggerEx log;
 
 	/**
 	 * Constructor:
@@ -72,10 +76,10 @@ public class TimeSeriesSparkChart implements NotificationListener {
 	 */
 	public TimeSeriesSparkChart(String title, String ylabel ) {  
 		this.yAxisLabel = ylabel; 
-
-		timeSeriesCollection = new TimeSeriesCollection();  
-		rawSeries = new TimeSeries("ylabel");  
-		meanSeries = new TimeSeries("mean");    
+		this.log = LogUtil.getLogger(getClass().getPackage().getName());
+		timeSeriesCollection = new TimeSeriesCollection();
+		rawSeries = new TimeSeries("ylabel",Second.class); 
+		meanSeries = new TimeSeries("mean",Second.class);    
 
 		timeSeriesCollection.addSeries(rawSeries);  
 		timeSeriesCollection.addSeries(meanSeries);   
@@ -109,11 +113,12 @@ public class TimeSeriesSparkChart implements NotificationListener {
 		axis.setFixedAutoRange(60000.0);  
 		return chart;  
 	}
-	
+
 	public void addDatum(TimeSeriesDatum datum) {
-		Millisecond millisec = new Millisecond(new Date(datum.getTimestamp()));
-		this.timeSeriesCollection.getSeries(0).add(millisec,datum.getValue());  
-		this.timeSeriesCollection.getSeries(1).add(millisec,datum.getAverage()); 
+		//log.infof("%s.addDatum: %s",TAG,datum.toString());
+		Second secs = new Second(new Date(datum.getTimestamp()));
+		this.timeSeriesCollection.getSeries(0).addOrUpdate(secs,datum.getValue());  
+		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage()); 
 	}
 	// ============================== Listener Interface =======================
 	/**
