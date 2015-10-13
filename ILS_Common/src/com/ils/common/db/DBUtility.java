@@ -27,7 +27,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  * close. Failure to do so will very quickly lead a resource exhaustion.
  */
 public class DBUtility {
-	private final static String TAG = "TestFrameGatewayRpcDispatcher";
+	private final static String TAG = "DBUtility";
 	private final LoggerEx log;
 	private final GatewayContext context;
 	

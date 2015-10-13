@@ -1,5 +1,6 @@
 package com.ils.common.ui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.Date;
@@ -12,6 +13,10 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.data.general.SeriesChangeEvent;
+import org.jfree.data.general.SeriesChangeListener;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -58,7 +63,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  * update live as new values are presented. To display in a dialog, the component
  * to add is: getChartPanel(().
  */
-public class TimeSeriesSparkChart implements NotificationListener {
+public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeListener {
 	private static final String TAG = "TimeSeriesSparkChart";
 	private static final long serialVersionUID = 8598531428961307855L;
 	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data  
@@ -78,8 +83,10 @@ public class TimeSeriesSparkChart implements NotificationListener {
 		this.yAxisLabel = ylabel; 
 		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 		timeSeriesCollection = new TimeSeriesCollection();
-		rawSeries = new TimeSeries("ylabel",Second.class); 
-		meanSeries = new TimeSeries("mean",Second.class);    
+		// Note: The class of the time-series time period class is inferred
+		//       when the first data item is added to the set.
+		rawSeries = new TimeSeries("ylabel"); 
+		meanSeries = new TimeSeries("mean");    
 
 		timeSeriesCollection.addSeries(rawSeries);  
 		timeSeriesCollection.addSeries(meanSeries);   
@@ -110,12 +117,22 @@ public class TimeSeriesSparkChart implements NotificationListener {
 		XYPlot plot = (XYPlot) chart.getPlot();  
 		DateAxis axis = (DateAxis) plot.getDomainAxis();  
 		axis.setAutoRange(true);  
-		axis.setFixedAutoRange(60000.0);  
+		axis.setFixedAutoRange(60000.0); 
+		
+		final XYItemRenderer renderer = plot.getRenderer();
+        if (renderer instanceof StandardXYItemRenderer) {
+            final StandardXYItemRenderer rr = (StandardXYItemRenderer) renderer;
+            rr.setPlotLines(true);
+            rr.setSeriesPaint(0, Color.RED, false);
+            rr.setSeriesPaint(1, Color.BLUE, false);
+            renderer.setSeriesStroke(0, new BasicStroke(2.0f));
+            renderer.setSeriesStroke(1, new BasicStroke(2.0f));
+        }
 		return chart;  
 	}
-
+	//Adding a new value to the time series triggers a SeriesChangeEvent
 	public void addDatum(TimeSeriesDatum datum) {
-		//log.infof("%s.addDatum: %s",TAG,datum.toString());
+		log.infof("%s.addDatum: %s",TAG,datum.toString());
 		Second secs = new Second(new Date(datum.getTimestamp()));
 		this.timeSeriesCollection.getSeries(0).addOrUpdate(secs,datum.getValue());  
 		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage()); 
@@ -132,5 +149,12 @@ public class TimeSeriesSparkChart implements NotificationListener {
 			TimeSeriesDatum datum = (TimeSeriesDatum)event.getUserData();
 			addDatum(datum); 
 		}
+	}
+
+	@Override
+	public void seriesChanged(SeriesChangeEvent changeEvent) {
+		log.infof("%s.seriesChanged: %s",TAG,changeEvent.toString());
+		chartPanel.repaint();
+		chartPanel.updateUI();
 	}
 }
