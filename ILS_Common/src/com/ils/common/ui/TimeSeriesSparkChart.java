@@ -13,8 +13,8 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StandardXYItemRenderer;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
+import org.jfree.chart.renderer.xy.XYAreaRenderer;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.SeriesChangeEvent;
 import org.jfree.data.general.SeriesChangeListener;
 import org.jfree.data.time.Second;
@@ -70,6 +70,7 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	private XYDataset xyDataset;                              // Dataset that will be used for the chart  
 	private TimeSeries rawSeries;                               // raw series data
 	private TimeSeries meanSeries;                              // mean series data
+	private JFreeChart chart = null;
 	private final ChartPanel chartPanel;
 	private final String yAxisLabel;
 	private final LoggerEx log;
@@ -91,7 +92,7 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		timeSeriesCollection.addSeries(rawSeries);  
 		timeSeriesCollection.addSeries(meanSeries);   
 
-		JFreeChart chart = createChart(title,yAxisLabel,timeSeriesCollection);  
+		chart = createChart(title,yAxisLabel,timeSeriesCollection);  
 		chartPanel = new ChartPanel(chart);  
 		chartPanel.setFillZoomRectangle(true);     
 	}  
@@ -100,9 +101,9 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	
 	public void setPreferredSize(Dimension dimension) {chartPanel.setPreferredSize(dimension);}
 
+	// Plot 0 is the raw data, plot1 is the mean.
 	private JFreeChart createChart(String title,String label,TimeSeriesCollection tsCollection) {  
-
-		JFreeChart chart = ChartFactory.createTimeSeriesChart(  
+		chart = ChartFactory.createTimeSeriesChart( 
 				title,            // title  
 				"",               // x-axis label  
 				label,            // y-axis label  
@@ -117,17 +118,33 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		XYPlot plot = (XYPlot) chart.getPlot();  
 		DateAxis axis = (DateAxis) plot.getDomainAxis();  
 		axis.setAutoRange(true);  
-		axis.setFixedAutoRange(60000.0); 
+		axis.setFixedAutoRange(60000.0);
 		
-		final XYItemRenderer renderer = plot.getRenderer();
-        if (renderer instanceof StandardXYItemRenderer) {
-            final StandardXYItemRenderer rr = (StandardXYItemRenderer) renderer;
-            rr.setPlotLines(true);
-            rr.setSeriesPaint(0, Color.RED, false);
-            rr.setSeriesPaint(1, Color.BLUE, false);
-            renderer.setSeriesStroke(0, new BasicStroke(2.0f));
-            renderer.setSeriesStroke(1, new BasicStroke(2.0f));
-        }
+		// Render the raw data
+		XYAreaRenderer renderer0 = new XYAreaRenderer();
+		renderer0.setSeriesVisible(0, true);
+		renderer0.setSeriesVisible(1, false);
+		renderer0.setBaseFillPaint(Color.RED);
+		renderer0.setSeriesPaint(0, Color.RED, false);
+        renderer0.setSeriesStroke(0, new BasicStroke(2.0f));
+		plot.setRenderer(0, renderer0);
+		
+		// Create a duplicate time series
+		TimeSeriesCollection newDataset = null;
+		if (plot.getDataset(0) instanceof TimeSeriesCollection) {
+			try {
+				newDataset = (TimeSeriesCollection)((TimeSeriesCollection) plot.getDataset()).clone();
+			}
+			catch(CloneNotSupportedException ignore) {}  // We know it is supported
+		}
+		plot.setDataset(1, newDataset);
+			
+		XYLineAndShapeRenderer renderer1 = new XYLineAndShapeRenderer();
+		renderer1.setSeriesVisible(0, false);
+		renderer1.setSeriesVisible(1, true);
+        renderer1.setSeriesPaint(1, Color.BLUE, false);
+        renderer1.setSeriesStroke(1, new BasicStroke(2.0f));
+        plot.setRenderer(1, renderer1);
 		return chart;  
 	}
 	//Adding a new value to the time series triggers a SeriesChangeEvent
@@ -136,6 +153,7 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		Second secs = new Second(new Date(datum.getTimestamp()));
 		this.timeSeriesCollection.getSeries(0).addOrUpdate(secs,datum.getValue());  
 		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage()); 
+		this.chart.fireChartChanged();
 	}
 	// ============================== Listener Interface =======================
 	/**
