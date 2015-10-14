@@ -153,7 +153,6 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		Second secs = new Second(new Date(datum.getTimestamp()));
 		this.timeSeriesCollection.getSeries(0).addOrUpdate(secs,datum.getValue());  
 		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage()); 
-		this.chart.fireChartChanged();
 	}
 	// ============================== Listener Interface =======================
 	/**
@@ -165,13 +164,15 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	public synchronized void handleNotification(Notification event,Object handback) {  
 		if( event.getUserData() instanceof TimeSeriesDatum ) {
 			TimeSeriesDatum datum = (TimeSeriesDatum)event.getUserData();
-			addDatum(datum); 
+			addDatum(datum);
+			log.infof("%s.handleNotification: %s",chart.getTitle(),datum.toString());
+			this.chart.fireChartChanged();
 		}
 	}
 
 	@Override
 	public void seriesChanged(SeriesChangeEvent changeEvent) {
-		log.infof("%s.seriesChanged: %s",TAG,changeEvent.toString());
+		log.infof("%s.seriesChanged: %s - %s",chart.getTitle(),changeEvent.toString());
 		chartPanel.repaint();
 		chartPanel.updateUI();
 	}
