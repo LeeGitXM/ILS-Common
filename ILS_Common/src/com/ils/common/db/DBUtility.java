@@ -81,7 +81,7 @@ public class DBUtility {
 		Datasource ds = context.getDatasourceManager().getDatasource(name);
 		if( ds!=null ) {
 			try {
-				log.infof("%s.getConnection: Status is %s (%d of %d busy)",TAG,ds.getStatus().name(),
+				log.debugf("%s.getConnection: Status is %s (%d of %d busy)",TAG,ds.getStatus().name(),
 						ds.getActiveConnections(),ds.getMaxConnections());
 				cxn = ds.getConnection();
 				cxn.setAutoCommit(true);
