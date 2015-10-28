@@ -15,6 +15,8 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYAreaRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.general.DatasetChangeListener;
 import org.jfree.data.general.SeriesChangeEvent;
 import org.jfree.data.general.SeriesChangeListener;
 import org.jfree.data.time.Second;
@@ -63,7 +65,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  * update live as new values are presented. To display in a dialog, the component
  * to add is: getChartPanel(().
  */
-public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeListener {
+public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeListener, DatasetChangeListener {
 	private static final String TAG = "TimeSeriesSparkChart";
 	private static final long serialVersionUID = 8598531428961307855L;
 	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data  
@@ -129,11 +131,13 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
         renderer0.setSeriesStroke(0, new BasicStroke(2.0f));
 		plot.setRenderer(0, renderer0);
 		
-		// Create a duplicate time series
+		// Create a duplicate time series. Since bothget updaated at the same time,
+		// we only listen for changes on the second
 		TimeSeriesCollection newDataset = null;
 		if (plot.getDataset(0) instanceof TimeSeriesCollection) {
 			try {
 				newDataset = (TimeSeriesCollection)((TimeSeriesCollection) plot.getDataset()).clone();
+				newDataset.addChangeListener(this);
 			}
 			catch(CloneNotSupportedException ignore) {}  // We know it is supported
 		}
@@ -149,10 +153,13 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	}
 	//Adding a new value to the time series triggers a SeriesChangeEvent
 	public void addDatum(TimeSeriesDatum datum) {
-		log.infof("%s.addDatum: %s",TAG,datum.toString());
+		log.tracef("%s.addDatum: %s",TAG,datum.toString());
 		Second secs = new Second(new Date(datum.getTimestamp()));
 		this.timeSeriesCollection.getSeries(0).addOrUpdate(secs,datum.getValue());  
-		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage()); 
+		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage());
+		chartPanel.repaint();
+		chartPanel.updateUI();
+		this.chart.fireChartChanged();
 	}
 	// ============================== Listener Interface =======================
 	/**
@@ -173,6 +180,14 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	@Override
 	public void seriesChanged(SeriesChangeEvent changeEvent) {
 		log.infof("%s.seriesChanged: %s - %s",chart.getTitle(),changeEvent.toString());
+		chartPanel.repaint();
+		chartPanel.updateUI();
+	}
+	
+	// ============================== Dataset Listener Interface =======================
+	@Override
+	public void datasetChanged(DatasetChangeEvent changeEvent) {
+		log.infof("%s.datasetChanged: %s - %s",chart.getTitle(),changeEvent.toString());
 		chartPanel.repaint();
 		chartPanel.updateUI();
 	}
