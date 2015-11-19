@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -14,17 +16,28 @@ import javax.swing.JPanel;
 
 import org.jfree.ui.DateChooserPanel;
 
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
+
 /**
  * This is a simple panel that allows entry of time-of-day 
  * using a DateChooser plus three combo boxes for the time.
  */
 public class DateTimeChooserPanel extends JPanel{
 	private static final long serialVersionUID = 1653393576145239228L;
+	private final static String TAG = "DateTimeChooserPanel";
+	private final LoggerEx log;
 	private static final Dimension COMBO_SIZE = new Dimension(20,24);
+	private final static String STANDARD_DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";
 	private JComboBox<String> hour, minute, second;
+	private final TimeZone timeZone;
 	private DateChooserPanel dateChooser;
+	private final SimpleDateFormat dateFormatter;
 
 	public DateTimeChooserPanel(){
+		this.log = LogUtil.getLogger(getClass().getPackage().getName());
+		this.dateFormatter= new SimpleDateFormat(STANDARD_DATE_FORMAT);
+		this.timeZone = dateFormatter.getTimeZone();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		initUI();
 	}
@@ -71,24 +84,40 @@ public class DateTimeChooserPanel extends JPanel{
 	 */
 	public Timestamp getTimestamp() {
 		// Start with the calendar date portion.
-		long time = dateChooser.getDate().getTime();
+		long rawtime = dateChooser.getDate().getTime();
+		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(rawtime)));
+		// Ignore the time portion
+		long days = rawtime/(24*60*60*1000);            // Even days
+		long time = days*24*60*60*1000;
+		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
+		// Re-correct for timezone.
+		time -= timeZone.getRawOffset();
+		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		int hr = hour.getSelectedIndex(); 
 		if( hr>=0) time += hr*3600*1000;
+		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		int min = minute.getSelectedIndex(); 
 		if( min>=0) time += min*60*1000;
+		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		int sec = second.getSelectedIndex(); 
 		if( sec>=0) time += sec*1000;
+		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		
 		return new Timestamp(time);
 	}
 	/** 
-	 * @return a timestamp representing all the user selections
+	 * Configure all the user widgets for a timestamp. Display all the widgets in units of
+	 * local time.  
 	 */
 	public void setTimestamp(Timestamp ts) {
+		dateChooser.setDate(ts);    // Time portion is immaterial
 		long time = ts.getTime();
+		//log.debugf("%s.setTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
+		
+		// Offset for time zone
+		time += timeZone.getRawOffset();
 		// Start with the calendar date portion.
 		long days = time/(24*60*60*1000);
-		dateChooser.setDate(new Date(days*24*60*60*1000));
 		time = time - days*24*60*60*1000;    // Remainder in a day
 		long hr = time/(60*60*1000);
 		hour.setSelectedIndex((int)hr);
