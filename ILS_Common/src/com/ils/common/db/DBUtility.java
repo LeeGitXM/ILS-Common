@@ -3,7 +3,6 @@ package com.ils.common.db;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -76,47 +75,7 @@ public class DBUtility {
 			log.warnf("%s.executeSQL: Datasource %s not found",TAG,source);
 		}
 	}
-	/**
-	 * Execute a sql query against the named datasource.
-	 * The results are all returned as a list of lists of strings.
-	 * The outer list represents database rows.
-	 *
-	 * @param sql command to execute
-	 * @param source a named data-source
-	 * @return a list of lists of results as strings.
-	 */
-	public List<List<String>> executeQuery(String sql,String source) {
-		List<List<String>> result = new ArrayList<>();
-		Connection cxn = getConnection(source);
-		if( cxn!=null ) {
-			try {
-				Statement stmt = cxn.createStatement();
-				ResultSet rs = stmt.executeQuery(sql);
-				ResultSetMetaData md = rs.getMetaData();
-				int ncols = md.getColumnCount();
-				while(rs.next()) {
-					List<String> row = new ArrayList<>();
-					int col = 0;
-					while(col<ncols) {
-						col++;   // 1-based
-						row.add(rs.getString(col));
-					}
-					result.add(row);
-				}
-				rs.close();
-			}
-			catch(SQLException sqle) {
-				log.warnf("%s.executeSQL: Exception executing %s (%s)",TAG,sql,sqle.getMessage());
-			}
-			finally {
-				closeConnection(cxn);
-			}
-		}
-		else {
-			log.warnf("%s.executeSQL: Datasource %s not found",TAG,source);
-		}
-		return result;
-	}
+	
 	
 	public Connection getConnection(String name) {
 		Connection cxn = null;
