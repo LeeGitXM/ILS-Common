@@ -22,7 +22,6 @@ import org.jfree.data.general.SeriesChangeListener;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
-import org.jfree.data.xy.XYDataset;
 
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
@@ -68,8 +67,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
 public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeListener, DatasetChangeListener {
 	private static final String TAG = "TimeSeriesSparkChart";
 	private static final long serialVersionUID = 8598531428961307855L;
-	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data  
-	private XYDataset xyDataset;                              // Dataset that will be used for the chart  
+	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data   
 	private TimeSeries rawSeries;                               // raw series data
 	private TimeSeries meanSeries;                              // mean series data
 	private JFreeChart chart = null;

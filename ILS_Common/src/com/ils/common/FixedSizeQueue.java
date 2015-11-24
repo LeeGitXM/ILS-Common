@@ -1,5 +1,5 @@
 /**
- *   (c) 2014  ILS Automation. All rights reserved. 
+ *   (c) 2014-2015  ILS Automation. All rights reserved. 
  */
 package com.ils.common;
 
@@ -13,9 +13,11 @@ public class FixedSizeQueue<E> extends LinkedList<E>  {
 		this.bufferSize = length;
 	}
 	
+	public int getBufferSize() { return bufferSize; }
+	
 	public void setBufferSize(int size) {
 		// Whittle down the list, if necessary
-		if( size<1 ) size = 1;
+		if( size<1 ) size = 0;
 		while( this.size()>size ) {
 			super.remove();
 		}
@@ -24,7 +26,7 @@ public class FixedSizeQueue<E> extends LinkedList<E>  {
 	
 	@Override
     public boolean add(E o) {
-        super.add(o);
+        if( bufferSize>0) super.add(o);
         while (size() > bufferSize) { super.remove(); }
         return true;
     }

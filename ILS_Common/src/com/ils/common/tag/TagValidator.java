@@ -5,7 +5,6 @@ package com.ils.common.tag;
 
 import java.io.IOException;
 
-import com.inductiveautomation.ignition.common.sqltags.TagDefinition;
 import com.inductiveautomation.ignition.common.sqltags.model.Tag;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataType;
@@ -24,7 +23,6 @@ public class TagValidator  {
 	private static final String TAG = "TagValidator";
 	private final LoggerEx log;
 	private final GatewayContext context;
-	private final ProviderRegistry registry = ProviderRegistry.getInstance();
 	
 	/**
 	 * Constructor.
@@ -55,20 +53,6 @@ public class TagValidator  {
 			    else  {
 			    	log.tracef("%s.exists: tag %s not found",TAG,path);
 			    }
-			}
-			else {
-				ILSTagProvider prov = registry.getProvider(providerName);
-				if( prov!=null) {
-					TagDefinition td = prov.getTagDefinition(tp);
-					if( td!=null) exists = true;
-				    else  {
-				    	log.tracef("%s.exists: tag %s not found",TAG,path);
-				    }
-				}
-				else {
-					log.infof("%s.exists: provider %s for tag %s not found",TAG,providerName,path);
-				}
-				
 			}
 		}
 		catch(IOException ioe) {
