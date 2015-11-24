@@ -215,8 +215,8 @@ public class InternalTagProvider implements TagProvider {
 		getOrAdd(path, value.getValue()).updateCurrentValue(new BasicTagValue(value));
 	}
 
-	public void configureTagType(TagMeta meta) {
-		this.meta.registerTypeType(meta);
+	public void configureTagType(TagMeta tagmeta) {
+		this.meta.registerTypeType(tagmeta);
 	}
 
 	public List<Tag> browse(TagPath path) {
@@ -338,9 +338,9 @@ public class InternalTagProvider implements TagProvider {
 					InternalTagProvider.this.applyDeletes(tagIds, scanclassIds);
 				}
 
-				public void tagstoreItemsAdded(Collection<TagStoreObject<TagConfig>> tags, Collection<TagStoreObject<ScanClass>> scanClasses)
+				public void tagstoreItemsAdded(Collection<TagStoreObject<TagConfig>> tags, Collection<TagStoreObject<ScanClass>> sClasses)
 				{
-					InternalTagProvider.this.applyUpdates(tags, scanClasses);
+					InternalTagProvider.this.applyUpdates(tags, sClasses);
 				}
 			});
 			this.internalTagStore.startup();
@@ -350,7 +350,7 @@ public class InternalTagProvider implements TagProvider {
 		}
 	}
 
-	protected void applyUpdates(Collection<TagStoreObject<TagConfig>> tags, Collection<TagStoreObject<ScanClass>> scanClasses) {
+	protected void applyUpdates(Collection<TagStoreObject<TagConfig>> tags, Collection<TagStoreObject<ScanClass>> sClasses) {
 		Set<TagPath> parents = new HashSet<>();
 		List<TestFrameTag> toNotify = new ArrayList<>();
 		synchronized (this.configLock) {
@@ -370,7 +370,7 @@ public class InternalTagProvider implements TagProvider {
 				}
 			}
 			if ((scanClasses != null) && (scanClasses.size() > 0)) {
-				for (TagStoreObject<ScanClass> sc : scanClasses) {
+				for (TagStoreObject<ScanClass> sc : sClasses) {
 					SimpleExecutableScanClass newSC = new SimpleScanClass((ScanClass)sc.getEntity(), getName(), sc.getId());
 					SimpleExecutableScanClass existing = (SimpleExecutableScanClass)this.scanClasses.get(sc.getId());
 					if (existing != null)
@@ -505,12 +505,12 @@ public class InternalTagProvider implements TagProvider {
 		}
 	}
 
-	public void addScanClasses(List<ScanClass> scanClasses) throws Exception {
+	public void addScanClasses(List<ScanClass> sClasses) throws Exception {
 		if (this.internalTagStore == null) {
 			commissionNewTagStore();
 		}
 		if (this.internalTagStore != null)
-			getTagStore().addScanClasses(scanClasses);
+			getTagStore().addScanClasses(sClasses);
 	}
 
 	protected List<EntityId> getIdsForSCNames(List<String> names) {
@@ -872,11 +872,11 @@ public class InternalTagProvider implements TagProvider {
 			return this.historizer == null ? null : this.historizer.getProvider();
 		}
 
-		public void configureTypes(DataType dType, ExtendedTagType tagType) {
-			boolean changed = (getDataType() != dType) || (!TypeUtilities.equals(this.tagType, tagType));
+		public void configureTypes(DataType dType, ExtendedTagType tType) {
+			boolean changed = (getDataType() != dType) || (!TypeUtilities.equals(this.tagType, tType));
 
 			setDataType(dType);
-			this.tagType = tagType;
+			this.tagType = tType;
 			if (changed)
 				notifyChange(null);
 		}
@@ -926,12 +926,12 @@ public class InternalTagProvider implements TagProvider {
 			return InternalTagProvider.this.getSimpleTagExecutor();
 		}
 
-		public void updateValue(Object value) {
-			updateCurrentValue(new BasicTagValue(value, DataQuality.GOOD_DATA));
+		public void updateValue(Object val) {
+			updateCurrentValue(new BasicTagValue(val, DataQuality.GOOD_DATA));
 		}
 
-		public void updateValue(Object value, Quality quality) {
-			updateCurrentValue(new BasicTagValue(value, quality));
+		public void updateValue(Object val, Quality quality) {
+			updateCurrentValue(new BasicTagValue(val, quality));
 		}
 
 		public void updateQuality(Quality quality) {

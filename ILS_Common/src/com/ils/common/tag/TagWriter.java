@@ -13,7 +13,6 @@ import java.util.List;
 import com.inductiveautomation.ignition.common.model.values.BasicQualifiedValue;
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
 import com.inductiveautomation.ignition.common.model.values.Quality;
-import com.inductiveautomation.ignition.common.sqltags.TagDefinition;
 import com.inductiveautomation.ignition.common.sqltags.model.Tag;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataQuality;
@@ -165,7 +164,6 @@ public class TagWriter  {
 		clear();   // Don't attempt to write these again
 	}
 
-	
 	/**
 	 * This is the general form of a write. The provider is derived from the 
 	 * path "source".
@@ -221,7 +219,7 @@ public class TagWriter  {
 		if( tag!=null ) {
 			DataType dtype = tag.getDataType();
 			Object value = val;
-			Quality qual = DataQuality.GOOD_DATA;
+			DataQuality qual = DataQuality.GOOD_DATA;
 			try {
 				if( val.equalsIgnoreCase("BAD") || val.equalsIgnoreCase("NaN") ) {
 					// leave the value as-is
@@ -237,8 +235,8 @@ public class TagWriter  {
 				else if( dtype==DataType.DateTime)   value = dateFormat.parse(val);
 				else value = val.toString();
 
-				List<WriteRequest<TagPath>> list = createTagList(tagPath,value);
-				provider.write(list, null, true);    // true-> isSystem to bypass permission checks
+				List<WriteRequest<TagPath>> singleRequestList = createTagList(tagPath,value);
+				provider.write(singleRequestList, null, true);    // true-> isSystem to bypass permission checks
 			}
 			catch(ParseException pe) {
 				log.warnf("%s.write: ParseException setting %s(%s) to %s (%s - expecting %s)",TAG,
@@ -268,10 +266,9 @@ public class TagWriter  {
 	public void write(ILSTagProvider provider,TagPath tagPath, String val,Date timestamp) {
 		if( timestamp==null ) timestamp = new Date();  // Now
 		log.debugf("%s.write %s: %s = %s",TAG,dateFormat.format(timestamp),tagPath.toStringFull(),val);
-
-		TagDefinition td = provider.getTagDefinition(tagPath);
-		if( td!=null ) {
-			DataType dtype = td.getDataType();
+		Tag tag = provider.getTag(tagPath);
+		if( tag!=null ) {
+			DataType dtype = tag.getDataType();
 			Object value = val;
 			Quality qual = DataQuality.GOOD_DATA;
 			try {
@@ -313,12 +310,12 @@ public class TagWriter  {
 	 * Create a list containing a single tag value. (For a standard provider).
 	 */
 	private List<WriteRequest<TagPath>> createTagList(TagPath path,Object value) {
-		List<WriteRequest<TagPath>> list = new ArrayList<WriteRequest<TagPath>>();
+		List<WriteRequest<TagPath>> singleRequestList = new ArrayList<WriteRequest<TagPath>>();
 		LocalRequest req = null;
 		//log.infof("%s.createTagList: path = %s",TAG,path);
 		req = new LocalRequest(path,value);
-		if(req.isValid)list.add(req);
-		return list;
+		if(req.isValid)singleRequestList.add(req);
+		return singleRequestList;
 	}
 	/**
 	 * Create a tag write request. 
@@ -326,46 +323,48 @@ public class TagWriter  {
 	public class LocalRequest extends BasicAsyncWriteRequest<TagPath> {
 		public boolean isValid = false;
 		private QualifiedValue qv = null;
-		
-		public LocalRequest( TagPath tp,QualifiedValue qv) {
+
+		public LocalRequest( TagPath tp,Object value) {
 			super();
-			if( qv!=null ) {
-				if( log.isTraceEnabled()) log.tracef("%s.localRequest: adding %s",TAG,tp.toStringFull());
+			initialize(tp,value);
+		}
+
+		public LocalRequest(String path,Object val) {
+			super();
+			try {
+				TagPath tp = TagPathParser.parse(path);
+				initialize(tp,val);
+			}
+			catch( IOException ioe) {
+				log.warnf("%s.localRequest: Exception parsing %s (%s)",TAG,path,ioe.getMessage());
+			}
+		}
+
+
+		private void initialize(TagPath tp,Object value) {
+			if( log.isTraceEnabled()) log.tracef("%s: localRequest; adding %s",TAG,tp.toStringFull());
+			if( value!=null && value instanceof QualifiedValue  ) {
+				this.qv = (QualifiedValue)value;
 				this.setTarget(tp);
 				this.setValue(qv.getValue());
 				this.setResult(qv.getQuality());
 				this.isValid = true;
 			}
-		}
-		
-		public LocalRequest( TagPath tp,Object value) {
-			super();
-			if( qv!=null ) {
-				if( log.isTraceEnabled()) log.tracef("%s.localRequest: adding %s",TAG,tp.toStringFull());
+			else if( value!=null)  {
 				this.setTarget(tp);
 				this.setValue(value);
-			    this.setResult(DataQuality.GOOD_DATA);
-			    this.isValid = true;
+				if( value.toString().equals("NaN") ||
+						value.toString().equals("BAD")	) {
+					this.setResult(DataQuality.OPC_BAD_DATA);
+				}
+				else {
+					this.setResult(DataQuality.GOOD_DATA);
+				}
+				this.isValid = true;
 			}
 		}
-		
-		public LocalRequest(String path,Object val) {
-			super();
-			if( val!=null && !val.toString().equals("NaN")) {
-				try {
-				    TagPath tp = TagPathParser.parse(path);
-				    if( log.isTraceEnabled()) log.tracef("%s: localRequest; adding %s",TAG,tp.toStringFull());
-				    this.setTarget(tp);
-				    this.setValue(val);
-				    this.setResult(DataQuality.GOOD_DATA);
-				    this.isValid = true;
-				}
-				catch( IOException ioe) {
-					log.warnf("%s.localRequest: Exception parsing %s (%s)",TAG,path,ioe.getMessage());
-				}
-			}
-		}
-		
+
+
 		public QualifiedValue getQualifiedValue() { return qv; }
 	}
 	

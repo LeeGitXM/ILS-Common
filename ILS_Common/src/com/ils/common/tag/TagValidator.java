@@ -1,8 +1,5 @@
 /**
- *   (c) 2013  ILS Automation. All rights reserved.
- *  
- *   The tag factory is designed to be called from the client
- *   via RPC. The client presents the same interface to scripting functions.
+ *   (c) 2015  ILS Automation. All rights reserved.
  */
 package com.ils.common.tag;
 
@@ -11,6 +8,8 @@ import java.io.IOException;
 import com.inductiveautomation.ignition.common.sqltags.TagDefinition;
 import com.inductiveautomation.ignition.common.sqltags.model.Tag;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
+import com.inductiveautomation.ignition.common.sqltags.model.types.DataType;
+import com.inductiveautomation.ignition.common.sqltags.model.types.TagType;
 import com.inductiveautomation.ignition.common.sqltags.parser.TagPathParser;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
@@ -76,5 +75,65 @@ public class TagValidator  {
 			log.warnf("%s.exists: Exception parsing tag %s (%s)",TAG,path,ioe.getMessage());
 		}
 		return exists;
+	}
+	
+	/**
+	 * Determine if the tag path is valid. If there is an issue a reason will be returned.
+	 * A null denotes success.
+	 * 
+	 * @param path fully qualified tag path
+	 * @return reason that tag is invalid, else null
+	 */
+	public String validateTag(String path) {
+		log.debugf("%s.validateTag: %s",TAG,path);
+		if( context==null) return null;
+		// Not initialized yet.
+		String reason = null;
+		if(path==null || path.isEmpty() ) return null;  // Path or value not set
+		try {
+			TagPath tp = TagPathParser.parse(path);
+
+			String providerName = TagUtility.providerNameFromPath(path);
+			// NOTE: For a simple tag, this returns the internal provider, a real provider.
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			// We assume the same provider
+			if( provider!= null  ) {
+				Tag tag = provider.getTag(tp);
+				if( tag!=null ) {
+					if( !tag.isEnabled() ) {
+						reason = "is disabled";
+					}
+					else if(tag.getType().equals(TagType.Folder) || tag.getType().equals(TagType.UDT_DEF) ||
+							tag.getType().equals(TagType.UDT_INST)   ) {
+						reason = String.format("tag type (%s) is not a simple type",tag.getType().toString());
+					}
+					else {
+						DataType dt = tag.getDataType();
+						DataType[] classicTypes = DataType.CLASSIC_TYPES_NO_DATASET;
+						for( DataType classicType:classicTypes) {
+							if(dt.equals(classicType))  return null;    // Good, a match
+						}
+						reason = String.format("datatype (%s) is not recognized",dt.toString());
+					}
+				}
+				else {
+					log.warnf("%s.validateTag: Provider %s did not find tag %s",TAG,providerName,path);
+					reason = String.format("is unknown to provider %s", providerName);
+				}
+			}
+			else {
+				log.warnf("%s.validateTag: no provider for %s ",TAG,path);
+				reason = "is not known to any provider";
+			}
+		}
+		catch( IOException ioe) {
+			log.warnf(TAG+"%s.localRequest: parse exception for path %s (%s)",TAG,path,ioe.getMessage());
+			reason = "has an unparsable tag path";
+		}
+		catch(Exception ex) {
+			log.warn(TAG+".validateTag: Exception ("+ex.getLocalizedMessage()+")");
+			reason = ex.getMessage();
+		}
+		return reason;
 	}
 }

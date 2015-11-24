@@ -59,7 +59,7 @@ public class BasicILSTagProvider implements ILSTagProvider {
 	
 	public GatewayContext getContext() { return this.context;  }
 	public String getName() { return this.name;  }
-	public void startup(GatewayContext context) {
+	public void startup(GatewayContext ctx) {
 		this.internalProvider.setContext(context);
 		context.getTagManager().registerTagProvider(this.internalProvider);
 	}

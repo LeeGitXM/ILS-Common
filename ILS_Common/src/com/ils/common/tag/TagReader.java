@@ -31,7 +31,6 @@ public class TagReader  {
 		this.context = ctx;
 	}
 
-
 	/**
 	 * Read the value of a tag. The time assigned is the current
 	 * time.

@@ -5,6 +5,7 @@ package com.ils.common.tag;
 
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
 import com.inductiveautomation.ignition.common.sqltags.TagDefinition;
+import com.inductiveautomation.ignition.common.sqltags.model.Tag;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import com.inductiveautomation.ignition.gateway.sqltags.simple.SimpleProviderInterface;
@@ -26,6 +27,10 @@ public interface ILSTagProvider extends SimpleProviderInterface  {
 	/**
 	 * @return details of a tag given the path.
 	 */
+	public Tag getTag(TagPath tp);
+	/**
+	 * @return a tag's definition given its path.
+	 */
 	public TagDefinition getTagDefinition(TagPath tp);
 	/**
 	 * Associates a write handler with the specified path.
@@ -38,7 +43,7 @@ public interface ILSTagProvider extends SimpleProviderInterface  {
 	 * @param context
 	 */
 	public void startup(GatewayContext context);
-	
+
 	/**
 	 * Unregister with the context's tag manager.
 	 */
