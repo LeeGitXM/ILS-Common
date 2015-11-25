@@ -19,15 +19,13 @@ public class TestAwareQualifiedValue extends BasicQualifiedValue  {
 
 	/**
 	 * Create a qualified value from just a value. If in a testing 
-	 * situation, set the time to the test time. 
+	 * situation, set the time to the test time. The standard timer
+	 * simply returns the current time as the "test time". 
 	 * @param observer
 	 */
 	public TestAwareQualifiedValue(WatchdogTimer timer,Object value) {
 		super(value);
-		if( timer instanceof AcceleratedWatchdogTimer  ) {
-			AcceleratedWatchdogTimer awt = (AcceleratedWatchdogTimer)timer;
-			setTimestamp(new Date(awt.getTestTime()));
-		}
+		setTimestamp(new Date(timer.getTestTime()));
 	}
 	/**
 	 * Create a qualified value from just a value. If in a testing 
@@ -36,9 +34,6 @@ public class TestAwareQualifiedValue extends BasicQualifiedValue  {
 	 */
 	public TestAwareQualifiedValue(WatchdogTimer timer,Object value,Quality q) {
 		super(value,q);
-		if( timer instanceof AcceleratedWatchdogTimer  ) {
-			AcceleratedWatchdogTimer awt = (AcceleratedWatchdogTimer)timer;
-			setTimestamp(new Date(awt.getTestTime()));
-		}
+		setTimestamp(new Date(timer.getTestTime()));
 	}
 }

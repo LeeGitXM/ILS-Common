@@ -31,12 +31,14 @@ public class AcceleratedWatchdogTimer extends WatchdogTimer implements Runnable 
 	/**
 	 * @return the reciprocal of the time factor. It's the speedup factor.
 	 */
+	@Override
 	public double getFactor() { return 1.0/factor; }
 	/**
 	 * @return the current test time. The time is updated
 	 *         each time a timer expires and offset by the
 	 *         specified offset.
 	 */
+	@Override
 	public long getTestTime() {
 		long now = System.nanoTime()/1000000;   // Work in milliseconds
 		return (long)((now-testTimeOffset)); 

@@ -75,7 +75,19 @@ public class WatchdogTimer implements Runnable   {
 		if(dog==null)  return;   // Ignore
 		 insert(dog);
 	}
+	/**
+	 * @return the reciprocal of the time factor. It's the speedup factor.
+	 *         For this base class, the value is 1.0.
+	 */
+	public double getFactor() { return 1.0; }
 	public String getName()   { return this.name; }
+	/**
+	 * By default test time is the same as real time.
+	 * @return
+	 */
+	public long getTestTime() {
+		return System.currentTimeMillis();
+	}
 
 	/**
 	 * Remove the specified watchdog from the list.
