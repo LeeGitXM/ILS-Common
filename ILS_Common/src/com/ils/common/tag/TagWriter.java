@@ -166,11 +166,12 @@ public class TagWriter  {
 
 	/**
 	 * This is the general form of a write. The provider is derived from the 
-	 * path "source".
+	 * path "source". If the path is empty, we fail silently.
 	 * @param path
 	 * @param val
 	 */
 	public void write(String path, String value,long timestamp) {
+		if( path==null || path.isEmpty()) return; 
 		TagPath tagPath = TagPathParser.parseSafe(path);
 		String providerName = tagPath.getSource();
 		ILSTagProvider iprovider = registry.getProvider(providerName);

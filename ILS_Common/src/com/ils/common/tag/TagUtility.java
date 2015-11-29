@@ -28,11 +28,11 @@ public class TagUtility
 	 */
 	public static String replaceProviderInPath(String provider,String path) {
 		String tagPath = path;
-		
-		int pos = path.indexOf("]");
-		if(pos>0) path = path.substring(pos+1);
-		tagPath = String.format("[%s]%s",provider,path);
-			
+		if( !path.isEmpty() ) {
+			int pos = path.indexOf("]");
+			if(pos>0) path = path.substring(pos+1);
+			tagPath = String.format("[%s]%s",provider,path);
+		}
 		return tagPath;
 	}
 }
