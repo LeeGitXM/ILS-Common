@@ -122,44 +122,45 @@ public class TagWriter  {
 	 * 
 	 */
 	public void updateTags(String providerName,Date timestamp) {
-		// For a "standard" provider, it is not possible to set the timestamp. Don't bother.
-		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null )  {
-			List<Quality> qualities = provider.write(list, null, true);    // true-> isSystem to bypass permission checks
-			int index = 0;
-			for(Quality q:qualities) {
-		    	if(!q.isGood()) {
-		    		log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", TAG, 
-		    				list.get(index).getTarget().toStringFull(), list.get(index).getValue().toString(), qualities.get(index).getName());
-		    	}
-		    	index++;
-	    	}
-		}
-		else {
-			ILSTagProvider prov = registry.getProvider(providerName);
-			if( prov!=null ) {
-				// For a "simple" provider, write a qualified value one by one.
-				for(WriteRequest<TagPath> r:list) {
-					if( r instanceof LocalRequest ) {
-						LocalRequest req = (LocalRequest)r;
-						if(!req.isValid ) continue;
-						QualifiedValue qv = req.getQualifiedValue();
-						if( qv!=null ) {
-							BasicQualifiedValue bqv = new BasicQualifiedValue(qv.getValue(),qv.getQuality(),timestamp);
-							prov.updateValue(req.getTarget(), bqv);
-						}
-						else {
-							write(prov,req.getTarget(),req.getValue().toString(),timestamp); 
-						}
+		// Try the ILS provider first.
+		ILSTagProvider prov = registry.getProvider(providerName);
+		if( prov!=null ) {
+			// For a "simple" provider, write a qualified value one by one.
+			for(WriteRequest<TagPath> r:list) {
+				if( r instanceof LocalRequest ) {
+					LocalRequest req = (LocalRequest)r;
+					if(!req.isValid ) continue;
+					QualifiedValue qv = req.getQualifiedValue();
+					if( qv!=null ) {
+						BasicQualifiedValue bqv = new BasicQualifiedValue(qv.getValue(),qv.getQuality(),timestamp);
+						prov.updateValue(req.getTarget(), bqv);
 					}
 					else {
-						log.warnf("%s.updateTags: Found %s in list instead of LocalRequest",TAG,r.getClass().getName());
+						write(prov,req.getTarget(),req.getValue().toString(),timestamp); 
 					}
 				}
+				else {
+					log.warnf("%s.updateTags: Found %s in list instead of LocalRequest",TAG,r.getClass().getName());
+				}
+			}
+		}
+		else {
+			// For a "standard" provider, it is not possible to set the timestamp. Don't bother.
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			if( provider != null )  {
+				List<Quality> qualities = provider.write(list, null, true);    // true-> isSystem to bypass permission checks
+				int index = 0;
+				for(Quality q:qualities) {
+			    	if(!q.isGood()) {
+			    		log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", TAG, 
+			    				list.get(index).getTarget().toStringFull(), list.get(index).getValue().toString(), qualities.get(index).getName());
+			    	}
+			    	index++;
+		    	}
 			}
 			else {
 				log.warnf("%s.updateTags: Provider %s not found",TAG,providerName);
-			}
+			}	
 		}
 		clear();   // Don't attempt to write these again
 	}
