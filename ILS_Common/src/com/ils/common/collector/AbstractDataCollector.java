@@ -290,7 +290,7 @@ public abstract class AbstractDataCollector  {
 					}					
 					point.timestamp = ts;
 					prototype.timestamp = ts;    // Update the prototype with the data collection time
-					//log.tracef("%s: reportValueChanged %s (index %d at %s)",TAG,path,index,ts.toString());
+					log.tracef("%s: reportValueChanged %s (index %d at %s)",TAG,path,index,ts.toString());
 					checkCollectionComplete();
 				}
 				else {

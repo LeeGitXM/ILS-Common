@@ -125,22 +125,21 @@ public class TagFactory  {
 		}
 	}
 
-	private void createParents(TagPath item) {
-		Stack<TagPath> parentStack = new Stack<>();
-		while(item.getParentPath()!=null) {
-			item = item.getParentPath();
-			parentStack.push(item);
-		}
-		// Unwrap in opposite order
-		while(!parentStack.isEmpty()) {
-			TagPath tp = parentStack.pop();
+	private void createParents(TagPath path) {
+		
+		int segcount = path.getPathLength();
+		int seg = 1;
+		while(seg<segcount) {
+			TagPath tp = BasicTagPath.subPath(path,0, seg);
+			log.tracef("%s.createParents: Subpath = %s",TAG,tp.toStringFull());
 			TagDefinition tag = new TagDefinition(tp.getItemName(),TagType.Folder);
 			try {
-				context.getTagManager().addTags(tp.getParentPath(), Arrays.asList(new TagNode[] { tag }), TagManagerBase.CollisionPolicy.Abort);
+				context.getTagManager().addTags(tp.getParentPath(), Arrays.asList(new TagNode[] { tag }), TagManagerBase.CollisionPolicy.Ignore);
 			}
 			catch(Exception ex) {
 				log.warnf("%s.createParents: Exception creating tag folder %s (%s)",TAG,tp,ex.getLocalizedMessage());
 			}
+			seg++;
 		}
 	}
 	/**
@@ -177,11 +176,14 @@ public class TagFactory  {
 			try {
 				// Guarantee that parent paths exist
 				createParents(tp);
-				TagDefinition tag = new TagDefinition(tp.getItemName(),TagType.Custom);
-				tag.setDataType(dataType);
-				tag.setEnabled(true);
-				tag.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
-				context.getTagManager().addTags(tp.getParentPath(), Arrays.asList(new TagNode[] { tag }), TagManagerBase.CollisionPolicy.Abort);
+				List<TagNode> toAdd = new ArrayList<>();
+				
+				TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
+				node.setDataType(dataType);
+				node.setEnabled(true);
+				node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
+				toAdd.add(node);
+				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
 			catch(Exception ex) {
 				log.warnf("%s.createTag: Exception creating tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
