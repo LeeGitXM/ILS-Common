@@ -66,7 +66,6 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  */
 public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeListener, DatasetChangeListener {
 	private static final String TAG = "TimeSeriesSparkChart";
-	private static final long serialVersionUID = 8598531428961307855L;
 	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data   
 	private TimeSeries rawSeries;                               // raw series data
 	private TimeSeries meanSeries;                              // mean series data
@@ -129,7 +128,7 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
         renderer0.setSeriesStroke(0, new BasicStroke(2.0f));
 		plot.setRenderer(0, renderer0);
 		
-		// Create a duplicate time series. Since bothget updaated at the same time,
+		// Create a duplicate time series. Since both get updated at the same time,
 		// we only listen for changes on the second
 		TimeSeriesCollection newDataset = null;
 		if (plot.getDataset(0) instanceof TimeSeriesCollection) {
@@ -159,6 +158,8 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		chartPanel.updateUI();
 		this.chart.fireChartChanged();
 	}
+	public TimeSeriesCollection getSeriesCollection() { return this.timeSeriesCollection; }
+	
 	// ============================== Listener Interface =======================
 	/**
 	 * The user-data inside the notification is expected to be a TimeSeriesDatum.
