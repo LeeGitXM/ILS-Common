@@ -44,9 +44,8 @@
 		</copy>
 	</target>
 	
-	<!-- Install the jar file both in the "external" repository and in the current Ignition installation -->
+	<!-- Create/copy the jar file into the current buil area -->
 	<target name ="jar" description="Create a jar for the ILS Common library">
     	<jar destfile="${jar.dir}/${jar.name}" includes="**/*.class,**/*.png" basedir="bin"/>
-		<copy file="${jar.dir}/${jar.name}" todir="${ignition.py.lib}/../../lib/core/common" />
 	</target>
 </project>
