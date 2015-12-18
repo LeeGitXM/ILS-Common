@@ -50,25 +50,26 @@ import com.inductiveautomation.ignition.gateway.sqltags.simple.WriteHandler;
  */
 public class TagFactory  {
 	private static final String TAG = "TagFactory";
-	//private static final int ANY_CHANGE = 16;  // Edit flag
 	private final LoggerEx log;
 	private final GatewayContext context;
 	private final SimpleDateFormat dateFormat;
-	private final ProviderRegistry simpleProviderRegistry;
+	private final ProviderRegistry providerRegistry;
 	private final SQLTagsManager tagManager;
 	private final List<TagPath> visitOrder;
 	
 	/**
 	 * Constructor.
 	 */
-	public TagFactory(GatewayContext ctxt) {
+	public TagFactory(GatewayContext ctxt,ProviderRegistry reg) {
 		this.context = ctxt;
 		this.dateFormat = new SimpleDateFormat(ILSProperties.TIMESTAMP_FORMAT);
-		this.simpleProviderRegistry = ProviderRegistry.getInstance();
+		this.providerRegistry = reg;
 		this.tagManager = context.getTagManager();
 		this.visitOrder = new ArrayList<>();   // For tag replication
 		log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
+	
+	public ProviderRegistry getProviderRegistry() { return providerRegistry; }
 	
 	/**
 	 * An Expression is just a tag with an expression attribute. This method creates a tag that is an
@@ -90,7 +91,7 @@ public class TagFactory  {
 			return;
 		}
 		DataType dataType = dataTypeFromString(type);
-		ILSTagProvider simpleProvider = simpleProviderRegistry.getProvider(providerName);
+		ILSTagProvider simpleProvider = providerRegistry.getProvider(providerName);
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
 		if( simpleProvider!=null) {
 			simpleProvider.configureTag(tp, dataType, TagType.Custom);
@@ -163,7 +164,7 @@ public class TagFactory  {
 		//       through the tag manager. Here the calls appear to succeed, but the tags do not show up.
 		// In the cases where we need historical timestamps,  we use the simple tag provider.
 		DataType dataType = dataTypeFromString(type);
-		BasicILSTagProvider simpleProvider = simpleProviderRegistry.getProvider(providerName);
+		BasicILSTagProvider simpleProvider = providerRegistry.getProvider(providerName);
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
 		if( simpleProvider!=null) {
 			simpleProvider.configureTag(tp, dataType, TagType.Custom);
@@ -205,7 +206,7 @@ public class TagFactory  {
 			return;
 		}
 		
-		BasicILSTagProvider simpleProvider = simpleProviderRegistry.getProvider(providerName);
+		BasicILSTagProvider simpleProvider = providerRegistry.getProvider(providerName);
 		if( simpleProvider!=null) {
 			simpleProvider.removeTag(tp);
 		}
@@ -235,12 +236,12 @@ public class TagFactory  {
 	 * @param toProvider
 	 * @param clear
 	 */
-	public void replicateProvider(String sourceProvider,String destProvider,String destDatabase,boolean clear) {
+	public void replicateProvider(String sourceProvider,String destProvider,boolean clear) {
 		visitOrder.clear(); // Visit order keeps track of folder order
 		if( clear ) clearTagsUnderProvider(destProvider);
 		// The map contains a list of children keyed by parent path
 		Map<TagPath, List<TagPath>> nodeMap = findNodesUnderProvider(sourceProvider);
-		copyTagsToNewProvider(sourceProvider,destProvider, destDatabase,nodeMap);
+		copyTagsToNewProvider(sourceProvider,destProvider,nodeMap);
 		log.infof("%s.replicate: ========== Complete =================", TAG);
 	}
 	/**
@@ -276,7 +277,7 @@ public class TagFactory  {
 
 		// The SimpleTagProvider, does not seem to provide a mechanism to alter the expression,
 		// so we simply delete and create another.
-		BasicILSTagProvider simpleProvider = ProviderRegistry.getInstance().getProvider(providerName);
+		BasicILSTagProvider simpleProvider = providerRegistry.getProvider(providerName);
 		if( simpleProvider!=null) {
 			deleteTag(providerName,tagPath);
 			createExpression(providerName,tagPath,tag.getDataType().toString(),expr);
@@ -318,9 +319,9 @@ public class TagFactory  {
 
 
 	}
-	private void copyTagsToNewProvider(String source,String destination,String destDatabase,Map<TagPath,List<TagPath>> nodeMap) {
+	private void copyTagsToNewProvider(String source,String destination,Map<TagPath,List<TagPath>> nodeMap) {
 		TagProvider sourceProvider = context.getTagManager().getTagProvider(source);
-		BasicILSTagProvider destSimpleProvider = simpleProviderRegistry.getProvider(destination);
+		BasicILSTagProvider destSimpleProvider = providerRegistry.getProvider(destination);
 		WriteHandler writeHandler = new BasicWriteHandler(destSimpleProvider);
 		for (TagPath parent : visitOrder) {
 			List<TagPath> paths = nodeMap.get(parent);
@@ -366,16 +367,11 @@ public class TagFactory  {
 					TagValue tv = null;
 					// For a simple provider we add the node one-by-one, otherwise accumulate in list
 					if( node!=null ) {
-						// Configure the target history database
-						if( node.getAttribute(TagProp.HistoryEnabled)!=null ) {
-							tv = node.getAttribute(TagProp.HistoryEnabled);
-							if( ((Boolean)(tv.getValue())).booleanValue() ) {
-								tv = new BasicTagValue(Boolean.TRUE);
-								node.setAttribute(TagProp.HistoryEnabled,tv );
-								tv = new BasicTagValue(destDatabase);
-								node.setAttribute(TagProp.PrimaryHistoryProvider,tv );
-							}
-						}
+						// Configure the target history database. We copy attributes. Is this necessary?
+						tv = tag.getAttribute(TagProp.HistoryEnabled);
+						node.setAttribute(TagProp.HistoryEnabled,tv );
+						tv = tag.getAttribute(TagProp.PrimaryHistoryProvider);
+						node.setAttribute(TagProp.PrimaryHistoryProvider,tv );
 						
 						if(destSimpleProvider!=null ) {
 							DataType dataType = node.getDataType();

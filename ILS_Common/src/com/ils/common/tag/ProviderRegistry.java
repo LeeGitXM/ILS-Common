@@ -6,33 +6,28 @@ package com.ils.common.tag;
 import java.util.HashMap;
 
 /**
- *  The Singleton instance is a container for currently defined ILSTagProvider
- *  instances. The hashtable holding instances of the provider is keyed by
- *  the provider name.
+ *  The registry is meant to exist for the lifetime of a designer or client session. It
+ *  holds modifiers for tag providers for other-than normal operation. It also holds a 
+ *  list of ILSTagProviders which are custom "simple" providers and do not survive a
+ *  Gateway restart. Custom providers have a different interface for writing to tags.
  *  
- *  ILSTagProviders implement the SimpleTagProviderInterface. Currently tags created with 
- *  these providers do not persist. However, they do acquire the timestamp of the QualifiedValue 
- *  data. Consequently, we will look in this registry first when looking for a provider.
+ *  The provider types are:
+ *      current - this is the default behavior. Tag values are written at the current real-time.
+ *                Setting a provider's mode to "current" REMOVES it from the registry.
+ *      test -    The timestamp for tag writes is the time given the tag by the writer.
+ *                It can be in the past.
+ *      history - In addition to writing with specified timestamps, like in "test" mode,
+ *                the tag writer adds values to a specified database instance and table.
+ *                (The database and table are required to make this work).
  */
 public class ProviderRegistry   {
-	private static ProviderRegistry instance = null;
 	private final HashMap<String,ILSTagProvider> providerMap;
 	
-	/**
-	 * Static method to create and/or fetch the single instance.
-	 */
-	public static ProviderRegistry getInstance() {
-		if( instance==null) {
-			synchronized(ProviderRegistry.class) {
-				instance = new ProviderRegistry();
-			}
-		}
-		return instance;
-	}
+
 	/**
 	 * Constructor is private per the Singleton pattern.
 	 */
-	private ProviderRegistry() {
+	public ProviderRegistry() {
 		providerMap = new HashMap<String,ILSTagProvider>() ;
 	}
 	/**

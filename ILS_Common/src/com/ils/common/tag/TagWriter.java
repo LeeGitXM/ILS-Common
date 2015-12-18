@@ -35,13 +35,14 @@ public class TagWriter  {
 	protected final LoggerEx log;
 	protected final GatewayContext context;
 	private final List<WriteRequest<TagPath>> list;
-	private ProviderRegistry registry = ProviderRegistry.getInstance();
+	private final ProviderRegistry providerRegistry;
 	/**
 	 * Constructor.
 	 */
-	public TagWriter(GatewayContext ctxt) {
+	public TagWriter(GatewayContext ctxt,ProviderRegistry reg) {
 		this.context = ctxt;
 		this.list = new ArrayList<WriteRequest<TagPath>>();
+		this.providerRegistry = reg;
 		log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 	/**
@@ -56,7 +57,7 @@ public class TagWriter  {
 	}
 	
 	public void clear() { list.clear(); }
-
+	public ProviderRegistry getProviderRegistry() { return providerRegistry; }
 	/**
 	 * Update the tags already added to the request list. All tags in the list
 	 * are assumed to belong to the same provider. At the end of this update,
@@ -83,7 +84,7 @@ public class TagWriter  {
 	    	}
 		}
 		else {
-			ILSTagProvider prov = registry.getProvider(providerName);
+			ILSTagProvider prov = providerRegistry.getProvider(providerName);
 			if( prov!=null ) {
 				// For a "simple" provider, write a qualified value one by one.
 				for(WriteRequest<TagPath> r:list) {
@@ -123,7 +124,7 @@ public class TagWriter  {
 	 */
 	public void updateTags(String providerName,Date timestamp) {
 		// Try the ILS provider first.
-		ILSTagProvider prov = registry.getProvider(providerName);
+		ILSTagProvider prov = providerRegistry.getProvider(providerName);
 		if( prov!=null ) {
 			// For a "simple" provider, write a qualified value one by one.
 			for(WriteRequest<TagPath> r:list) {
@@ -175,7 +176,7 @@ public class TagWriter  {
 		if( path==null || path.isEmpty()) return; 
 		TagPath tagPath = TagPathParser.parseSafe(path);
 		String providerName = tagPath.getSource();
-		ILSTagProvider iprovider = registry.getProvider(providerName);
+		ILSTagProvider iprovider = providerRegistry.getProvider(providerName);
 		if( iprovider!=null) {
 			write(iprovider,tagPath, value, new Date(timestamp));
 		}
@@ -194,7 +195,7 @@ public class TagWriter  {
 	 */
 	public void write(TagPath tagPath, String value,Date timestamp) {
 		String providerName = tagPath.getSource();
-		ILSTagProvider iprovider = registry.getProvider(providerName);
+		ILSTagProvider iprovider = providerRegistry.getProvider(providerName);
 		if( iprovider!=null) {
 			write(iprovider,tagPath, value, timestamp);
 		}
