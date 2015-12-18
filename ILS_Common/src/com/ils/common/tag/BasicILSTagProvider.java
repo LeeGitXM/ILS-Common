@@ -1,3 +1,6 @@
+/**
+ *   (c) 2015  ILS Automation. All rights reserved.
+ */
 package com.ils.common.tag;
 
 import java.io.IOException;
@@ -25,8 +28,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.simple.WriteHandler;
 
 /**
  * A tag provider that is not quite as "simple" as a SimpleTagProvider. This code has 
- * been reverse-engineered from the IA implementation of a SimpleTagProvider. It should 
- * be replaced at the earliest possible opportunity.
+ * been reverse-engineered from the IA implementation of a SimpleTagProvider.
  * 
  * This code contains logic for persistent storage of the tags, but currently we avoid
  * its use. Tags created with this provider "disappear" on a Gateway restart.

@@ -91,7 +91,7 @@ public class TagFactory  {
 			return;
 		}
 		DataType dataType = dataTypeFromString(type);
-		ILSTagProvider simpleProvider = providerRegistry.getProvider(providerName);
+		ILSTagProvider simpleProvider = providerRegistry.getSimpleProvider(providerName);
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
 		if( simpleProvider!=null) {
 			simpleProvider.configureTag(tp, dataType, TagType.Custom);
@@ -164,14 +164,13 @@ public class TagFactory  {
 		//       through the tag manager. Here the calls appear to succeed, but the tags do not show up.
 		// In the cases where we need historical timestamps,  we use the simple tag provider.
 		DataType dataType = dataTypeFromString(type);
-		BasicILSTagProvider simpleProvider = providerRegistry.getProvider(providerName);
+		BasicILSTagProvider simpleProvider = providerRegistry.getSimpleProvider(providerName);
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
 		if( simpleProvider!=null) {
 			simpleProvider.configureTag(tp, dataType, TagType.Custom);
 			WriteHandler handler = new BasicWriteHandler(simpleProvider);
 			simpleProvider.registerWriteHandler(tp, handler);
 		}
-		// This doesn't work ... do we have to create parents first?
 		else if( provider != null ) {
 			try {
 				// Guarantee that parent paths exist
@@ -182,6 +181,11 @@ public class TagFactory  {
 				node.setDataType(dataType);
 				node.setEnabled(true);
 				node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
+				// Is this a tag that we need to write to in the history?
+				DatabaseStoringProviderDelegate delegate = providerRegistry.getDatabaseStoringDelegate(providerName);
+				if(delegate!=null) {
+					delegate.configureTag(tp,dataType);
+				}
 				toAdd.add(node);
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
@@ -206,7 +210,7 @@ public class TagFactory  {
 			return;
 		}
 		
-		BasicILSTagProvider simpleProvider = providerRegistry.getProvider(providerName);
+		BasicILSTagProvider simpleProvider = providerRegistry.getSimpleProvider(providerName);
 		if( simpleProvider!=null) {
 			simpleProvider.removeTag(tp);
 		}
@@ -277,7 +281,7 @@ public class TagFactory  {
 
 		// The SimpleTagProvider, does not seem to provide a mechanism to alter the expression,
 		// so we simply delete and create another.
-		BasicILSTagProvider simpleProvider = providerRegistry.getProvider(providerName);
+		BasicILSTagProvider simpleProvider = providerRegistry.getSimpleProvider(providerName);
 		if( simpleProvider!=null) {
 			deleteTag(providerName,tagPath);
 			createExpression(providerName,tagPath,tag.getDataType().toString(),expr);
@@ -321,7 +325,7 @@ public class TagFactory  {
 	}
 	private void copyTagsToNewProvider(String source,String destination,Map<TagPath,List<TagPath>> nodeMap) {
 		TagProvider sourceProvider = context.getTagManager().getTagProvider(source);
-		BasicILSTagProvider destSimpleProvider = providerRegistry.getProvider(destination);
+		BasicILSTagProvider destSimpleProvider = providerRegistry.getSimpleProvider(destination);
 		WriteHandler writeHandler = new BasicWriteHandler(destSimpleProvider);
 		for (TagPath parent : visitOrder) {
 			List<TagPath> paths = nodeMap.get(parent);

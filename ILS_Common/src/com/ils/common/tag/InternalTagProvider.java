@@ -1,3 +1,8 @@
+/**
+ *   (c) 2015  ILS Automation. All rights reserved.
+ *   Code based on de-compiled Inductive Automation class
+ *   "InternalTagProvider", embedded in a SimpleTagProvider.
+ */
 package com.ils.common.tag;
 
 import java.io.IOException;

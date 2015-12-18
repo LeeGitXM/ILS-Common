@@ -12,8 +12,11 @@ import com.inductiveautomation.ignition.gateway.sqltags.simple.SimpleProviderInt
 import com.inductiveautomation.ignition.gateway.sqltags.simple.WriteHandler;
 
 /**
- *  Extend the SimpleProviderInterface to account for common methods in our
- *  providers in our TestFrame module.
+ *  Extend the SimpleProviderInterface to account for common 
+ *  provider methods in our TestFrame module.
+ *  
+ *  NOTE: This interface has largely been made obsolete by our discovery
+ *        of a way to write past time-stamps using a normal tag provider.
  */
 public interface ILSTagProvider extends SimpleProviderInterface  {
 	/**

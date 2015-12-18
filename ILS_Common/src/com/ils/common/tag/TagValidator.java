@@ -17,7 +17,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.TagProvider;
 
 /**
  *  Given a tag path, verify that the tag exists. The tags are assumed to be
- *  project-gateway tags.
+ *  project-gateway tags. The "dataset" tag type is flagged as bad.
  */
 public class TagValidator  {
 	private static final String TAG = "TagValidator";
@@ -93,9 +93,9 @@ public class TagValidator  {
 					}
 					else {
 						DataType dt = tag.getDataType();
-						DataType[] classicTypes = DataType.CLASSIC_TYPES_NO_DATASET;
-						for( DataType classicType:classicTypes) {
-							if(dt.equals(classicType))  return null;    // Good, a match
+						DataType[] types = DataType.CLASSIC_TYPES_NO_DATASET;
+						for( DataType type:types) {
+							if(dt.equals(type))  return null;    // Good, a match
 						}
 						reason = String.format("datatype (%s) is not recognized",dt.toString());
 					}
