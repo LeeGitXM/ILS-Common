@@ -35,9 +35,9 @@ public class ProviderRegistry   {
 	 * Constructor is private per the Singleton pattern.
 	 */
 	public ProviderRegistry() {
-		historyProviderMap = new HashMap<>() ;
-		simpleProviderMap = new HashMap<>() ;
-		testProviders = new HashSet<>() ;
+		historyProviderMap = new HashMap<String,DatabaseStoringProviderDelegate>();
+		simpleProviderMap = new HashMap<String,ILSTagProvider>();
+		testProviders = new HashSet<String>();
 	}
 	/**
 	 * Inform the registry of the existence of a particular simple tag
