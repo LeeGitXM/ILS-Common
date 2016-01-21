@@ -80,6 +80,7 @@ public class TagFactory  {
 	 * @param type - data type
 	 */
 	public void createExpression(String providerName, String tagPath, String type, String expr) {
+		tagPath = stripProvider(tagPath);
 		log.debugf("%s.createExpression: [%s] %s (%s) = %s",TAG,providerName,tagPath,type,expr);
 		TagPath tp = null;
 		try {
@@ -143,6 +144,7 @@ public class TagFactory  {
 	 * @param type String version of datatype
 	 */
 	public void createTag(String providerName, String tagPath, String type) {
+		tagPath = stripProvider(tagPath);
 		log.debugf("%s.createTag [%s]%s (%s)",TAG,providerName,tagPath,type);
 		TagPath tp = null;
 		try {
@@ -199,6 +201,7 @@ public class TagFactory  {
 	 * @param historyProvider the datasource containing the history
 	 */
 	public void createTagWithHistory(String providerName, String tagPath, String type,String historyProvider) {
+		tagPath = stripProvider(tagPath);
 		log.debugf("%s.createTagWithHistory [%s]%s (%s)",TAG,providerName,tagPath,type);
 		TagPath tp = null;
 		try {
@@ -240,6 +243,7 @@ public class TagFactory  {
 		}
 	}
 	public void deleteTag(String providerName, String tagPath) {
+		tagPath = stripProvider(tagPath);
 		log.debugf("%s.deleteTag [%s]%s",TAG,providerName,tagPath);
 		TagPath tp = null;
 		try {
@@ -298,6 +302,7 @@ public class TagFactory  {
 	 * @param expr, the new expression.
 	 */
 	public synchronized void updateExpression(String providerName, String tagPath, String expr) {
+		tagPath = stripProvider(tagPath);
 		log.debugf("%s: updateExpression %s to %s",TAG,tagPath,expr);
 		if(providerName==null || tagPath==null) return;
 
@@ -508,6 +513,14 @@ public class TagFactory  {
 				recursivelyBrowse(childPath, provider,nodeMap);
 			}
 		}
+	}
+	// If the tag path has a source (provider), strip it off.
+	// This is for use with commands that explicitly specify
+	// the provider.
+	private String stripProvider(String path) {
+		int pos = path.indexOf("]");
+		if(pos>0) path = path.substring(pos+1);
+		return path;
 	}
 	
 	// Dump whatever information we can glean from a TagPath

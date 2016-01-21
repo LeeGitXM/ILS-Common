@@ -17,8 +17,6 @@ import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.general.DatasetChangeEvent;
-import org.jfree.data.general.DatasetChangeListener;
 import org.jfree.data.general.SeriesChangeEvent;
 import org.jfree.data.general.SeriesChangeListener;
 import org.jfree.data.time.Second;
@@ -68,7 +66,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  * update live as new values are presented. To display in a dialog, the component
  * to add is: getChartPanel(().
  */
-public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeListener, DatasetChangeListener {
+public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeListener {
 	private static final String TAG = "TimeSeriesSparkChart";
 	private TimeSeriesCollection timeSeriesCollection;        // Collection of time series data   
 	private TimeSeries rawSeries;                               // raw series data
@@ -95,9 +93,6 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 
 		timeSeriesCollection.addSeries(rawSeries);  
 		timeSeriesCollection.addSeries(meanSeries); 
-		
-		addDatum(new TimeSeriesDatum(0.0,0.0,System.currentTimeMillis()-10000));
-		addDatum(new TimeSeriesDatum(1.0,1.0,System.currentTimeMillis()));
 
 		chart = createChart(title,yAxisLabel,timeSeriesCollection);  
 		chartPanel = new ChartPanel(chart);  
@@ -144,7 +139,7 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		 
 		DateAxis axis = (DateAxis) plot.getDomainAxis();
         axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
-		//axis.setAutoRange(true);  
+		axis.setAutoRange(true);  
 		//axis.setFixedAutoRange(60000.0);
 		/*
 		// Render the raw data
@@ -185,10 +180,8 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		Second secs = new Second(new Date(datum.getTimestamp()));
 		this.timeSeriesCollection.getSeries(0).addOrUpdate(secs,datum.getValue());  
 		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage());
-		//chartPanel.repaint();
-		//chartPanel.updateUI();
-		//this.chart.fireChartChanged();
 	}
+
 	public TimeSeriesCollection getSeriesCollection() { return this.timeSeriesCollection; }
 	
 	// ============================== Listener Interface =======================
@@ -210,14 +203,6 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	@Override
 	public void seriesChanged(SeriesChangeEvent changeEvent) {
 		log.infof("%s.seriesChanged: %s - %s",chart.getTitle(),changeEvent.toString());
-		chartPanel.repaint();
-		chartPanel.updateUI();
-	}
-	
-	// ============================== Dataset Listener Interface =======================
-	@Override
-	public void datasetChanged(DatasetChangeEvent changeEvent) {
-		log.infof("%s.datasetChanged: %s - %s",chart.getTitle(),changeEvent.toString());
 		chartPanel.repaint();
 		chartPanel.updateUI();
 	}
