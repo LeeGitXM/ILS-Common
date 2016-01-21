@@ -6,7 +6,6 @@ package com.ils.common.tag;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -81,7 +80,7 @@ public class TagFactory  {
 	 * @param type - data type
 	 */
 	public void createExpression(String providerName, String tagPath, String type, String expr) {
-		log.infof("%s.createExpression: [%s] %s (%s) = %s",TAG,providerName,tagPath,type,expr);
+		log.debugf("%s.createExpression: [%s] %s (%s) = %s",TAG,providerName,tagPath,type,expr);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
@@ -123,7 +122,7 @@ public class TagFactory  {
 		int seg = 1;
 		while(seg<segcount) {
 			TagPath tp = BasicTagPath.subPath(path,0, seg);
-			log.infof("%s.createParents: Subpath = %s",TAG,tp.toStringFull());
+			log.debugf("%s.createParents: Subpath = %s",TAG,tp.toStringFull());
 			TagDefinition tag = new TagDefinition(tp.getItemName(),TagType.Folder);
 			try {
 				List<TagNode> toAdd = new ArrayList<>();
@@ -144,7 +143,7 @@ public class TagFactory  {
 	 * @param type String version of datatype
 	 */
 	public void createTag(String providerName, String tagPath, String type) {
-		log.infof("%s.createTag [%s]%s (%s)",TAG,providerName,tagPath,type);
+		log.debugf("%s.createTag [%s]%s (%s)",TAG,providerName,tagPath,type);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
@@ -200,7 +199,7 @@ public class TagFactory  {
 	 * @param historyProvider the datasource containing the history
 	 */
 	public void createTagWithHistory(String providerName, String tagPath, String type,String historyProvider) {
-		log.infof("%s.createTagWithHistory [%s]%s (%s)",TAG,providerName,tagPath,type);
+		log.debugf("%s.createTagWithHistory [%s]%s (%s)",TAG,providerName,tagPath,type);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);

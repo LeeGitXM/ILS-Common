@@ -1,19 +1,21 @@
 package com.ils.common.ui;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.management.Notification;
 import javax.management.NotificationListener;
+import javax.swing.BorderFactory;
+import javax.swing.border.EtchedBorder;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYAreaRenderer;
+import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.general.DatasetChangeEvent;
 import org.jfree.data.general.DatasetChangeListener;
@@ -22,6 +24,8 @@ import org.jfree.data.general.SeriesChangeListener;
 import org.jfree.data.time.Second;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.ui.RectangleInsets;
 
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
@@ -83,17 +87,22 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		this.yAxisLabel = ylabel; 
 		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 		timeSeriesCollection = new TimeSeriesCollection();
-		// Note: The class of the time-series time period class is inferred
+		
+		// Note: The class of the time-series time period is inferred
 		//       when the first data item is added to the set.
-		rawSeries = new TimeSeries("ylabel"); 
+		rawSeries = new TimeSeries("raw"); 
 		meanSeries = new TimeSeries("mean");    
 
 		timeSeriesCollection.addSeries(rawSeries);  
-		timeSeriesCollection.addSeries(meanSeries);   
+		timeSeriesCollection.addSeries(meanSeries); 
+		
+		addDatum(new TimeSeriesDatum(0.0,0.0,System.currentTimeMillis()-10000));
+		addDatum(new TimeSeriesDatum(1.0,1.0,System.currentTimeMillis()));
 
 		chart = createChart(title,yAxisLabel,timeSeriesCollection);  
 		chartPanel = new ChartPanel(chart);  
-		chartPanel.setFillZoomRectangle(true);     
+		chartPanel.setFillZoomRectangle(true); 
+		chartPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 	}  
 
 	public ChartPanel getChartPanel() { return this.chartPanel; }
@@ -101,12 +110,12 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	public void setPreferredSize(Dimension dimension) {chartPanel.setPreferredSize(dimension);}
 
 	// Plot 0 is the raw data, plot1 is the mean.
-	private JFreeChart createChart(String title,String label,TimeSeriesCollection tsCollection) {  
+	private JFreeChart createChart(String title,String label,XYDataset dataset) {  
 		chart = ChartFactory.createTimeSeriesChart( 
 				title,            // title  
 				"",               // x-axis label  
 				label,            // y-axis label  
-				tsCollection,     // data  
+				dataset,          // data  
 				false,            // create legend?  
 				true,             // generate tooltips?  
 				false             // generate URLs?  
@@ -115,14 +124,33 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		chart.setBackgroundPaint(Color.lightGray);  
 
 		XYPlot plot = (XYPlot) chart.getPlot();  
-		DateAxis axis = (DateAxis) plot.getDomainAxis();  
-		axis.setAutoRange(true);  
-		axis.setFixedAutoRange(60000.0);
-		
+		plot.setBackgroundPaint(Color.lightGray);
+		plot.setDomainGridlinePaint(Color.white);
+		plot.setRangeGridlinePaint(Color.white);
+		plot.setAxisOffset(new RectangleInsets(1.0, 1.0, 1.0, 1.0)); // was 5.0
+		plot.setDomainCrosshairVisible(false);
+		plot.setRangeCrosshairVisible(false);
+		plot.getRangeAxis().setLabel("");
+		// Remove?
+        XYItemRenderer r = plot.getRenderer();
+        if (r instanceof XYLineAndShapeRenderer) {
+            XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer) r;
+            renderer.setBaseShapesVisible(false);
+            renderer.setDrawSeriesLineAsPath(true);
+        }
+        else {
+        	log.warnf("%s.createChart: Renderer is not a XYLineRender",TAG);
+        }
+		 
+		DateAxis axis = (DateAxis) plot.getDomainAxis();
+        axis.setDateFormatOverride(new SimpleDateFormat("HH:mm:ss"));
+		//axis.setAutoRange(true);  
+		//axis.setFixedAutoRange(60000.0);
+		/*
 		// Render the raw data
 		XYAreaRenderer renderer0 = new XYAreaRenderer();
 		renderer0.setSeriesVisible(0, true);
-		renderer0.setSeriesVisible(1, false);
+		renderer0.setSeriesVisible(1, true);
 		renderer0.setBaseFillPaint(Color.RED);
 		renderer0.setSeriesPaint(0, Color.RED, false);
         renderer0.setSeriesStroke(0, new BasicStroke(2.0f));
@@ -141,22 +169,25 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		plot.setDataset(1, newDataset);
 			
 		XYLineAndShapeRenderer renderer1 = new XYLineAndShapeRenderer();
-		renderer1.setSeriesVisible(0, false);
+		renderer1.setSeriesVisible(0, true);
 		renderer1.setSeriesVisible(1, true);
         renderer1.setSeriesPaint(1, Color.BLUE, false);
         renderer1.setSeriesStroke(1, new BasicStroke(2.0f));
+        renderer1.setBaseShapesVisible(false);
+        renderer1.setDrawSeriesLineAsPath(true);
         plot.setRenderer(1, renderer1);
+        */
 		return chart;  
 	}
 	//Adding a new value to the time series triggers a SeriesChangeEvent
 	public void addDatum(TimeSeriesDatum datum) {
-		log.tracef("%s.addDatum: %s",TAG,datum.toString());
+		log.infof("%s.addDatum: %s",TAG,datum.toString());
 		Second secs = new Second(new Date(datum.getTimestamp()));
 		this.timeSeriesCollection.getSeries(0).addOrUpdate(secs,datum.getValue());  
 		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage());
-		chartPanel.repaint();
-		chartPanel.updateUI();
-		this.chart.fireChartChanged();
+		//chartPanel.repaint();
+		//chartPanel.updateUI();
+		//this.chart.fireChartChanged();
 	}
 	public TimeSeriesCollection getSeriesCollection() { return this.timeSeriesCollection; }
 	
