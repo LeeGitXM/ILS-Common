@@ -51,7 +51,7 @@ public class TagReader  {
 				Tag tag = provider.getTag(tp);
 				if( tag!=null ) result = tag.getValue();
 			} 
-			if( !tp.getSource().equalsIgnoreCase("system") )log.infof("%s.readTag: %s = %s",TAG,path,result.toString());
+			if( log.isDebugEnabled() && !tp.getSource().equalsIgnoreCase("system")  )log.infof("%s.readTag: %s = %s",TAG,path,result.toString());
 		}
 		catch(IOException ioe) {
 			log.warnf("%s.readTag: Exception parsing path %s",TAG,path);

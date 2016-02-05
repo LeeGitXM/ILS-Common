@@ -176,7 +176,7 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	}
 	//Adding a new value to the time series triggers a SeriesChangeEvent
 	public void addDatum(TimeSeriesDatum datum) {
-		log.infof("%s.addDatum: %s",TAG,datum.toString());
+		log.tracef("%s.addDatum: %s",TAG,datum.toString());
 		Second secs = new Second(new Date(datum.getTimestamp()));
 		this.timeSeriesCollection.getSeries(0).addOrUpdate(secs,datum.getValue());  
 		this.timeSeriesCollection.getSeries(1).addOrUpdate(secs,datum.getAverage());
