@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.ils.common.ILSProperties;
+import com.ils.common.persistence.ToolkitProperties;
+import com.ils.common.persistence.ToolkitRecordHandler;
 import com.inductiveautomation.ignition.common.BasicDataset;
 import com.inductiveautomation.ignition.common.model.values.BasicQualifiedValue;
 import com.inductiveautomation.ignition.common.model.values.BasicQuality;
@@ -369,6 +371,18 @@ public class TagFactory  {
 
 	}
 	private void copyTagsToNewProvider(String source,String destination,Map<TagPath,List<TagPath>> nodeMap) {
+		// In the case of Query tags going to and from production to isolation, we need to change the database 
+		// binding also.  Start by reading the configuration ... If not configured, values are empty.
+		ToolkitRecordHandler toolkitHandler = new ToolkitRecordHandler(context);
+		String productionProvider = toolkitHandler.getToolkitProperty(ToolkitProperties.TOOLKIT_PROPERTY_PROVIDER);
+		String isolationProvider  = toolkitHandler.getToolkitProperty(ToolkitProperties.TOOLKIT_PROPERTY_ISOLATION_PROVIDER);
+		String productionDatabase = toolkitHandler.getToolkitProperty(ToolkitProperties.TOOLKIT_PROPERTY_DATABASE);
+		String isolationDatabase  = toolkitHandler.getToolkitProperty(ToolkitProperties.TOOLKIT_PROPERTY_ISOLATION_DATABASE);
+		boolean fromProductionToIsolation = false;
+		if( source.equalsIgnoreCase(productionProvider) && destination.equalsIgnoreCase(isolationProvider)) fromProductionToIsolation = true;
+		boolean fromIsolationToProduction = false;
+		if( source.equalsIgnoreCase(isolationProvider) && destination.equalsIgnoreCase(productionProvider)) fromIsolationToProduction = true;
+				
 		TagProvider sourceProvider = context.getTagManager().getTagProvider(source);
 		BasicILSTagProvider destSimpleProvider = providerRegistry.getSimpleProvider(destination);
 		WriteHandler writeHandler = new BasicWriteHandler(destSimpleProvider);
@@ -422,6 +436,20 @@ public class TagFactory  {
 						tv = tag.getAttribute(TagProp.PrimaryHistoryProvider);
 						node.setAttribute(TagProp.PrimaryHistoryProvider,tv );
 						
+						// In the case of a SQL Query Expression, we may want to set the database
+						tv = tag.getAttribute(TagProp.SQLBindingDatasource);
+						if( tv!=null && tv.getValue()!=null) {
+							String database = tv.getValue().toString();
+							if(fromProductionToIsolation && productionDatabase.equalsIgnoreCase(database) ) {
+								tv = new BasicTagValue(isolationDatabase);
+								node.setAttribute(TagProp.SQLBindingDatasource,tv );
+							}
+							else if(fromIsolationToProduction && isolationDatabase.equalsIgnoreCase(database) ) {
+								tv = new BasicTagValue(productionDatabase);
+								node.setAttribute(TagProp.SQLBindingDatasource,tv);
+							}
+						}
+						 
 						if(destSimpleProvider!=null ) {
 							DataType dataType = node.getDataType();
 							TagType ttype = node.getType();
