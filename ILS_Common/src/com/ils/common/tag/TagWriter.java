@@ -32,7 +32,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.model.WriteRequest;
  */
 public class TagWriter  {
 	protected static final String TAG = "TagWriter";
-	private static final String DATETIME_FORMAT = "yyyy/MM/dd hh:mm:ss";
+	private static final String DATETIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT);
 	protected final LoggerEx log;
 	protected final GatewayContext context;

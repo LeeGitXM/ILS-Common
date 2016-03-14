@@ -29,7 +29,7 @@ public class DBHistoryUtility {
 	private final static String TAG = "DBHistoryUtility";
 	private final LoggerEx log;
 	private final GatewayContext context;
-	private final SimpleDateFormat formatter = new SimpleDateFormat("YYYY/mm/dd hh:MM:ss");
+	private final SimpleDateFormat formatter = new SimpleDateFormat("YYYY/mm/dd HH:mm:ss");
 	
 	public DBHistoryUtility(GatewayContext ctx) {
 		this.context = ctx;
