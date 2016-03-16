@@ -36,17 +36,18 @@ public class DBUtility {
 		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 	/** 
-	 * Anytime a connection is "gotten", it should be closed.
+	 * Any time a connection is "gotten", it should be closed.
 	 * @param cxn
 	 */
 	public void closeConnection(Connection cxn) {
-		try {
-			cxn.close();
+		if( cxn!=null ) {
+			try {
+				cxn.close();
+			}
+			catch(SQLException sqle) {
+				log.warnf("%s.closeConnection: Exception closing connection (%s)",TAG,sqle.getMessage());
+			}
 		}
-		catch(SQLException sqle) {
-			log.warnf("%s.closeConnection: Exception closing connection (%s)",TAG,sqle.getMessage());
-		}
-
 	}
 	/**
 	 * Execute a sql statement against the named datasource.
@@ -76,6 +77,51 @@ public class DBUtility {
 		}
 	}
 	
+	/**
+	 * Execute an array of sql statements against the named datasource.
+	 * The statements may be DDL (e.g. create table()). On completion
+	 * a status string is returned.
+	 *
+	 * @param sql command to execute
+	 * @param source a named data-source
+	 * @return a result message on error, otherwise an empty string.
+	 */
+	public String executeMultilineSQL(String[] lines,String database) {
+		String result = "";
+		Datasource ds = context.getDatasourceManager().getDatasource(database);
+		if( ds!=null ) {
+			Connection cxn = null;
+			int index = 0;
+			String sql = "";
+			try {
+				cxn = ds.getConnection();
+				cxn.setAutoCommit(true);
+				cxn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+				Statement stmt = cxn.createStatement();
+				int count = lines.length;
+				
+				while( index<count ) {
+					sql = lines[index];
+					index++;
+					// Scrub comments
+					sql = scrubSQL(sql);
+					if( sql.isEmpty() ) continue;
+					stmt.executeUpdate(sql);
+				}
+				
+			}
+			catch(SQLException sqle) {
+				result = String.format("Exception line %d executing %s (%s)",index-1,sql,sqle.getLocalizedMessage());
+			}
+			finally {
+				closeConnection(cxn);
+			}
+		}
+		else {
+			result = String.format("Datasource %s does not exist", database);
+		}
+		return result;
+	}
 	
 	public Connection getConnection(String name) {
 		Connection cxn = null;
@@ -198,5 +244,14 @@ public class DBUtility {
 			log.warnf("%s.runScalarQuery: Datasource %s not found",TAG,source);
 		}
 		return result;
+	}
+	private String scrubSQL(String sql) {
+		// Scrub comments
+		if( sql.startsWith("\n")) sql = sql.substring(1);
+		sql = sql.replaceAll("#.*$", "");
+		if( sql.endsWith("\n")) sql = sql.substring(0, sql.length()-1);
+		if( sql.endsWith("\r")) sql = sql.substring(0, sql.length()-1);
+		sql.trim();
+		return sql;
 	}
 }
