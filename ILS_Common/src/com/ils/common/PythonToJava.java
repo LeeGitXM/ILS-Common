@@ -161,8 +161,8 @@ public class PythonToJava {
 	}
 	/**
 	 * Assuming the contents of the PyList are strings, convert the PyList to a list 
-	 * of strings. We convert them to lowercase, presumably to perform a case-insensitive
-	 * compare.
+	 * of strings. We convert them to lowercase and trim whitespce, presumably to 
+	 * perform a case-insensitive compare.
 	 * 
 	 * The result of this method is designed to be serializable through JSON.
 	 * @param list the incoming PyList
@@ -174,7 +174,7 @@ public class PythonToJava {
 		if( list!=null ) {
 			PyObject [] objs = list.getArray();
 			for(PyObject obj : objs) {
-				result.add(obj.toString().toLowerCase());
+				result.add(obj.toString().trim().toLowerCase());
 			}
 		}
 		return result;
