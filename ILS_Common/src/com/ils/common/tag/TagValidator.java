@@ -74,6 +74,7 @@ public class TagValidator  {
 		// Not initialized yet.
 		String reason = null;
 		if(path==null || path.isEmpty() ) return null;  // Path or value not set
+		if(path.endsWith("]") )           return null;  // Only the provider, no path
 		try {
 			TagPath tp = TagPathParser.parse(path);
 
