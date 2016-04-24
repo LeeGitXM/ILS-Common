@@ -242,11 +242,11 @@ public class TagWriter  {
 					qual = DataQuality.OPC_BAD_DATA;
 				}
 				else if( dtype==DataType.Float4 ||
-						dtype==DataType.Float8 )     value = Double.parseDouble(val);
+						 dtype==DataType.Float8 )     value = Double.parseDouble(val);
 				else if( dtype==DataType.Int1 ||
-						dtype==DataType.Int2 ||
-						dtype==DataType.Int4 ||
-						dtype==DataType.Int8   )     value =  (int)Double.parseDouble(val);
+						 dtype==DataType.Int2 ||
+						 dtype==DataType.Int4 ||
+						 dtype==DataType.Int8   )     value =  (int)Double.parseDouble(val);
 				else if( dtype==DataType.Boolean)    value = Boolean.parseBoolean(val);
 				else if( dtype==DataType.DateTime)   value = dateFormat.parse(val);
 				else value = val.toString();
@@ -271,14 +271,35 @@ public class TagWriter  {
 	
 	/**
 	 * Update a tag with a single value at the specified time-stamp (maybe).
+	 * If the tag is a float, make sure the data value is also. The Ignition
+	 * default conversion has trouble with scientific notation.
 	 * 
 	 * @param tagPath
 	 * @param qv, the new tag value. If qv is a TagValue, then the time-stamp is used.
 	 */
 	public void write(TagProvider provider,TagPath tagPath, QualifiedValue qv) {
-		
-		List<WriteRequest<TagPath>> singleRequestList = createTagList(tagPath,qv);
-		provider.write(singleRequestList, null, true);    // true-> isSystem to bypass permission checks
+		Tag tag = provider.getTag(tagPath);
+		if( tag!=null ) {
+			DataType dt = tag.getDataType();
+			if( dt.equals(DataType.Float4) || dt.equals(DataType.Float8)) {
+				if( qv.getValue() instanceof String ) {
+					// Do our own conversion 
+					try {
+						double dbl = Double.NaN;
+						dbl = Double.parseDouble(qv.getValue().toString());
+						qv = new BasicQualifiedValue(new Double(dbl),qv.getQuality(),qv.getTimestamp());
+					}
+					catch(NumberFormatException nfe ) {
+						log.warnf("%s.write: Attempt to write %s to %s, a numeric tag",TAG,qv.getValue().toString(),tagPath.toString());
+					}
+				}
+			}
+			List<WriteRequest<TagPath>> singleRequestList = createTagList(tagPath,qv);
+			provider.write(singleRequestList, null, true);    // true-> isSystem to bypass permission checks
+		}
+		else {
+			log.warnf("%s.write: Tag %s, not found",TAG,tagPath.toString());
+		}
 	}
 
 	/**
@@ -343,6 +364,7 @@ public class TagWriter  {
 		if(req.isValid)singleRequestList.add(req);
 		return singleRequestList;
 	}
+	
 	private List<WriteRequest<TagPath>> convertRequests(List<WriteRequest<TagPath>> inList) {
 		List<WriteRequest<TagPath>> outList = new ArrayList<>();
 		for( WriteRequest<TagPath>req:inList ) {
