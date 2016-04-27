@@ -54,7 +54,7 @@ public class AcceleratedWatchdogTimer extends WatchdogTimer implements Runnable 
 		long testTime = System.currentTimeMillis() - offset;
 		long now = System.nanoTime()/1000000;   // Work in milliseconds
 		this.testTimeOffset = now - testTime; 
-		log.infof("%s.setTestTimeOffset: current time is %s",TAG,formatter.format(new Date(testTime)));
+		log.debugf("%s.setTestTimeOffset: current time is %s",TAG,formatter.format(new Date(testTime)));
 	}
 	/**
 	 * Set the clock speed execution factor. For production

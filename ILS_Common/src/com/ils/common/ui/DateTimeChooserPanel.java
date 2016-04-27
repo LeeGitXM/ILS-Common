@@ -85,23 +85,19 @@ public class DateTimeChooserPanel extends JPanel{
 	public Timestamp getTimestamp() {
 		// Start with the calendar date portion.
 		long rawtime = dateChooser.getDate().getTime();
-		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(rawtime)));
+		//log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(rawtime)));
 		// Ignore the time portion
 		long days = rawtime/(24*60*60*1000);            // Even days
 		long time = days*24*60*60*1000;
-		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		// Re-correct for timezone.
 		time -= timeZone.getRawOffset();
-		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		int hr = hour.getSelectedIndex(); 
 		if( hr>=0) time += hr*3600*1000;
-		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		int min = minute.getSelectedIndex(); 
 		if( min>=0) time += min*60*1000;
-		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		int sec = second.getSelectedIndex(); 
 		if( sec>=0) time += sec*1000;
-		log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
+		//log.infof("%s.getTimestamp: %s", TAG,dateFormatter.format(new Timestamp(time)));
 		
 		return new Timestamp(time);
 	}

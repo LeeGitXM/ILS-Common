@@ -195,14 +195,14 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 		if( event.getUserData() instanceof TimeSeriesDatum ) {
 			TimeSeriesDatum datum = (TimeSeriesDatum)event.getUserData();
 			addDatum(datum);
-			log.infof("%s.handleNotification: %s",chart.getTitle(),datum.toString());
+			log.debugf("%s.handleNotification: %s",chart.getTitle(),datum.toString());
 			this.chart.fireChartChanged();
 		}
 	}
 
 	@Override
 	public void seriesChanged(SeriesChangeEvent changeEvent) {
-		log.infof("%s.seriesChanged: %s - %s",chart.getTitle(),changeEvent.toString());
+		log.debugf("%s.seriesChanged: %s - %s",chart.getTitle(),changeEvent.toString());
 		chartPanel.repaint();
 		chartPanel.updateUI();
 	}

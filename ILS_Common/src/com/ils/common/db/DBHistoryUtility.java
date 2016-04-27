@@ -125,7 +125,7 @@ public class DBHistoryUtility {
 		Datasource ds = context.getDatasourceManager().getDatasource(name);
 		if( ds!=null ) {
 			try {
-				log.infof("%s.getConnection: Status is %s (%d of %d busy)",TAG,ds.getStatus().name(),
+				log.tracef("%s.getConnection: Status is %s (%d of %d busy)",TAG,ds.getStatus().name(),
 						ds.getActiveConnections(),ds.getMaxConnections());
 				cxn = ds.getConnection();
 				cxn.setAutoCommit(true);
@@ -146,7 +146,7 @@ public class DBHistoryUtility {
 		for(TagPath path:tagPaths) {
 			QualifiedValue qv = data.get(index);
 			// Historical tag variant. Interval is seconds, date.getTime() is millsecs.
-			log.infof("%setHistoryValue: %s=%s (%s)",TAG,path.toStringFull(),qv.getValue().toString(),formatter.format(qv.getTimestamp()));
+			log.tracef("%setHistoryValue: %s=%s (%s)",TAG,path.toStringFull(),qv.getValue().toString(),formatter.format(qv.getTimestamp()));
 			SQL = String.format("insert into %s (tagid,floatValue,dataintegrity,t_stamp) select id,%s,192,%d from sqlth_te where tagpath='%s';",
 					historyTable,qv.toString(),qv.getTimestamp().getTime(),path.toStringPartial().toLowerCase());
 			log.trace(String.format("%s:process: updating history (%s)",TAG,SQL));
