@@ -76,7 +76,6 @@ public class DBUtility {
 			log.warnf("%s.executeSQL: Datasource %s not found",TAG,source);
 		}
 	}
-	
 	/**
 	 * Execute an array of sql statements against the named datasource.
 	 * The statements may be DDL (e.g. create table()). On completion
@@ -84,9 +83,23 @@ public class DBUtility {
 	 *
 	 * @param sql command to execute
 	 * @param source a named data-source
+	 * @param mysql
 	 * @return a result message on error, otherwise an empty string.
 	 */
 	public String executeMultilineSQL(String[] lines,String database) {
+		return executeMultilineSQL(lines,database,DBMS.ANSI);
+	}
+	/**
+	 * Execute an array of sql statements against the named datasource.
+	 * The statements may be DDL (e.g. create table()). On completion
+	 * a status string is returned.
+	 *
+	 * @param sql command to execute
+	 * @param source a named data-source
+	 * @param mysql
+	 * @return a result message on error, otherwise an empty string.
+	 */
+	public String executeMultilineSQL(String[] lines,String database,DBMS dbms) {
 		String result = "";
 		Datasource ds = context.getDatasourceManager().getDatasource(database);
 		if( ds!=null ) {
@@ -104,14 +117,15 @@ public class DBUtility {
 					sql = lines[index];
 					index++;
 					// Scrub comments
-					sql = scrubSQL(sql);
+					sql = scrubSQL(sql,dbms);
 					if( sql.isEmpty() ) continue;
 					stmt.executeUpdate(sql);
 				}
 				
 			}
 			catch(SQLException sqle) {
-				result = String.format("Exception line %d executing %s (%s)",index-1,sql,sqle.getLocalizedMessage());
+				result = String.format("SQLException: line %d executing %s\n(%s)",index-1,sql,sqle.getLocalizedMessage());
+				log.warnf("%s.executeMultilineSQL %s",TAG,result);
 			}
 			finally {
 				closeConnection(cxn);
@@ -245,10 +259,10 @@ public class DBUtility {
 		}
 		return result;
 	}
-	private String scrubSQL(String sql) {
+	private String scrubSQL(String sql,DBMS dbms) {
 		// Scrub comments
 		if( sql.startsWith("\n")) sql = sql.substring(1);
-		sql = sql.replaceAll("#.*$", "");
+		if(dbms.equals(DBMS.MYSQL))  sql = sql.replaceAll("#.*$", "");   // Mysql comments
 		if( sql.endsWith("\n")) sql = sql.substring(0, sql.length()-1);
 		if( sql.endsWith("\r")) sql = sql.substring(0, sql.length()-1);
 		sql.trim();
