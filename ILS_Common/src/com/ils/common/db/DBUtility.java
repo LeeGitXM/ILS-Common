@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLTimeoutException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  */
 public class DBUtility {
 	private final static String TAG = "DBUtility";
+	private final int BATCH_SIZE = 100;
 	private final LoggerEx log;
 	private final GatewayContext context;
 	
@@ -108,10 +110,11 @@ public class DBUtility {
 			String sql = "";
 			try {
 				cxn = ds.getConnection();
-				cxn.setAutoCommit(true);
-				cxn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+				cxn.setAutoCommit(false);
 				Statement stmt = cxn.createStatement();
+				stmt.setQueryTimeout(300);    // 5 minutes
 				int count = lines.length;
+				int batchCount = 0;
 				
 				while( index<count ) {
 					sql = lines[index];
@@ -120,8 +123,18 @@ public class DBUtility {
 					sql = scrubSQL(sql,dbms);
 					if( sql.isEmpty() ) continue;
 					stmt.executeUpdate(sql);
+					batchCount++;
+					if( batchCount>BATCH_SIZE) {
+						batchCount = 0;
+						cxn.commit();
+					}
 				}
-				
+				cxn.commit();
+				stmt.close();
+			}
+			catch(SQLTimeoutException sqlte) {
+				result = String.format("SQLTimeoutException: line %d executing %s\n(%s)",index-1,sql,sqlte.getLocalizedMessage());
+				log.warnf("%s.executeMultilineSQL %s",TAG,result);
 			}
 			catch(SQLException sqle) {
 				result = String.format("SQLException: line %d executing %s\n(%s)",index-1,sql,sqle.getLocalizedMessage());
