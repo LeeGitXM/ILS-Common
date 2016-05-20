@@ -271,7 +271,7 @@ public class TagWriter  {
 	
 	/**
 	 * Update a tag with a single value at the specified time-stamp (maybe).
-	 * If the tag is a float, make sure the data value is also. The Ignition
+	 * Make sure the data value matches the tag type. The Ignition
 	 * default conversion has trouble with scientific notation.
 	 * 
 	 * @param tagPath
@@ -281,21 +281,36 @@ public class TagWriter  {
 		Tag tag = provider.getTag(tagPath);
 		if( tag!=null ) {
 			DataType dt = tag.getDataType();
-			if( dt.equals(DataType.Float4) || dt.equals(DataType.Float8)) {
-				if( qv.getValue() instanceof String ) {
-					// Do our own conversion 
-					try {
+			if( qv.getValue() instanceof String ) {
+				// Do our own conversion 
+				Object obj = qv.getValue().toString();
+				try {
+					if( dt.equals(DataType.Float4) || dt.equals(DataType.Float8)) {
 						double dbl = Double.NaN;
-						dbl = Double.parseDouble(qv.getValue().toString());
-						qv = new BasicQualifiedValue(new Double(dbl),qv.getQuality(),qv.getTimestamp());
+						obj = new Double(Double.parseDouble(obj.toString()));
 					}
-					catch(NumberFormatException nfe ) {
-						log.warnf("%s.write: Attempt to write %s to %s, a numeric tag",TAG,qv.getValue().toString(),tagPath.toString());
+					else if( dt==DataType.Int1 || dt==DataType.Int2 ||
+							dt==DataType.Int4 || dt==DataType.Int8   )    {
+						obj =  new Integer((int)Double.parseDouble(obj.toString()));
 					}
+					else if( dt==DataType.Boolean)    {
+						obj = new Boolean(Boolean.parseBoolean(obj.toString()));
+					}
+					else if( dt==DataType.DateTime)  {
+						obj = dateFormat.parse(obj.toString());
+					}
+					qv = new BasicQualifiedValue(obj,qv.getQuality(),qv.getTimestamp()); 
+					List<WriteRequest<TagPath>> singleRequestList = createTagList(tagPath,qv);
+					provider.write(singleRequestList, null, true);    // true-> isSystem to bypass permission checks
+				}
+				catch(ParseException pe) {
+					log.warnf("%s.write: ParseException setting %s(%s) to %s (%s - expecting %s)",TAG,
+							tagPath.toStringFull(),dt.name(),obj,pe.getLocalizedMessage(),DATETIME_FORMAT);
+				}
+				catch(NumberFormatException nfe ) {
+					log.warnf("%s.write: Attempt to write %s to %s, a numeric tag",TAG,qv.getValue().toString(),tagPath.toString());
 				}
 			}
-			List<WriteRequest<TagPath>> singleRequestList = createTagList(tagPath,qv);
-			provider.write(singleRequestList, null, true);    // true-> isSystem to bypass permission checks
 		}
 		else {
 			log.warnf("%s.write: Tag %s, not found",TAG,tagPath.toString());
