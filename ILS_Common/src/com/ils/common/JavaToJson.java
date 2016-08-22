@@ -33,7 +33,7 @@ public class JavaToJson {
 			result = mapper.writeValueAsString(bean);
 		}
 		catch( JsonProcessingException jpe) {
-			log.warn(TAG+".opjectToJson: Parse exception ("+jpe.getLocalizedMessage()+")",jpe);
+			log.warn(TAG+".objectToJson: Parse exception ("+jpe.getLocalizedMessage()+")",jpe);
 		}
 		return result; 
 	}	
