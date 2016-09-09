@@ -28,6 +28,7 @@ public class CircularRealBuffer implements RandomAccess {
 	 * @param capacity - maximum number of observations retained
 	 */
 	public CircularRealBuffer(int capacity) {
+		if( capacity<0 ) capacity = 0;
 		log = LogUtil.getLogger(getClass().getPackage().getName());
 		log.debug(String.format("%s create with capacity %d", TAG,capacity));
 		n = capacity + 1;
