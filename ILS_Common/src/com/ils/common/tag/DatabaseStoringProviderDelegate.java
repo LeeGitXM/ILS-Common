@@ -13,7 +13,6 @@ import com.ils.common.db.DBUtility;
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataType;
-import com.inductiveautomation.ignition.common.sqltags.model.types.ExtendedTagType;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
