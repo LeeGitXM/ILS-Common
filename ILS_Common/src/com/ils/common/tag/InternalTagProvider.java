@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -23,7 +24,11 @@ import org.apache.log4j.Logger;
 import com.inductiveautomation.ignition.common.DiagnosticsSample;
 import com.inductiveautomation.ignition.common.NamedValue;
 import com.inductiveautomation.ignition.common.QualifiedPath;
+import com.inductiveautomation.ignition.common.QualifiedPathUtils;
 import com.inductiveautomation.ignition.common.TypeUtilities;
+import com.inductiveautomation.ignition.common.browsing.BrowseFilter;
+import com.inductiveautomation.ignition.common.browsing.BrowseResults;
+import com.inductiveautomation.ignition.common.browsing.TagInfoResult;
 import com.inductiveautomation.ignition.common.expressions.ExpressionParseContext;
 import com.inductiveautomation.ignition.common.expressions.FunctionFactory;
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
@@ -33,15 +38,16 @@ import com.inductiveautomation.ignition.common.script.ScriptManager;
 import com.inductiveautomation.ignition.common.sqltags.BasicTagValue;
 import com.inductiveautomation.ignition.common.sqltags.TagDefinition;
 import com.inductiveautomation.ignition.common.sqltags.TagProviderMetaImpl;
+import com.inductiveautomation.ignition.common.sqltags.model.BasicInformation;
 import com.inductiveautomation.ignition.common.sqltags.model.ScanClass;
 import com.inductiveautomation.ignition.common.sqltags.model.Tag;
 import com.inductiveautomation.ignition.common.sqltags.model.TagDiagnostics;
+import com.inductiveautomation.ignition.common.sqltags.model.TagInfo;
 import com.inductiveautomation.ignition.common.sqltags.model.TagManagerBase;
 import com.inductiveautomation.ignition.common.sqltags.model.TagNode;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPathTree;
 import com.inductiveautomation.ignition.common.sqltags.model.TagProp;
-import com.inductiveautomation.ignition.common.sqltags.model.TagProviderInformation;
 import com.inductiveautomation.ignition.common.sqltags.model.TagProviderMeta;
 import com.inductiveautomation.ignition.common.sqltags.model.TagTree;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataQuality;
@@ -72,6 +78,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.execution.tags.AbstractE
 import com.inductiveautomation.ignition.gateway.sqltags.model.ExecutableScanClass;
 import com.inductiveautomation.ignition.gateway.sqltags.model.ExecutableTag;
 import com.inductiveautomation.ignition.gateway.sqltags.model.TagExecutor;
+import com.inductiveautomation.ignition.gateway.sqltags.model.TagProviderInformation;
 import com.inductiveautomation.ignition.gateway.sqltags.model.TagStoreListener;
 import com.inductiveautomation.ignition.gateway.sqltags.model.TagSubscriptionModel;
 import com.inductiveautomation.ignition.gateway.sqltags.model.TagValueListener;
@@ -82,6 +89,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.model.tagstore.TagConfig
 import com.inductiveautomation.ignition.gateway.sqltags.model.tagstore.TagPropertyValue;
 import com.inductiveautomation.ignition.gateway.sqltags.model.tagstore.TagStore;
 import com.inductiveautomation.ignition.gateway.sqltags.model.tagstore.TagStoreObject;
+import com.inductiveautomation.ignition.gateway.sqltags.providers.LongEntityId;
 import com.inductiveautomation.ignition.gateway.sqltags.scanclasses.SimpleExecutableScanClass;
 import com.inductiveautomation.ignition.gateway.sqltags.simple.CustomTagStore;
 import com.inductiveautomation.ignition.gateway.sqltags.simple.ProviderSubscriptionModel;
@@ -100,6 +108,7 @@ public class InternalTagProvider implements TagProvider {
 	private final TagPathTree<WriteHandler> writeHandlers = new TagPathTree<>();
 	private final Map<EntityId, TagPath> extMap = new HashMap<>();
 	private final Map<EntityId, SimpleExecutableScanClass> scanClasses = new HashMap<>();
+	private SimpleScanClass onChangeSC = null;
 	private final Map<String, Set<ExecutableTag>> histTags = new HashMap<>();
 	private Set<String> histProvSet = new HashSet<>();
 	private final TagProviderMetaImpl meta;
@@ -395,7 +404,7 @@ public class InternalTagProvider implements TagProvider {
 	}
 
 	protected void applyDeletes(Collection<EntityId> tagIds, Collection<EntityId> scIds) {
-		Set parents = new HashSet<>();
+		Set<TagPath> parents = new HashSet<>();
 		synchronized (this.configLock) {
 			if ((tagIds != null) && (tagIds.size() > 0)) {
 				for (EntityId id : tagIds) {
@@ -433,14 +442,14 @@ public class InternalTagProvider implements TagProvider {
 	public TagProviderInformation getStatusInformation() {
 		TagProviderInformation ret = new TagProviderInformation(getName());
 
-		List scInfo = new ArrayList();
+		List<BasicInformation> scInfo = new ArrayList<>();
 		synchronized (this.configLock) {
 			for (ExecutableScanClass sc : this.scanClasses.values()) {
-				List info = sc.getStatusInformation();
+				List<BasicInformation> info = sc.getStatusInformation();
 				scInfo.addAll(info);
 			}
-			ret.getProperties().add(new NamedValue("Status.SQLTags.ProviderInfo.TagCount", Integer.valueOf(this.tree.size())));
-			ret.getProperties().add(new NamedValue("Status.SQLTags.ProviderInfo.ScanClassCount", Integer.valueOf(this.scanClasses.size())));
+			ret.getProperties().put("tags",new NamedValue<Integer>("Status.SQLTags.ProviderInfo.TagCount", Integer.valueOf(this.tree.size())));
+			ret.getProperties().put("scanClasses",new NamedValue<Integer>("Status.SQLTags.ProviderInfo.ScanClassCount", Integer.valueOf(this.scanClasses.size())));
 		}
 		ret.setScanClassInfo(scInfo);
 
@@ -484,7 +493,7 @@ public class InternalTagProvider implements TagProvider {
 		TagWriteValidator validator = new TagWriteValidator(this, user, isSystem);
 		List<Quality> results = new ArrayList<>(requests.size());
 		for (int i = 0; i < requests.size(); i++) {
-			WriteRequest req = (WriteRequest)requests.get(i);
+			WriteRequest<TagPath> req = (WriteRequest<TagPath>)requests.get(i);
 			WriteHandler handler = getWriteHandler((TagPath)req.getTarget());
 			Quality res = null;
 			if (handler == null)
@@ -502,7 +511,7 @@ public class InternalTagProvider implements TagProvider {
 
 	public List<ScanClass> getScanClasses() {
 		synchronized (this.configLock) {
-			List ret = new ArrayList();
+			List<ScanClass> ret = new ArrayList<>();
 			for (SimpleExecutableScanClass sc : this.scanClasses.values()) {
 				ret.add(sc.getScanClass());
 			}
@@ -520,7 +529,7 @@ public class InternalTagProvider implements TagProvider {
 
 	protected List<EntityId> getIdsForSCNames(List<String> names) {
 		synchronized (this.configLock) {
-			List ret = new ArrayList();
+			List<EntityId> ret = new ArrayList<>();
 			for (SimpleExecutableScanClass sc : this.scanClasses.values()) {
 				ret.add(sc.getEntityId());
 			}
@@ -529,7 +538,7 @@ public class InternalTagProvider implements TagProvider {
 	}
 
 	public void modifyScanClass(String scName, ScanClass newDefinition) throws Exception {
-		List ids = getIdsForSCNames(Arrays.asList(new String[] { scName }));
+		List<EntityId> ids = getIdsForSCNames(Arrays.asList(new String[] { scName }));
 		if (ids.size() == 0) {
 			throw new IllegalArgumentException(String.format("Scan class '%s' could not be found.", new Object[] { scName }));
 		}
@@ -537,7 +546,7 @@ public class InternalTagProvider implements TagProvider {
 	}
 
 	public void removeScanClasses(List<String> scanclassNames) {
-		List ids = getIdsForSCNames(scanclassNames);
+		List<EntityId> ids = getIdsForSCNames(scanclassNames);
 		getTagStore().deleteScanClasses(ids);
 	}
 
@@ -623,7 +632,7 @@ public class InternalTagProvider implements TagProvider {
 
 	protected void processRemoval(Tag t, TagPath p, Set<EntityId> toRemove, Set<TagPath> toNotify, List<TestFrameTag> toUpdate)
 	{
-		TagStoreObject tso = (TagStoreObject)this.extensions.get(p);
+		TagStoreObject<TagConfig> tso = (TagStoreObject<TagConfig>)this.extensions.get(p);
 
 		if (tso != null)
 			toRemove.add(tso.getId());
@@ -634,11 +643,9 @@ public class InternalTagProvider implements TagProvider {
 			toUpdate.add((TestFrameTag)t);
 	}
 
-	public List<BrowseElement> browseOPC(String driver, BrowseElement root)
-			throws Exception
-			{
+	public List<BrowseElement> browseOPC(String driver, BrowseElement root)throws Exception {
 		return null;
-			}
+	}
 
 	public List<String> getDrivers()
 	{
@@ -650,18 +657,30 @@ public class InternalTagProvider implements TagProvider {
 	}
 
 	protected void registerHistoricalTag(TestFrameTag tag) {
+		boolean histEnabled = TypeUtilities.toBool(tag.getAttribute(TagProp.HistoryEnabled).getValue()).booleanValue();
 		String histSC = tag.getHistoricalScanclass();
-		if (!StringUtils.isBlank(histSC))
+		if (histEnabled) {
 			synchronized (this.configLock) {
-				histSC = histSC.toLowerCase();
-				Set tags = (Set)this.histTags.get(histSC);
+				if (StringUtils.isBlank(histSC)) {
+					histSC = "_exempt_";
+					if (this.onChangeSC == null) {
+						this.onChangeSC = new SimpleScanClass(new ScanClassDefinition("_exempt_", ScanClassMode.Direct, 1000, 1000, null, null, 0.0D, Integer.valueOf(60000), new Flags()), "_exempt_", new LongEntityId(Long.valueOf(-1L)));
+						this.onChangeSC.startExecution();
+						this.log.debug("Created on-change scan class.");
+					} 
+				} 
+				else {
+					histSC = histSC.toLowerCase();
+				} 
+				Set<ExecutableTag> tags = (Set<ExecutableTag>)this.histTags.get(histSC);
 				if (tags == null) {
-					tags = new HashSet();
+					tags = new HashSet<>();
 					this.histTags.put(histSC, tags);
-				}
+				} 
 				tags.add(tag);
 				this.histProvSet = null;
-			}
+			} 
+		}
 	}
 
 	protected void unregisterHistoricalTag(TestFrameTag tag)
@@ -669,7 +688,7 @@ public class InternalTagProvider implements TagProvider {
 		String histSC = tag.getHistoricalScanclass();
 		if (histSC != null)
 			synchronized (this.configLock) {
-				Set tags = (Set)this.histTags.get(histSC.toLowerCase());
+				Set<ExecutableTag> tags = (Set<ExecutableTag>)this.histTags.get(histSC.toLowerCase());
 				if (tags != null) {
 					tags.remove(tag);
 				}
@@ -681,7 +700,7 @@ public class InternalTagProvider implements TagProvider {
 	protected Set<ExecutableTag> getHistoricalTagsForSC(String name)
 	{
 		synchronized (this.configLock) {
-			Set ret = (Set)this.histTags.get(name.toLowerCase());
+			Set<ExecutableTag> ret = (Set<ExecutableTag>)this.histTags.get(name.toLowerCase());
 			if (ret == null) {
 				ret = Collections.emptySet();
 			}
@@ -837,8 +856,8 @@ public class InternalTagProvider implements TagProvider {
 		}
 	}
 
-	protected class TestFrameTag extends AbstractExecutableTag
-	{
+	protected class TestFrameTag extends AbstractExecutableTag {
+		private static final long serialVersionUID = 1L;
 		private final TagValue value = new BasicTagValue(null, DataQuality.STALE);
 		private TagDefinition ext = null;
 		private EntityId eid;
@@ -968,5 +987,53 @@ public class InternalTagProvider implements TagProvider {
 		public TagType getType() {
 			return this.tagType.getCoreType();
 		}
+	}
+
+	@Override
+	public BrowseResults<TagInfoResult> browseTagInfo(QualifiedPath root, boolean recursive, BrowseFilter filter) {
+		TagPath rootTP = QualifiedPathUtils.toTagPath(root);
+		List<TagInfoResult> results = new ArrayList<>();
+		int offset = 0;
+		int limit = filter.getMaxResults();
+		 if (filter.getOffset() >= 0) {
+			 offset = filter.getOffset();
+		} 
+		else if (filter.getContinuationPoint() != null) {
+			offset = TypeUtilities.toInteger(filter.getContinuationPoint()).intValue();
+		}
+		int lastPos = browseTagInfoDeep(rootTP, recursive, offset, new AtomicInteger(0), results, filter);
+		BrowseResults<TagInfoResult> ret = new BrowseResults(results);
+		if ((limit > 0) && (lastPos >= 0)) {
+			ret.setContinuationPoint(TypeUtilities.toString(Integer.valueOf(lastPos)));
+		}
+		return ret;
+	}
+	
+	protected int browseTagInfoDeep(TagPath path, boolean recursive, int totalOffset, AtomicInteger currentOffset, List<TagInfoResult> results, BrowseFilter filter)  { 
+		Collection<Tag> tags = this.tree.getChildren(path);
+		for (Tag t : tags) { 
+			QualifiedPath p = QualifiedPathUtils.fromTagPath(path.getChildPath(t.getName()));
+			if ((filter.checkNameFilters(p)) &&  
+					(currentOffset.incrementAndGet() > totalOffset)) {
+				TagInfo tinfo = TagInfo.createFrom(p, t);
+				results.add(new TagInfoResult(tinfo));
+			} 
+			if ((filter.getMaxResults() > 0) && (results.size() >= filter.getMaxResults())) {
+				return currentOffset.get();
+			}
+			if ((recursive) && (t.getType().hasSubTags())) {
+				int subOffset = browseTagInfoDeep(path.getChildPath(t.getName()), recursive, totalOffset, currentOffset, results, filter);
+				if (subOffset >= 0) {
+					return subOffset;
+				}
+			}
+		} 
+		return -1;
+	}
+
+
+	@Override
+	public void executeScanclass(String scname) {
+		this.onChangeSC.execute();
 	}
 }

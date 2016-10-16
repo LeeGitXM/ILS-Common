@@ -34,7 +34,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.simple.WriteHandler;
  * its use. Tags created with this provider "disappear" on a Gateway restart.
  */
 public class BasicILSTagProvider implements ILSTagProvider {
-	protected final String TAG = "TestFrameTagProvider";
+	protected final String TAG = "BasicILSTagProvider";
 	protected final LoggerEx log;
 	protected final InternalTagProvider internalProvider;
 	protected final GatewayContext context;
@@ -46,7 +46,7 @@ public class BasicILSTagProvider implements ILSTagProvider {
 		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 		this.internalProvider = new InternalTagProvider(context,this.name);
 		// STANDARD_STATUS does not allow renaming or deletion.
-		// My attempt at extendedProperties and SUPPORTS_EXPRESSIONS doesn't work.
+		// My attempt at extendedProperties and SUPPORTS_EXPRESSIONS doesn't work (Ignition78).
 		Set<TagProp> extendedProperties = new HashSet<>();
 		extendedProperties.add(TagProp.Expression);
 		extendedProperties.add(TagProp.ExpressionType);
