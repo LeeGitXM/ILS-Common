@@ -17,12 +17,16 @@ import org.python.core.PyList;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 
+import com.inductiveautomation.ignition.common.Dataset;
+import com.inductiveautomation.ignition.common.script.builtin.DatasetUtilities.PyDataSet;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  *  JavaToPython is a class with methods for converting
  *  HashTables and ArrayLists to PyDictionaries and PyLists.
+ *  
+ *  Note that a PyDataSet is not a PyObject.
  */
 public class JavaToPython {
 	private static final String TAG = "JavaToPython";
@@ -92,6 +96,10 @@ public class JavaToPython {
 					PyList embeddedlist = listToPyList((List<?>)obj);
 					result.add(embeddedlist);
 				}
+				else if (obj instanceof com.inductiveautomation.ignition.common.Dataset ) {
+					log.tracef("%s: tableToPyDictionary: Dataset ...",TAG);
+					result.add(datasetToPy((Dataset)obj));
+				}
 				else if (obj instanceof com.ils.common.GeneralPurposeDataContainer ) {
 					log.tracef("%s: listToPyList: GeneralPurposeDataContainer ...",TAG);
 					result.add(dataContainerToPy((GeneralPurposeDataContainer)obj));
@@ -158,6 +166,13 @@ public class JavaToPython {
 		}
 		return result;
 	}
+	
+	/**
+	 * Use Ignition utilities to convert to a Python Dataset
+	 */
+	public synchronized PyDataSet datasetToPy(Dataset dataset) {
+		return new PyDataSet(dataset);
+	}
 
 	/**
 	 * Assuming the contents of the table are either simple objects, lists, tables or maps, 
@@ -205,6 +220,10 @@ public class JavaToPython {
 						log.tracef("%s: tableToPyDictionary: key %s = embedded list ...",TAG,key);
 						PyList list = listToPyList((List<?>)value);
 						result.put(key.toString(), list);
+					}
+					else if (value instanceof com.inductiveautomation.ignition.common.Dataset ) {
+						log.tracef("%s: tableToPyDictionary: Dataset ...",TAG);
+						result.put(key.toString(),datasetToPy((Dataset)value));
 					}
 					else if (value instanceof com.ils.common.GeneralPurposeDataContainer ) {
 						log.tracef("%s: tableToPyDictionary: GeneralPurposeDataContainer ...",TAG);
@@ -268,6 +287,10 @@ public class JavaToPython {
 						log.tracef("%s: tableToPyDictionary: key %s = embedded list ...",TAG,key);
 						PyList list = listToPyList((List<?>)value);
 						result.put(key.toString(), list);
+					}
+					else if (value instanceof com.inductiveautomation.ignition.common.Dataset ) {
+						log.tracef("%s: tableToPyDictionary: Dataset ...",TAG);
+						result.put(key.toString(),datasetToPy((Dataset)value));
 					}
 					else if (value instanceof com.ils.common.GeneralPurposeDataContainer ) {
 						log.tracef("%s: tableToPyDictionary: GeneralPurposeDataContainer ...",TAG);
