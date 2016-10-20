@@ -1002,7 +1002,7 @@ public class InternalTagProvider implements TagProvider {
 			offset = TypeUtilities.toInteger(filter.getContinuationPoint()).intValue();
 		}
 		int lastPos = browseTagInfoDeep(rootTP, recursive, offset, new AtomicInteger(0), results, filter);
-		BrowseResults<TagInfoResult> ret = new BrowseResults(results);
+		BrowseResults<TagInfoResult> ret = new BrowseResults<TagInfoResult>(results);
 		if ((limit > 0) && (lastPos >= 0)) {
 			ret.setContinuationPoint(TypeUtilities.toString(Integer.valueOf(lastPos)));
 		}
