@@ -35,8 +35,7 @@ public class TagReader  {
 	 * Read the value of a tag. The time assigned is the current
 	 * time.
 	 * 
-	 * @param provider tag provider. Use an empty string for the default provider
-	 * @param path fully qualified tag path
+	 * @param path fully qualified tag path (includes provider)
 	 */
 	public QualifiedValue readTag(String path) {
 		
