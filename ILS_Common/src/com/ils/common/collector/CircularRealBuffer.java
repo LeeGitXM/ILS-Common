@@ -22,7 +22,7 @@ public class CircularRealBuffer implements RandomAccess {
 
 
 	/**
-	 * Create a new history buffer with the specified capacity.
+	 * Create a new real-value buffer with the specified capacity.
 	 * We create an additional spot for the "leader" marker position.
 	 * 
 	 * @param capacity - maximum number of observations retained
