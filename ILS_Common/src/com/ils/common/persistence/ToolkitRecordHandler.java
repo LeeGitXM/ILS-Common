@@ -1,5 +1,5 @@
 /**
- *   (c) 2014-2015  ILS Automation. All rights reserved.
+ *   (c) 2014-2017  ILS Automation. All rights reserved.
  *  
  */
 package com.ils.common.persistence;
@@ -10,7 +10,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 /**
  *  This handler provides is a common interface for handling requests to save/restore 
- *  properties in the ORM persistence engine.
+ *  properties in the SQLite persistence engine.
  *  
  */
 public class ToolkitRecordHandler  {

@@ -55,7 +55,7 @@ public class KeyedCircularBuffer implements RandomAccess {
 	 */
 	public synchronized void add(Map<String,String>map,Object data) {
 		if( data==null || map==null) return;   // No effect
-		log.debug(String.format("%s add %f at %d", TAG,data.toString(),leader));
+		log.debugf("%s add %s at %d", TAG,data.toString(),leader);
 		FilterableValue fv = new FilterableValue(leader,map,data);
 		buf[leader] = fv;
 		leader = wrapIndex(++leader);
@@ -117,7 +117,7 @@ public class KeyedCircularBuffer implements RandomAccess {
 	 * @return an array of members that match the filter and are newer than the specified start index, 
 	 *         in chronological order up to a specified maximum count. The trailing entries of the array may be null.
 	 */
-	public synchronized FilterableValue[] getRecentValuesFilteredToIndex(List<FilterPair> filters,int start,int max) {
+	public synchronized FilterableValue[] getRecentValuesFilteredFromIndex(List<FilterPair> filters,int start,int max) {
 		if( max>size ) max = size;
 		FilterableValue[] values = new FilterableValue[max];
 		int i = wrapIndex(leader-max);
