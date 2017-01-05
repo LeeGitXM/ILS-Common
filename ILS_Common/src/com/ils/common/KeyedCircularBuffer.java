@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 
-import org.python.core.PyDictionary;
-
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 /**
@@ -198,37 +196,6 @@ public class KeyedCircularBuffer implements RandomAccess {
 		public Object getValue() { return this.value; }
 		public String toString() {
 			return String.format("%d: %s",index,value.toString());
-		}
-	}
-	
-	/**
-	 * If the filter contains one of these it passes. Make the 
-	 * class comparable by implementing hashCode and equals.
-	 */
-	public class FilterPair {
-		private final String key;
-		private final String value;
-		
-		public FilterPair(String s1, String s2) {
-			this.key = s1;
-			this.value= s2;
-		}
-		
-		@Override
-		public boolean equals(Object arg) {
-			boolean result = false;
-			if( arg instanceof FilterPair ) {
-				FilterPair that = (FilterPair)arg;
-				if( this.key.equals(that.key) &&
-					this.value.equals(that.value) ) {
-					result = true;
-				}
-			}
-			return result;
-		}
-		@Override
-		public int hashCode() {
-			return key.hashCode()-value.hashCode();
 		}
 	}
 }
