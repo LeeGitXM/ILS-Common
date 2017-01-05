@@ -195,7 +195,7 @@ public class KeyedCircularBuffer implements RandomAccess {
 			}
 			return true;
 		}
-		public Object getValue() { return this.getValue(); }
+		public Object getValue() { return this.value; }
 		public String toString() {
 			return String.format("%d: %s",index,value.toString());
 		}
