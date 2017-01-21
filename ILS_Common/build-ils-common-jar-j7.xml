@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="ils.makejar" default="all" basedir=".">
+	<!-- Build a Java 7 version of the common libraries -->
 	<property name="jar.dir" value="${basedir}/../../external/lib" />
 	<property name="sdk.dir" value="${basedir}/../../ignition-79/lib" />
 	<property name="jar.name" value="ils-common-j7.jar" />
