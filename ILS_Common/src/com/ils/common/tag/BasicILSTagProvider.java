@@ -1,10 +1,11 @@
 /**
- *   (c) 2015  ILS Automation. All rights reserved.
+ *   (c) 2015-2017  ILS Automation. All rights reserved.
  */
 package com.ils.common.tag;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,14 +18,18 @@ import com.inductiveautomation.ignition.common.sqltags.model.TagProp;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataType;
 import com.inductiveautomation.ignition.common.sqltags.model.types.ExtendedTagType;
 import com.inductiveautomation.ignition.common.sqltags.model.types.TagEditingFlags;
-import com.inductiveautomation.ignition.common.sqltags.model.types.TagMeta;
 import com.inductiveautomation.ignition.common.sqltags.model.types.TagType;
 import com.inductiveautomation.ignition.common.sqltags.parser.TagPathParser;
+import com.inductiveautomation.ignition.common.tags.config.TagConfigSet;
+import com.inductiveautomation.ignition.common.tags.config.TagConfiguration;
 import com.inductiveautomation.ignition.common.util.Flags;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
+import com.inductiveautomation.ignition.gateway.sqltags.simple.InternalTagProvider;
+import com.inductiveautomation.ignition.gateway.sqltags.simple.ProviderConfiguration;
 import com.inductiveautomation.ignition.gateway.sqltags.simple.WriteHandler;
+import com.inductiveautomation.ignition.gateway.tags.config.TagConfigurationUtils;
 
 /**
  * A tag provider that is not quite as "simple" as a SimpleTagProvider. This code has 
@@ -36,6 +41,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.simple.WriteHandler;
 public class BasicILSTagProvider implements ILSTagProvider {
 	protected final String TAG = "BasicILSTagProvider";
 	protected final LoggerEx log;
+	//protected final InternalTagProvider internalProvider;
 	protected final InternalTagProvider internalProvider;
 	protected final GatewayContext context;
 	protected final String name;
@@ -71,14 +77,11 @@ public class BasicILSTagProvider implements ILSTagProvider {
 			this.internalProvider.getContext().getTagManager().unregisterTagProvider(this.name);
 	}
 
-	
-
 	protected InternalTagProvider getInternal() {
 		return this.internalProvider;
 	}
 
-	public void setProviderMetaFlag(int flag, boolean value)
-	{
+	public void setProviderMetaFlag(int flag, boolean value) {
 		getInternal().setProviderMetaFlag(flag, value);
 	}
 
@@ -113,6 +116,43 @@ public class BasicILSTagProvider implements ILSTagProvider {
 		return getInternal().getTagDefinition(tagpath);
 	}
 
+	public TagConfigSet browse(String path, boolean recursive) {
+		return TagConfigurationUtils.browseConfiguration(getInternal(), TagPathParser.parseSafe(getName(), path), recursive);
+	}
+	@Override
+	public void configureProvider(ProviderConfiguration config) {
+		getInternal().configureProvider(config);
+	}
+
+	public void configureTag(String path, DataType dType, ExtendedTagType tagType)  {
+		configureTag(getPath(path), dType, tagType);
+	}
+
+	public void configureTag(TagPath path, DataType dType, ExtendedTagType tagType) {
+		getInternal().setupTag(path, dType, tagType);
+	}
+	public void configureTag(TagConfiguration config){
+		getInternal().configureTag(config);
+	}
+
+	public void removeTag(String path) {
+		removeTag(getPath(path));
+	}
+
+	public void removeTag(TagPath path)  {
+		getInternal().removeTags(Arrays.asList(new TagPath[] { path }));
+	}
+	@Deprecated
+	public void configureTagType(ExtendedTagType tagType, Flags editingFlags, Set<TagProp> bindableProperties) {}
+
+	public void registerWriteHandler(String path, WriteHandler handler) {
+		getInternal().registerWriteHandler(path, handler);
+	}
+
+	public void registerWriteHandler(TagPath path, WriteHandler handler) {
+		registerWriteHandler(path.toStringFull(), handler);
+	}
+	
 	protected String sanitizePath(String path) {
 		if (path == null) {
 			return null;
@@ -122,43 +162,19 @@ public class BasicILSTagProvider implements ILSTagProvider {
 	}
 
 	public void updateValue(String path, Object value, Quality quality) {
-		updateValue(getPath(path), value, quality);
+		getInternal().updateValue(path, value, quality);
 	}
 
-	public void updateValue(TagPath path, Object value, Quality quality)  {
-		this.internalProvider.updateValue(path, value, quality);
+	public void updateValue(TagPath tpath, Object value, Quality quality)  {
+		getInternal().updateValue(tpath.toStringFull(),value,quality);
 	}
-
-	public void updateValue(TagPath path, QualifiedValue value)  {
-		this.internalProvider.updateValue(path, value);
+	@Deprecated
+	public void updateValue(TagPath tpath, QualifiedValue qv)  {
+		getInternal().updateValue(tpath.toStringFull(),qv.getValue(),qv.getQuality());
 	}
-
-	public void configureTag(String path, DataType dType, ExtendedTagType tagType)  {
-		configureTag(getPath(path), dType, tagType);
-	}
-
-	public void configureTag(TagPath path, DataType dType, ExtendedTagType tagType) {
-		this.internalProvider.setupTag(path, dType, tagType);
-	}
-
-	public void removeTag(String path) {
-		removeTag(getPath(path));
-	}
-
-	public void removeTag(TagPath path)  {
-		this.internalProvider.removeTags(Arrays.asList(new TagPath[] { path }));
-	}
-
-	public void configureTagType(ExtendedTagType tagType, Flags editingFlags, Set<TagProp> bindableProperties) {
-		TagMeta newMeta = new TagMeta(tagType, editingFlags, bindableProperties);
-		this.internalProvider.configureTagType(newMeta);
-	}
-
-	public void registerWriteHandler(String path, WriteHandler handler) {
-		registerWriteHandler(getPath(path), handler);
-	}
-
-	public void registerWriteHandler(TagPath path, WriteHandler handler) {
-		this.internalProvider.registerWriteHandler(path, handler);
+	@Override
+	public void updateValue(String path, Object value, Quality quality, Date timestamp) {
+		getInternal().updateValue(path, value, quality,timestamp);
+		
 	}
 }
