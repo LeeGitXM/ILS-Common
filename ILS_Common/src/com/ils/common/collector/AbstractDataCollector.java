@@ -260,6 +260,7 @@ public abstract class AbstractDataCollector  {
 	 */
 	protected synchronized void reportQualityChanged(String path,Date ts, boolean good) {
 		// Search the prototype for the data point with this path
+		//log.infof("%s: reportQualityChanged: tag path (%s)",TAG,path);
 		if( path!=null) {
 			Integer indx = positionMap.get(path);
 			if( indx!=null) {
