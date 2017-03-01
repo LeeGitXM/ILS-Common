@@ -253,6 +253,52 @@ public abstract class AbstractDataCollector  {
 		return count;
 	}
 	/**
+	 * Handle receipt of a new quality-only value. This method should be called
+	 * by the subclass whenever it receives an update via subscription where the
+	 * value is null and the TagProp is not "Property". Presumably the quality
+	 * has gone bad and the value is not available.Leave it unchanged.
+	 */
+	protected synchronized void reportQualityChanged(String path,Date ts, boolean good) {
+		// Search the prototype for the data point with this path
+		if( path!=null) {
+			Integer indx = positionMap.get(path);
+			if( indx!=null) {
+				int index = indx.intValue();
+				if( index>=0 && index<prototype.dataPoints.length && prototype.dataPoints[index]!=null) {
+					DataPoint point = prototype.dataPoints[index];
+					point.updated = true;
+					point.missedReads = 0;
+					if( good ) {
+						point.badReads = 0;
+						point.isGood = true;
+					}
+					else if( point.isGood==false){ // Already bad
+						point.badReads++;
+					}
+					else {                         // "provisionally" good			
+						point.badReads++;
+						if( point.badReads > badReadTolerance) {
+							point.isGood = false;
+						}
+					}					
+					point.timestamp = ts;
+					prototype.timestamp = ts;    // Update the prototype with the data collection time
+					log.tracef("%s: reportQualityChanged %s (index %d at %s)",TAG,path,index,ts.toString());
+					checkCollectionComplete();
+				}
+				else {
+					log.errorf("%s: reportQualityChanged: point for %s is null, index=%d",TAG,path,indx);
+				}
+			}
+			else {
+				log.errorf("%s: reportQualityChanged: unknown tag path (%s)",TAG,path);
+			}
+		}
+		else {
+		   //log.trace(TAG+"reportQualityChanged: null (ignored) ");
+		}
+	}
+	/**
 	 * Handle receipt of a new data value.This method should be called
 	 * by the subclass whenever it receives an update via subscription.
 	 * 
