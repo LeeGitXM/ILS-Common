@@ -15,20 +15,22 @@ public class FixedSizeQueue<E> extends LinkedList<E>  {
 	
 	public int getBufferSize() { return bufferSize; }
 	
-	public void setBufferSize(int size) {
+	public synchronized void setBufferSize(int size) {
 		// Whittle down the list, if necessary
 		if( size<1 ) size = 0;
 		while( this.size()>size ) {
-			super.remove();
+			remove();
 		}
 		bufferSize = size;
 	}
 	
 	@Override
-    public boolean add(E o) {
+    public synchronized boolean add(E o) {
         if( bufferSize>0) {
         	super.add(o);
-        	while (size() > bufferSize) { super.remove(); }
+        	while (size() > bufferSize) {
+        		remove(); 
+        	}
         }
         return true;
     }
