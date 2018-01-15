@@ -2,6 +2,7 @@ package com.ils.common.db;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLTimeoutException;
@@ -237,7 +238,38 @@ public class DBUtility {
 		return columns;
 	}
 	/**
-	 * Execute a sql query against the named datasource.
+	 * Execute a SQL prepared against the named datasource.
+	 * The SQL allows for a single argument.
+	 *
+	 * @param SQL command to execute
+	 * @param arg the single argument
+	 * @param source a named datasource
+	 * @param suppliedConnection a database connection. If null the method will manage.
+	 */
+	public void runPreparedStatement(String sql,String arg,String source,Connection suppliedConnection) {
+		Connection cxn = suppliedConnection;
+		if( cxn==null ) cxn = getConnection(source);
+		String result = "";
+		if( cxn!=null ) {
+			try {
+				PreparedStatement stmt = cxn.prepareStatement(sql);
+				if( arg!=null ) stmt.setString(1,arg);
+				stmt.execute();
+				stmt.close();
+			}
+			catch(SQLException sqle) {
+				log.warnf("%s.runPreparedStatement: Exception executing %s (%s)",TAG,sql,sqle.getMessage());
+			}
+			finally {
+				if(suppliedConnection==null ) closeConnection(cxn);
+			}
+		}
+		else {
+			log.warnf("%s.runPreparedStatement: Datasource %s not found",TAG,source);
+		}
+	}
+	/**
+	 * Execute a SQL query against the named datasource.
 	 * The query is expected to return exactly one value.
 	 *
 	 * @param sql command to execute
