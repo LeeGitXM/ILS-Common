@@ -249,7 +249,6 @@ public class DBUtility {
 	public void runPreparedStatement(String sql,String arg,String source,Connection suppliedConnection) {
 		Connection cxn = suppliedConnection;
 		if( cxn==null ) cxn = getConnection(source);
-		String result = "";
 		if( cxn!=null ) {
 			try {
 				PreparedStatement stmt = cxn.prepareStatement(sql);
