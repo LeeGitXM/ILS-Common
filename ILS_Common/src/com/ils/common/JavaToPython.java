@@ -37,7 +37,10 @@ public class JavaToPython {
 		PyObject result = null;
 		
 		// "Simple datatypes" 
-		if( obj instanceof String ) {
+		if( obj == null ) {
+			result = new PyString("NULL");
+		}
+		else if( obj instanceof String ) {
 			result = new PyString(obj.toString());
 		}
 		else if( obj instanceof Integer ) {
