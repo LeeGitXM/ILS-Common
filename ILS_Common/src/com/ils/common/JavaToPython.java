@@ -17,8 +17,6 @@ import org.python.core.PyList;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 
-import com.inductiveautomation.ignition.common.Dataset;
-import com.inductiveautomation.ignition.common.script.builtin.DatasetUtilities.PyDataSet;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 
