@@ -68,7 +68,7 @@ public abstract class AbstractDataCollector  {
 	 */
 	public void removeDataPoint(int index) {
 		// Operate on the existing array.
-		if( index<prototype.dataPoints.length) {
+		if( index<prototype.dataPoints.length && prototype.dataPoints[index]!=null ) {
 			log.tracef("%s: removeDataPoint. Removing data point at %d (%s)",TAG,index,prototype.dataPoints[index].tagPath);
 			stopSubscription(prototype.dataPoints[index]); 
 			prototype.dataPoints[index] = null;  // Don't use any more
