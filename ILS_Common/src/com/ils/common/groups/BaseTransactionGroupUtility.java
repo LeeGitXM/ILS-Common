@@ -9,9 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.python.core.PyDictionary;
 import org.python.core.PyList;
-import org.python.core.PyString;
 
 import com.inductiveautomation.factorysql.common.config.CommonGroupProperties;
 import com.inductiveautomation.factorysql.common.config.CommonItemProperties;
@@ -36,6 +34,7 @@ public abstract class BaseTransactionGroupUtility {
 	protected final static String TRANSACTION_GROUP = "group";
 	// Property keys for the python map
 	protected final static String KEY_DATASOURCE= "datasource";
+	protected final static String KEY_NAME= "name";
 	protected final static String KEY_ORIGINAL= "original";
 	protected final static String KEY_PATH= "path";    
 	protected final static String KEY_TABLE= "table";
@@ -104,10 +103,15 @@ public abstract class BaseTransactionGroupUtility {
 				log.warnf("%s.createTransactionGroupForUnit: destination required",CLSS);
 				return;
 			}
+			String name = map.get(KEY_NAME);
+			if( name==null) {
+				log.warnf("%s.createTransactionGroupForUnit: name required",CLSS);
+				return;
+			}
 			GroupConfig group = deserialize(pr);  // The is the transaction group
 			if( group!=null ) {
 				log.infof("deserializing: got %s (now %s)",group.getName(),path);
-				group.setName(path);
+				group.setName(name);
 				modifyPropertiesForTarget(group,map);
 				deleteTransactionGroup(path);  // In case it exists
 				addResource(path,group);
