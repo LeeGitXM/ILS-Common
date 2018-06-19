@@ -21,9 +21,11 @@ public class DesignerTransactionGroupUtility extends BaseTransactionGroupUtility
 		context = app.getAdapterContext();
 		hook = (FSQLDesignerModuleHook)context.getModule(FSQL_MODULE_ID);
 		setProject(context.getProject());
+		listTransactionGroups(); // Populate the lookup maps
 	}
 	/**
 	 * The hook's addResource wants the enclosing folder as the path.
+	 * We don't know the new resourceId.
 	 * @param path full path to the resource.
 	 * @param gc the group
 	 */
@@ -32,6 +34,7 @@ public class DesignerTransactionGroupUtility extends BaseTransactionGroupUtility
 		int pos = path.lastIndexOf("/");
 		if( pos>0 ) folder = path.substring(0,pos);
 		hook.addResource("group",folder,gc.getName(),gc);
+		listTransactionGroups(); // Re-populate the lookup maps
 	}
 	
 	public XMLDeserializer getDeserializer() { return this.context.createDeserializer(); }

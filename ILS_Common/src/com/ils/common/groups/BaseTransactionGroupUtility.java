@@ -5,6 +5,7 @@
 
 package com.ils.common.groups;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,17 @@ public abstract class BaseTransactionGroupUtility {
 	protected final static String KEY_TSTAMP= "tstamp";
 	protected final static String KEY_UNIT= "unit";
 	
+	protected final static String KEY_CONFIGURED_ITEMS = "CONFIGURED_ITEMS";
+	protected final static String KEY_DRIVING_TAG_PATH = "DRIVING_TAG_PATH";
+	protected final static String KEY_TARGET_NAME      = "TARGET_NAME";
+	protected final static String KEY_TARGET_DATA_TYPE = "TARGET_DATA_TYPE";
+	
+	protected static List<String> exclusions;
+	static {
+		exclusions = new ArrayList<>();
+		exclusions.add("EFT");
+	}
+	
 	// Defaults
 	protected final static String DEFAULT_TSTAMP= "tstamp";
 	
@@ -49,6 +61,10 @@ public abstract class BaseTransactionGroupUtility {
 	protected final Map<Long, TransactionGroup> groupsById;     // Lookup by resource Id
 	protected Project project = null;
 
+	/**
+	 * Constructor: Each subclass must independently call listTransactionGroups()
+	 *              after the project is established.
+	 */
 	public BaseTransactionGroupUtility() {
 		this.groupsByPath = new HashMap<>();
 		this.groupsById = new HashMap<>();
@@ -84,8 +100,6 @@ public abstract class BaseTransactionGroupUtility {
 		return list;
 	}
 	
-
-	
 	/**
 	 * Create a new transaction group based on the specified source, but modified 
 	 * for a different processing unit. Save as a new project resource. Delete
@@ -94,7 +108,6 @@ public abstract class BaseTransactionGroupUtility {
 	 * @param properties are desired options for the new transaction group 
 	 */
 	public void createTransactionGroupForUnit(String source,Map<String,String> map) {
-		listTransactionGroups(); // Populate the lookup maps
 		TransactionGroup master = groupsByPath.get(source);
 		if( master!=null ) {
 			ProjectResource pr = project.getResource(master.getResourceId());
@@ -110,7 +123,7 @@ public abstract class BaseTransactionGroupUtility {
 			}
 			GroupConfig group = deserialize(pr);  // The is the transaction group
 			if( group!=null ) {
-				log.infof("deserializing: got %s (now %s)",group.getName(),path);
+				log.infof("%s.createTransactionGroupForUnit: Deserializing: got %s (now %s)",CLSS,group.getName(),path);
 				group.setName(name);
 				modifyPropertiesForTarget(group,map);
 				deleteTransactionGroup(path);  // In case it exists
@@ -141,7 +154,7 @@ public abstract class BaseTransactionGroupUtility {
 			}
 		}
 		catch(SerializationException se) {
-			log.errorf("deserialize: Exception reading %d (%s)",res.getResourceId(),se.getLocalizedMessage());
+			log.errorf("%s.deserialize: Exception reading %d (%s)",CLSS,res.getResourceId(),se.getLocalizedMessage());
 		}
 		return null;
 	}
@@ -195,11 +208,51 @@ public abstract class BaseTransactionGroupUtility {
 		else if( key.equals(CommonGroupProperties.UPDATE_RATE.getName())) {}
 		else if( key.equals(CommonGroupProperties.UPDATE_UNITS.getName())) {}
 		else {
-			log.infof("UNRECOGNIZED:  %s = %s",prop.getName(),prop.getValue().toString());
+			log.infof("%s.modifyPropertyForTarget: UNRECOGNIZED:  %s = %s",CLSS,prop.getName(),prop.getValue().toString());
 		}
 	}
 	
 
+	/**
+	 * Given the path to a transaction group, return a map of its tag paths
+	 * keyed by the control parameter name.
+	 * @param path
+	 * @return
+	 */
+	public Map<String,String> propertiesForGroup(String path) {
+		Map<String,String> result = new HashMap<>();
+		TransactionGroup tg = groupsByPath.get(path);
+		if( tg!=null ) {
+			ProjectResource pr = project.getResource(tg.getResourceId());
+			GroupConfig group = deserialize(pr);  // The is the transaction group
+			if( group!=null ) {
+				log.infof("%s.propertiesForGroup: deserialized: got group %s",CLSS,group.getName());
+				if( group.getProperties()!=null ) {
+					Map<String,MetaProperty> props = group.getProperties().getProperties();
+					ItemConfig[] items = (ItemConfig[])props.get(KEY_CONFIGURED_ITEMS).getValue();
+					log.infof("%s.propertiesForGroup: %d configured items",CLSS,items.length);
+					for( ItemConfig item:items ) {
+						Map<String,MetaProperty> iprops = item.getProperties().getProperties();
+						String name = iprops.get(KEY_TARGET_NAME).getValue().toString();
+						if(exclusions.contains(name)) continue;
+						if(!iprops.get(KEY_TARGET_DATA_TYPE).getValue().toString().equals("Float4")) continue;
+						result.put(name,iprops.get(KEY_DRIVING_TAG_PATH).getValue().toString());
+						//log.infof("%s.propertiesForGroup: %s %s %s",CLSS,iprops.get(KEY_TARGET_NAME).getValue(),iprops.get(KEY_TARGET_DATA_TYPE).getValue(),iprops.get(KEY_DRIVING_TAG_PATH).getValue());
+					}
+				}
+				else {
+					log.warnf("%s.propertiesForGroup: group %s has no properties",CLSS,group.getName());
+				}
+			}
+			else {
+				log.warnf("%s.propertiesForGroup: No configuration found for path %s",CLSS,path);
+			}
+		}
+		else {
+			log.warnf("%s.propertiesForGroup: No group found for path %s",CLSS,path);
+		}
+		return result;
+	}
 	
 	/**
 	 * Given the resource path, return the corresponding resource Id.
@@ -209,7 +262,6 @@ public abstract class BaseTransactionGroupUtility {
 	 */
 	private Long resourceIdForPath(String path) {
 		Long result = null;
-		listTransactionGroups(); // Populate the lookup maps
 		TransactionGroup group = groupsByPath.get(path);
 		if( group!=null) result = new Long(group.getResourceId());
 		return result;

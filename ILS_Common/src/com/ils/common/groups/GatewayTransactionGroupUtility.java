@@ -21,6 +21,7 @@ public class GatewayTransactionGroupUtility extends BaseTransactionGroupUtility 
 		setProject(context.getProjectManager().getProject(projectId, ApplicationScope.GATEWAY, ProjectVersion.Staging));
 		hook = (FactorySQLGatewayHook)context.getModule(FSQL_MODULE_ID);
 		log.infof("GatewayTransactionGroupUtility.constructor: ExecutionManager is %s",hook.getGroupExecutionManager().getClass().getCanonicalName());
+		listTransactionGroups(); // Populate the lookup maps
 	}
 	
 	protected void addResource(String path,GroupConfig group) {}  // TODO
