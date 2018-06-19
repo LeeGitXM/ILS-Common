@@ -9,7 +9,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -50,14 +49,14 @@ public class InternalDatabaseHandler {
 	 * anyway.
 	 * @param name
 	 */
-	public void setProjectDatasource(String oldName,String newName) {
+	public void setProjectDatasource(String newName) {
 		ProjectManager pmgr = context.getProjectManager();
 		List<Project> projects = pmgr.getProjectsLite(ProjectVersion.Staging);
 		Properties admin = getAdministrativeUser();
 		if( admin!=null ) {
 			for( Project proj: projects ) {
 				GlobalProps props = pmgr.getProps(proj.getId(), ProjectVersion.Staging);
-				log.infof("%s.setProviderDatasource: Found project %s, datasource %s=%s?",CLSS,proj.getName(),props.getDefaultDatasourceName(),oldName);
+				log.infof("%s.setProviderDatasource: Found project %s, datasource %s=%s?",CLSS,proj.getName(),props.getDefaultDatasourceName(),newName);
 				if( !props.getDefaultDatasourceName().equalsIgnoreCase(newName)) {
 					props.setDefaultDatasourceName(newName);
 					AuthenticatedUser user = new BasicAuthenticatedUser(props.getAuthProfileName(),admin.getProperty("ProfileId"),
@@ -65,7 +64,7 @@ public class InternalDatabaseHandler {
 					try {
 						pmgr.saveProject(proj, user, "n/a", 
 								String.format("ILS Automation: updating default datasource in %s",proj.getName()), false);
-						log.infof("%s.setProviderDatasource: Saved project %s, datasource %s->%s",CLSS,proj.getName(),oldName,newName);
+						log.infof("%s.setProviderDatasource: Saved project %s, datasource now %s",CLSS,proj.getName(),newName);
 					}
 					// We get an error notifying project listeners. It appears not to matter with us.
 					catch(Exception ex) {
