@@ -156,13 +156,18 @@ public class InternalDatabaseHandler {
 		long id = -1;
 		String SQL = "";
 		try {
-			SQL = "SELECT datasources_id FROM datasources DS"
-				+ " WHERE name = ?";
+			SQL = "SELECT DS.datasources_id FROM datasources DS"
+				+ " WHERE DS.name = ?";
 			PreparedStatement statement = cxn.prepareStatement(SQL);
 			statement.setString(1, name);
 			ResultSet rs = statement.executeQuery();
-			rs.next();
-			id = rs.getLong(1);   // 1-based
+			if( !rs.isAfterLast() ) {
+				rs.next();
+				id = rs.getLong(1);   // 1-based
+			}
+			else {
+				log.warn(String.format("%s.getDatasourceId: No datasource %s found",CLSS,name));
+			}
 			rs.close();
 			statement.close();
 		}
@@ -186,8 +191,13 @@ public class InternalDatabaseHandler {
 			PreparedStatement statement = cxn.prepareStatement(SQL);
 			statement.setString(1, name);
 			ResultSet rs = statement.executeQuery();
-			rs.next();
-			id = rs.getLong(1);   // 1-based
+			if(!rs.isAfterLast() ) {
+				rs.next();
+				id = rs.getLong(1);   // 1-based
+			}
+			else {
+				log.warn(String.format("%s.getProviderId: No tag provider %s found",CLSS,name));
+			}
 			rs.close();
 			statement.close();
 		}
