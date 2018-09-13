@@ -134,11 +134,11 @@ public class DBUtility {
 				stmt.close();
 			}
 			catch(SQLTimeoutException sqlte) {
-				result = String.format("SQLTimeoutException: line %d executing %s\n(%s)",index-1,sql,sqlte.getLocalizedMessage());
+				result = String.format("SQLTimeoutException: line %d executing %s\n(%s: %s)",index-1,sql,database,sqlte.getLocalizedMessage());
 				log.warnf("%s.executeMultilineSQL %s",TAG,result);
 			}
 			catch(SQLException sqle) {
-				result = String.format("SQLException: line %d executing %s\n(%s)",index-1,sql,sqle.getLocalizedMessage());
+				result = String.format("SQLException: line %d executing %s\n(%s: %s)",index-1,sql,database,sqle.getLocalizedMessage());
 				log.warnf("%s.executeMultilineSQL %s",TAG,result);
 			}
 			finally {
