@@ -36,9 +36,10 @@ public abstract class BaseTransactionGroupUtility {
 	// Property keys for the python map
 	protected final static String KEY_DATASOURCE= "datasource";
 	protected final static String KEY_NAME= "name";
-	protected final static String KEY_ORIGINAL= "original";
-	protected final static String KEY_PATH= "path";    
+	protected final static String KEY_PATTERN = "pattern";
+	protected final static String KEY_PATH= "path";         // Transaction group path  
 	protected final static String KEY_TABLE= "table";
+	protected final static String KEY_TAGPATH = "tagpath";  // Root of tagpath
 	protected final static String KEY_TSTAMP= "tstamp";
 	protected final static String KEY_UNIT= "unit";
 	
@@ -121,9 +122,10 @@ public abstract class BaseTransactionGroupUtility {
 				log.warnf("%s.createTransactionGroupForUnit: name required",CLSS);
 				return;
 			}
+			
 			GroupConfig group = deserialize(pr);  // The is the transaction group
 			if( group!=null ) {
-				log.infof("%s.createTransactionGroupForUnit: Deserializing: got %s (now %s)",CLSS,group.getName(),path);
+				log.infof("%s.createTransactionGroupForUnit: Deserialized %s (now %s)",CLSS,group.getName(),path);
 				group.setName(name);
 				modifyPropertiesForTarget(group,map);
 				deleteTransactionGroup(path);  // In case it exists
@@ -179,8 +181,7 @@ public abstract class BaseTransactionGroupUtility {
 	
 	private void modifyPropertyForTarget(MetaProperty prop,Map<String,String>map ) {
 		String key = prop.getName();
-		String oldName = map.get(KEY_ORIGINAL);
-		String newName = map.get(KEY_UNIT);
+		//log.infof("%s.modifyPropertyForTarget: %s %s",CLSS,prop.getName(),prop.getValue().toString());
 		if( key.equals(CommonGroupProperties.CONFIGURED_ITEMS.getName())) {
 			modifyConfiguredItemsForTarget((ItemConfig[])prop.getValue(),map);
 		}
@@ -188,11 +189,13 @@ public abstract class BaseTransactionGroupUtility {
 			prop.setValue(map.get(KEY_DATASOURCE));
 		}
 		else if( key.equals(CommonItemProperties.DRIVING_TAG_PATH.getName())) {
-			prop.setValue(prop.getValue().toString().replaceAll(oldName, newName));
+			prop.setValue(modifyTagPath(prop.getValue().toString(),map));
 		}
 		else if( key.equals(CommonGroupProperties.EXECUTION_ENABLED.getName())) {}
 		else if( key.equals(CommonGroupProperties.GROUP_EXECUTION_FLAGS.getName())) {}
-		else if( key.equals("NAME")) {}  // Already handled
+		else if( key.equals("NAME")) {
+			prop.setValue(modifyTagPath(prop.getValue().toString(),map));
+		} 
 		else if( key.equals(CommonGroupProperties.TABLE_NAME.getName())) {
 			prop.setValue(map.get(KEY_TABLE));
 		}
@@ -203,7 +206,7 @@ public abstract class BaseTransactionGroupUtility {
 		else if( key.equals(CommonGroupProperties.TRIGGER_INACTIVE_COMPARE.getName())) {}
 		else if( key.equals(CommonGroupProperties.TRIGGER_MODE.getName())) {}
 		else if( key.equals(CommonGroupProperties.TRIGGER_PATH.getName())) {
-			prop.setValue(prop.getValue().toString().replaceAll(oldName, newName));
+			prop.setValue(modifyTagPath(prop.getValue().toString(),map));
 		}
 		else if( key.equals(CommonGroupProperties.UPDATE_RATE.getName())) {}
 		else if( key.equals(CommonGroupProperties.UPDATE_UNITS.getName())) {}
@@ -226,17 +229,17 @@ public abstract class BaseTransactionGroupUtility {
 			ProjectResource pr = project.getResource(tg.getResourceId());
 			GroupConfig group = deserialize(pr);  // The is the transaction group
 			if( group!=null ) {
-				log.infof("%s.propertiesForGroup: deserialized: got group %s",CLSS,group.getName());
 				if( group.getProperties()!=null ) {
 					Map<String,MetaProperty> props = group.getProperties().getProperties();
 					ItemConfig[] items = (ItemConfig[])props.get(KEY_CONFIGURED_ITEMS).getValue();
-					log.infof("%s.propertiesForGroup: %d configured items",CLSS,items.length);
+					//log.infof("%s.propertiesForGroup: %d configured items",CLSS,items.length);
 					for( ItemConfig item:items ) {
 						Map<String,MetaProperty> iprops = item.getProperties().getProperties();
 						String name = iprops.get(KEY_TARGET_NAME).getValue().toString();
 						if(exclusions.contains(name)) continue;
 						if(!iprops.get(KEY_TARGET_DATA_TYPE).getValue().toString().equals("Float4")) continue;
-						result.put(name,iprops.get(KEY_DRIVING_TAG_PATH).getValue().toString());
+						String tagpath = iprops.get(KEY_DRIVING_TAG_PATH).getValue().toString();
+						result.put(name,tagpath);
 						//log.infof("%s.propertiesForGroup: %s %s %s",CLSS,iprops.get(KEY_TARGET_NAME).getValue(),iprops.get(KEY_TARGET_DATA_TYPE).getValue(),iprops.get(KEY_DRIVING_TAG_PATH).getValue());
 					}
 				}
@@ -252,6 +255,20 @@ public abstract class BaseTransactionGroupUtility {
 			log.warnf("%s.propertiesForGroup: No group found for path %s",CLSS,path);
 		}
 		return result;
+	}
+	
+	// Modify the original tag path to incorporate a new root pattern
+	private String modifyTagPath(String inPath,Map<String,String> map) {
+		String tagpath = inPath;
+		// Remove the provider, if it exists
+		if( tagpath.startsWith("/")) tagpath = tagpath.substring(1);
+		int pos = tagpath.indexOf("]");
+		if( pos>0 ) tagpath = tagpath.substring(pos+1);
+		String pattern = map.get(KEY_PATTERN);
+		String path = map.get(KEY_TAGPATH);
+		String newPath = tagpath.replace(pattern, path);
+		//log.infof("%s.modifyTagPath: %s -> %s",CLSS,inPath,newPath);
+		return newPath;
 	}
 	
 	/**
