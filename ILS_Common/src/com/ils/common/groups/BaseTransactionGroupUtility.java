@@ -236,11 +236,12 @@ public abstract class BaseTransactionGroupUtility {
 					for( ItemConfig item:items ) {
 						Map<String,MetaProperty> iprops = item.getProperties().getProperties();
 						String name = iprops.get(KEY_TARGET_NAME).getValue().toString();
+						//log.infof("%s.propertiesForGroup: %s %s %s",CLSS,iprops.get(KEY_TARGET_NAME).getValue(),iprops.get(KEY_TARGET_DATA_TYPE).getValue(),iprops.get(KEY_DRIVING_TAG_PATH).getValue());
 						if(exclusions.contains(name)) continue;
-						if(!iprops.get(KEY_TARGET_DATA_TYPE).getValue().toString().equals("Float4")) continue;
+						if(!iprops.get(KEY_TARGET_DATA_TYPE).getValue().toString().equals("Float4") && !iprops.get(KEY_TARGET_DATA_TYPE).getValue().toString().equals("Float8")) continue;
 						String tagpath = iprops.get(KEY_DRIVING_TAG_PATH).getValue().toString();
 						result.put(name,tagpath);
-						//log.infof("%s.propertiesForGroup: %s %s %s",CLSS,iprops.get(KEY_TARGET_NAME).getValue(),iprops.get(KEY_TARGET_DATA_TYPE).getValue(),iprops.get(KEY_DRIVING_TAG_PATH).getValue());
+						log.infof("%s.propertiesForGroup: using %s %s %s",CLSS,iprops.get(KEY_TARGET_NAME).getValue(),iprops.get(KEY_TARGET_DATA_TYPE).getValue(),iprops.get(KEY_DRIVING_TAG_PATH).getValue());
 					}
 				}
 				else {
