@@ -179,37 +179,38 @@ public abstract class BaseTransactionGroupUtility {
 		}
 	}
 	
+	// We have seen DRIVING_TAG_PATH return a null name, and so protect for it and the rest.
 	private void modifyPropertyForTarget(MetaProperty prop,Map<String,String>map ) {
 		String key = prop.getName();
 		//log.infof("%s.modifyPropertyForTarget: %s %s",CLSS,prop.getName(),prop.getValue().toString());
-		if( key.equals(CommonGroupProperties.CONFIGURED_ITEMS.getName())) {
+		if( CommonGroupProperties.CONFIGURED_ITEMS.getName()!=null && key.equals(CommonGroupProperties.CONFIGURED_ITEMS.getName())) {
 			modifyConfiguredItemsForTarget((ItemConfig[])prop.getValue(),map);
 		}
-		else if( key.equals(CommonGroupProperties.DATA_SOURCE.getName())) {
+		else if( CommonGroupProperties.DATA_SOURCE.getName()!=null          && key.equals(CommonGroupProperties.DATA_SOURCE.getName())) {
 			prop.setValue(map.get(KEY_DATASOURCE));
 		}
-		else if( key.equals(CommonItemProperties.DRIVING_TAG_PATH.getName())) {
+		else if( CommonItemProperties.DRIVING_TAG_PATH.getName()!=null       && key.equals(CommonItemProperties.DRIVING_TAG_PATH.getName())) {
 			prop.setValue(modifyTagPath(prop.getValue().toString(),map));
 		}
-		else if( key.equals(CommonGroupProperties.EXECUTION_ENABLED.getName())) {}
-		else if( key.equals(CommonGroupProperties.GROUP_EXECUTION_FLAGS.getName())) {}
+		else if( CommonGroupProperties.EXECUTION_ENABLED.getName()!=null     && key.equals(CommonGroupProperties.EXECUTION_ENABLED.getName())) {}
+		else if( CommonGroupProperties.GROUP_EXECUTION_FLAGS.getName()!=null && key.equals(CommonGroupProperties.GROUP_EXECUTION_FLAGS.getName())) {}
 		else if( key.equals("NAME")) {
 			prop.setValue(modifyTagPath(prop.getValue().toString(),map));
 		} 
-		else if( key.equals(CommonGroupProperties.TABLE_NAME.getName())) {
+		else if( CommonGroupProperties.TABLE_NAME.getName()!=null && key.equals(CommonGroupProperties.TABLE_NAME.getName())) {
 			prop.setValue(map.get(KEY_TABLE));
 		}
-		else if( key.equals(CommonItemProperties.TARGET_DATA_TYPE.getName())) {}
-		else if( key.equals(CommonItemProperties.TARGET_NAME.getName())) {}
-		else if( key.equals(CommonItemProperties.TARGET_TYPE.getName())) {}
-		else if( key.equals(CommonGroupProperties.TIMESTAMP_COLUMN.getName())) {}
-		else if( key.equals(CommonGroupProperties.TRIGGER_INACTIVE_COMPARE.getName())) {}
-		else if( key.equals(CommonGroupProperties.TRIGGER_MODE.getName())) {}
-		else if( key.equals(CommonGroupProperties.TRIGGER_PATH.getName())) {
+		else if( CommonItemProperties.TARGET_DATA_TYPE.getName()!=null  && key.equals(CommonItemProperties.TARGET_DATA_TYPE.getName())) {}
+		else if( CommonItemProperties.TARGET_NAME.getName()!=null       && key.equals(CommonItemProperties.TARGET_NAME.getName())) {}
+		else if( CommonItemProperties.TARGET_TYPE.getName()!=null       && key.equals(CommonItemProperties.TARGET_TYPE.getName())) {}
+		else if( CommonGroupProperties.TIMESTAMP_COLUMN.getName()!=null && key.equals(CommonGroupProperties.TIMESTAMP_COLUMN.getName())) {}
+		else if( CommonGroupProperties.TRIGGER_INACTIVE_COMPARE.getName()!=null && key.equals(CommonGroupProperties.TRIGGER_INACTIVE_COMPARE.getName())) {}
+		else if( CommonGroupProperties.TRIGGER_MODE.getName()!=null     && key.equals(CommonGroupProperties.TRIGGER_MODE.getName())) {}
+		else if( CommonGroupProperties.TRIGGER_PATH.getName()!=null     && key.equals(CommonGroupProperties.TRIGGER_PATH.getName())) {
 			prop.setValue(modifyTagPath(prop.getValue().toString(),map));
 		}
-		else if( key.equals(CommonGroupProperties.UPDATE_RATE.getName())) {}
-		else if( key.equals(CommonGroupProperties.UPDATE_UNITS.getName())) {}
+		else if( CommonGroupProperties.UPDATE_RATE.getName()!=null      && key.equals(CommonGroupProperties.UPDATE_RATE.getName())) {}
+		else if( CommonGroupProperties.UPDATE_UNITS.getName()!=null     && key.equals(CommonGroupProperties.UPDATE_UNITS.getName())) {}
 		else {
 			log.infof("%s.modifyPropertyForTarget: UNRECOGNIZED:  %s = %s",CLSS,prop.getName(),prop.getValue().toString());
 		}
