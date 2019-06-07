@@ -277,7 +277,9 @@ public class DBUtility {
 	 */
 	public String runScalarQuery(String sql,String source,Connection suppliedConnection) {
 		Connection cxn = suppliedConnection;
-		if( cxn==null ) cxn = getConnection(source);
+		if( cxn==null ) {
+			cxn = getConnection(source);
+		}
 		String result = "";
 		if( cxn!=null ) {
 			try {
@@ -295,7 +297,9 @@ public class DBUtility {
 				log.warnf("%s.runScalarQuery: Exception executing %s (%s)",TAG,sql,sqle.getMessage());
 			}
 			finally {
-				if(suppliedConnection==null ) closeConnection(cxn);
+				if(suppliedConnection==null ) {
+					closeConnection(cxn);
+				}
 			}
 		}
 		else {
