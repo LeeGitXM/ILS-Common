@@ -7,7 +7,6 @@ package com.ils.common.watchdog;
 import java.util.Date;
 
 import com.inductiveautomation.ignition.common.model.values.BasicQualifiedValue;
-import com.inductiveautomation.ignition.common.model.values.Quality;
 
 
 /**
@@ -25,15 +24,6 @@ public class TestAwareQualifiedValue extends BasicQualifiedValue  {
 	 */
 	public TestAwareQualifiedValue(WatchdogTimer timer,Object value) {
 		super(value);
-		setTimestamp(new Date(timer.getTestTime()));
-	}
-	/**
-	 * Create a qualified value from just a value. If in a testing 
-	 * situation, set the time to the test time. 
-	 * @param observer
-	 */
-	public TestAwareQualifiedValue(WatchdogTimer timer,Object value,Quality q) {
-		super(value,q);
 		setTimestamp(new Date(timer.getTestTime()));
 	}
 }

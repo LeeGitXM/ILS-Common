@@ -1,5 +1,5 @@
 /**
- *   (c) 2018  ILS Automation. All rights reserved. 
+ *   (c) 2019  ILS Automation. All rights reserved. 
  */
 package com.ils.common.persistence;
 
@@ -10,16 +10,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Optional;
 import java.util.Properties;
 
 import com.inductiveautomation.ignition.common.project.GlobalProps;
-import com.inductiveautomation.ignition.common.project.Project;
-import com.inductiveautomation.ignition.common.project.ProjectVersion;
+import com.inductiveautomation.ignition.common.project.ProjectNotFoundException;
+import com.inductiveautomation.ignition.common.project.RuntimeProject;
 import com.inductiveautomation.ignition.common.user.AuthenticatedUser;
 import com.inductiveautomation.ignition.common.user.BasicAuthenticatedUser;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
-import com.inductiveautomation.ignition.gateway.SRContext;
+import com.inductiveautomation.ignition.gateway.IgnitionGateway;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistenceSession;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import com.inductiveautomation.ignition.gateway.project.ProjectManager;
@@ -39,42 +40,48 @@ public class InternalDatabaseHandler {
 	 */
 	public InternalDatabaseHandler() { 
 		log = LogUtil.getLogger(getClass().getPackage().getName());
-		context = SRContext.get();
+		context = IgnitionGateway.get();
 	}
 	
 	/**
 	 * We don't really know which project we want, so we guess. Change any 
 	 * projects with a default provider equal to the old datasource and
-	 * update to the new. We soulldn't be using default datasources 
+	 * update to the new. We shouldn't be using default datasources 
 	 * anyway.
 	 * @param name
 	 */
 	public void setProjectDatasource(String newName) {
 		ProjectManager pmgr = context.getProjectManager();
-		List<Project> projects = pmgr.getProjectsLite(ProjectVersion.Staging);
+		List<String> names = pmgr.getProjectNames();
 		Properties admin = getAdministrativeUser();
-		if( admin!=null ) {
-			for( Project proj: projects ) {
-				GlobalProps props = pmgr.getProps(proj.getId(), ProjectVersion.Staging);
-				log.infof("%s.setProviderDatasource: Found project %s, datasource %s=%s?",CLSS,proj.getName(),props.getDefaultDatasourceName(),newName);
-				if( !props.getDefaultDatasourceName().equalsIgnoreCase(newName)) {
-					props.setDefaultDatasourceName(newName);
-					AuthenticatedUser user = new BasicAuthenticatedUser(props.getAuthProfileName(),admin.getProperty("ProfileId"),
-									admin.getProperty("Name", "admin"),props.getRequiredRoles());
-					try {
-						pmgr.saveProject(proj, user, "n/a", 
-								String.format("ILS Automation: updating default datasource in %s",proj.getName()), false);
-						log.infof("%s.setProviderDatasource: Saved project %s, datasource now %s",CLSS,proj.getName(),newName);
-					}
-					// We get an error notifying project listeners. It appears not to matter with us.
-					catch(Exception ex) {
-						log.errorf("%s.setProjectDatasource: Exception when saving merged project (%s)",CLSS,ex.getLocalizedMessage());
+		try {
+			if( admin!=null ) {
+				for( String name: names ) {
+					GlobalProps props = pmgr.getProjectProps(name);
+					log.infof("%s.setProviderDatasource: Found project %s, datasource %s=%s?",CLSS,name,props.getDefaultDatasourceName(),newName);
+					if( !props.getDefaultDatasourceName().equalsIgnoreCase(newName)) {
+						props.setDefaultDatasourceName(newName);
+						AuthenticatedUser user = new BasicAuthenticatedUser(props.getAuthProfileName(),admin.getProperty("ProfileId"),
+								admin.getProperty("Name", "admin"),props.getRequiredRoles());
+						try {
+							Optional<RuntimeProject> optional = pmgr.getProject(name);
+							RuntimeProject rp = optional.get();  // should always exist
+							pmgr.createOrReplaceProject(name,rp.getManifest(),rp.getResources());
+							log.infof("%s.setProviderDatasource: Saved project %s, datasource now %s",CLSS,name,newName);
+						}
+						// We get an error notifying project listeners. It appears not to matter with us.
+						catch(Exception ex) {
+							log.errorf("%s.setProjectDatasource: Exception when saving merged project (%s)",CLSS,ex.getLocalizedMessage());
+						}
 					}
 				}
 			}
+			else {
+				log.errorf("%s.setProjectDatasource: No admin user found to save project",CLSS);
+			}
 		}
-		else {
-			log.errorf("%s.setProjectDatasource: No admin user found to save project",CLSS);
+		catch( ProjectNotFoundException pnfe) {
+			log.errorf("%s.setProjectDatasource: Coding error (%s)",CLSS,pnfe.getLocalizedMessage());
 		}
 	}
 	/**

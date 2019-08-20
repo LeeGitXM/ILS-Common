@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.python.core.PyList;
 
@@ -18,7 +19,8 @@ import com.inductiveautomation.factorysql.common.config.GroupConfig;
 import com.inductiveautomation.factorysql.common.config.ItemConfig;
 import com.inductiveautomation.ignition.common.metaproperties.MetaProperty;
 import com.inductiveautomation.ignition.common.project.Project;
-import com.inductiveautomation.ignition.common.project.ProjectResource;
+import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
+import com.inductiveautomation.ignition.common.project.resource.ProjectResourceId;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.common.xmlserialization.SerializationException;
@@ -58,8 +60,8 @@ public abstract class BaseTransactionGroupUtility {
 	protected final static String DEFAULT_TSTAMP= "tstamp";
 	
 	protected LoggerEx log;
-	protected final Map<String, TransactionGroup> groupsByPath; // Lookup by path name
-	protected final Map<Long, TransactionGroup> groupsById;     // Lookup by resource Id
+	protected final Map<String, TransactionGroup> groupsByPath;              // Lookup by path name
+	protected final Map<ProjectResourceId, TransactionGroup> groupsById;     // Lookup by resource Id
 	protected Project project = null;
 
 	/**
@@ -73,7 +75,7 @@ public abstract class BaseTransactionGroupUtility {
 	}
 
 	protected abstract void addResource(String path,GroupConfig group);
-	protected abstract void deleteResource(long resourceId);
+	protected abstract void deleteResource(ProjectResourceId resourceId);
 	protected abstract XMLDeserializer getDeserializer();
 	protected void setProject(Project proj) {
 		this.project = proj;
@@ -88,12 +90,12 @@ public abstract class BaseTransactionGroupUtility {
 		PyList list = new PyList();
 		for (ProjectResource res : project.getResources()) {
 			if (res.getResourceType().equals(TRANSACTION_GROUP)) {
-				String name = res.getName();
-				long resId = res.getResourceId();
-				String path = project.getFolderPath(resId);
-				TransactionGroup tg = new TransactionGroup(name,resId,path);
+				String name = res.getResourceName();
+				ProjectResourceId resId = res.getResourceId();
+				String path = resId.getFolderPath();
+				TransactionGroup tg = new TransactionGroup(name,resId);
 				groupsByPath.put(path, tg);
-				groupsById.put(new Long(resId), tg);
+				groupsById.put(resId, tg);
 				list.add(path);
 			}
 		}
@@ -111,7 +113,8 @@ public abstract class BaseTransactionGroupUtility {
 	public void createTransactionGroupForUnit(String source,Map<String,String> map) {
 		TransactionGroup master = groupsByPath.get(source);
 		if( master!=null ) {
-			ProjectResource pr = project.getResource(master.getResourceId());
+			Optional<ProjectResource> optional = project.getResource(master.getResourceId());
+			ProjectResource pr = optional.get();
 			String path = map.get(KEY_PATH);
 			if( path==null) {
 				log.warnf("%s.createTransactionGroupForUnit: destination required",CLSS);
@@ -138,8 +141,8 @@ public abstract class BaseTransactionGroupUtility {
 	}
 	
 	public void deleteTransactionGroup(String path) {
-		Long groupId = resourceIdForPath(path);
-		if( groupId!=null) deleteResource(groupId.longValue());
+		ProjectResourceId groupId = resourceIdForPath(path);
+		if( groupId!=null) deleteResource(groupId);
 	}
 	
 	public GroupConfig deserialize(ProjectResource res) {
@@ -227,7 +230,8 @@ public abstract class BaseTransactionGroupUtility {
 		Map<String,String> result = new HashMap<>();
 		TransactionGroup tg = groupsByPath.get(path);
 		if( tg!=null ) {
-			ProjectResource pr = project.getResource(tg.getResourceId());
+			Optional<ProjectResource> optional = project.getResource(tg.getResourceId());
+			ProjectResource pr = optional.get();
 			GroupConfig group = deserialize(pr);  // The is the transaction group
 			if( group!=null ) {
 				if( group.getProperties()!=null ) {
@@ -279,25 +283,23 @@ public abstract class BaseTransactionGroupUtility {
 	 * @param path in the resource nav tree
 	 * @return resourceId
 	 */
-	private Long resourceIdForPath(String path) {
-		Long result = null;
+	private ProjectResourceId resourceIdForPath(String path) {
+		ProjectResourceId result = null;
 		TransactionGroup group = groupsByPath.get(path);
-		if( group!=null) result = new Long(group.getResourceId());
+		if( group!=null) result = group.getResourceId();
 		return result;
 	}
 
 	private class TransactionGroup {
 		private final String name;
-		private final long resourceId;
-		private final String path;
+		private final ProjectResourceId resourceId;
 
-		public TransactionGroup(String nam,long resId,String folderPath) {
+		public TransactionGroup(String nam,ProjectResourceId resId) {
 			this.name = nam;
 			this.resourceId = resId;
-			this.path = folderPath;
 		}
 
 		public String getName() {return name;}
-		public long getResourceId() { return resourceId; }
+		public ProjectResourceId getResourceId() { return resourceId; }
 	}
 }

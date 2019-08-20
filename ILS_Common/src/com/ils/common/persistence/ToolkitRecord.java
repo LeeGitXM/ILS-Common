@@ -7,6 +7,7 @@ package com.ils.common.persistence;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistentRecord;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.RecordMeta;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.StringField;
+
 import simpleorm.dataset.SFieldFlags;
 
 /**

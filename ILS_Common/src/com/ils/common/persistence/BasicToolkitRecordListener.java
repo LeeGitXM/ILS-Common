@@ -12,7 +12,6 @@ import com.inductiveautomation.ignition.gateway.web.models.KeyValue;
 /**
  * Respond to changes in our toolkit properties in the HSQL persistent database.
  * For documentation relating to the SimpleORM data model:
- * @See: http://simpleorm.org/sorm/whitepaper.html
  */
 public class BasicToolkitRecordListener implements IRecordListener<ToolkitRecord> {
 	private final static String TAG = "ToolkitRecordListener";

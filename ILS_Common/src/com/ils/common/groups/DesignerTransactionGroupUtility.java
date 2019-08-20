@@ -4,6 +4,7 @@ import com.inductiveautomation.factorypmi.application.FPMIApp;
 import com.inductiveautomation.factorysql.common.config.GroupConfig;
 import com.inductiveautomation.factorysql.designer.FSQLDesignerModuleHook;
 import com.inductiveautomation.ignition.client.model.ClientContext;
+import com.inductiveautomation.ignition.common.project.resource.ProjectResourceId;
 import com.inductiveautomation.ignition.common.xmlserialization.deserialization.XMLDeserializer;
 
 /**
@@ -33,13 +34,13 @@ public class DesignerTransactionGroupUtility extends BaseTransactionGroupUtility
 		String folder = "";
 		int pos = path.lastIndexOf("/");
 		if( pos>0 ) folder = path.substring(0,pos);
-		hook.addResource("group",folder,gc.getName(),gc);
+		hook.addResource("group",gc.getName(),gc);
 		listTransactionGroups(); // Re-populate the lookup maps
 	}
 	
 	public XMLDeserializer getDeserializer() { return this.context.createDeserializer(); }
 	
-	public void deleteResource(long resourceId) { 
+	public void deleteResource(ProjectResourceId resourceId) { 
 		hook.deleteResource(resourceId);
 	}
 }
