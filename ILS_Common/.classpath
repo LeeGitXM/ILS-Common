@@ -8,15 +8,5 @@
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/External"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Ignition-80"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/ignition-common.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/client-api.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/designer-api.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/gateway-api.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/gateway.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/simple-orm.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/sql-bridge-common-api.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/vision-client-api.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/sql-bridge-designer-api.jar"/>
-	<classpathentry kind="lib" path="/Ignition-80/lib/sql-bridge-gateway.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

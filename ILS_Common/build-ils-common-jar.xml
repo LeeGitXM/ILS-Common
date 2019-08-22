@@ -57,14 +57,5 @@
 				<include name="ils-common.jar" />
 			</fileset>
 		</copy>
-		<echo message="Copying packed jar file into ${ignition.py.lib}/../../lib/core/common" />
-		<!-- Create our packer task -->
-		<taskdef name="pack200" classname="com.sun.tools.apache.ant.pack200.Pack200Task" classpath="${basedir}/AntLib/Pack200Task.jar" />
-		<pack200 src="${jar.dir}/ils-common.jar" destfile="${ignition.py.lib}/../../lib/core/common/ils-common.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
-		<copy todir="${jar.dir}">
-			<fileset dir="${ignition.py.lib}/../../lib/core/common">
-				<include name="ils-common*" />
-			</fileset>
-		</copy>
 	</target>	
 </project>
