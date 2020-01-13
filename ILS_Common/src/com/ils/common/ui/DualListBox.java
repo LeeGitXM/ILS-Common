@@ -27,6 +27,7 @@ public class DualListBox extends JPanel{
 	private static final Insets EMPTY_INSETS = new Insets(0,0,0,0);
 	private static final String DEFAULT_SOURCE_CHOICE_LABEL = "Available Choices";
 	private static final String DEFAULT_DEST_CHOICE_LABEL = "Your Choices";
+	public static final String PROPERTY_CHANGE_UPDATE = "Dual Updated";
 	private static Icon addIcon = new ImageIcon(DualListBox.class.getResource("/images/arrow_right_blue.png"));
 	private static Icon removeIcon = new ImageIcon(DualListBox.class.getResource("/images/arrow_left_blue.png"));
 	private JLabel sourceLabel;
@@ -185,6 +186,7 @@ public class DualListBox extends JPanel{
 			destListModel.removeElement(sel);
 		}
 		destList.getSelectionModel().clearSelection();
+		firePropertyChange(PROPERTY_CHANGE_UPDATE, "NA", "BOOP");
 	}
 	
 	private void clearSourceSelected(){
@@ -193,6 +195,7 @@ public class DualListBox extends JPanel{
 			sourceListModel.removeElement(sel);
 		}
 		sourceList.getSelectionModel().clearSelection();
+		firePropertyChange(PROPERTY_CHANGE_UPDATE, "NA", "BOOP");
 	}
 	
 	private void fillListModel(SortedListModel<String> model, List<String> newValues){
