@@ -36,7 +36,7 @@ public class TagWriter  {
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT);
 	protected final LoggerEx log;
 	protected final GatewayContext context;
-	private final List<WriteRequest<TagPath>> list;
+	protected final List<WriteRequest<TagPath>> list;
 	private final ProviderRegistry providerRegistry;
 	/**
 	 * Constructor.
@@ -55,10 +55,10 @@ public class TagWriter  {
 	public void appendRequest(String path,Object value) {
 		if( path==null || value==null) return;
 		LocalRequest req = new LocalRequest(path,value);
-		if(req.isValid)list.add(req);
+		if(req.isValid)getList().add(req);
 	}
 	
-	public void clear() { list.clear(); }
+	public void clear() { getList().clear(); }
 	public ProviderRegistry getProviderRegistry() { return providerRegistry; }
 	
 	/**
@@ -76,12 +76,12 @@ public class TagWriter  {
 		// For a "standard" provider, simply blast the entire list.
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
 		if( provider != null )  {
-			List<Quality> qualities = provider.write(list, null, true);    // true-> isSystem to bypass permission checks
+			List<Quality> qualities = provider.write(getList(), null, true);    // true-> isSystem to bypass permission checks
 			int index = 0;
 			for(Quality q:qualities) {
 		    	if(!q.isGood()) {
 		    		log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", TAG, 
-		    				list.get(index).getTarget().toStringFull(), list.get(index).getValue().toString(), qualities.get(index).getName());
+		    				getList().get(index).getTarget().toStringFull(), getList().get(index).getValue().toString(), qualities.get(index).getName());
 		    	}
 		    	index++;
 	    	}
@@ -90,7 +90,7 @@ public class TagWriter  {
 			ILSTagProvider prov = providerRegistry.getSimpleProvider(providerName);
 			if( prov!=null ) {
 				// For a "simple" provider, write a qualified value one by one.
-				for(WriteRequest<TagPath> r:list) {
+				for(WriteRequest<TagPath> r:getList()) {
 					if( r instanceof LocalRequest ) {
 						LocalRequest req = (LocalRequest)r;
 						if(!req.isValid ) continue;
@@ -134,7 +134,7 @@ public class TagWriter  {
 			ILSTagProvider prov = providerRegistry.getSimpleProvider(providerName);
 			if( prov!=null ) {
 				// For a "simple" provider, write a qualified value one by one.
-				for(WriteRequest<TagPath> r:list) {
+				for(WriteRequest<TagPath> r:getList()) {
 					if( r instanceof LocalRequest ) {
 						LocalRequest req = (LocalRequest)r;
 						if(!req.isValid ) continue;
@@ -154,7 +154,7 @@ public class TagWriter  {
 			}
 			else {
 				// For a "standard" provider, in order to set the time-stamp, the quantities must be a TagValue
-				List<WriteRequest<TagPath>> tagValueList = convertRequests(list);
+				List<WriteRequest<TagPath>> tagValueList = convertRequests(getList());
 				TagProvider provider = context.getTagManager().getTagProvider(providerName);
 				if( provider != null )  {
 					List<Quality> qualities = provider.write(tagValueList, null, true);    // true-> isSystem to bypass permission checks
@@ -162,7 +162,7 @@ public class TagWriter  {
 					for(Quality q:qualities) {
 						if(!q.isGood()) {
 							log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", TAG, 
-									list.get(index).getTarget().toStringFull(), list.get(index).getValue().toString(), qualities.get(index).getName());
+									getList().get(index).getTarget().toStringFull(), getList().get(index).getValue().toString(), qualities.get(index).getName());
 						}
 						index++;
 					}
@@ -391,6 +391,9 @@ public class TagWriter  {
 			}
 		}
 		return outList;
+	}
+	protected List<WriteRequest<TagPath>> getList() {
+		return list;
 	}
 	// ==================================== Local Request ==========================
 	/**
