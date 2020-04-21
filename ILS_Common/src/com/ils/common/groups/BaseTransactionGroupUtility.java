@@ -33,7 +33,8 @@ import com.inductiveautomation.ignition.common.xmlserialization.deserialization.
  */
 public abstract class BaseTransactionGroupUtility {
 	private final static String CLSS = "BaseTransactionGroupUtility";
-	protected final static String FSQL_MODULE_ID = "fsql";
+	protected final static String FSQL_MODULE_ID = "com.inductiveautomation.sqlbridge";
+	protected final static String TRANSACTION_GROUP_PATH = "Site/Units";
 	protected final static String TRANSACTION_GROUP = "transaction-groups"; // Was "group"
 	// Property keys for the python map
 	protected final static String KEY_DATASOURCE= "datasource";
@@ -90,9 +91,9 @@ public abstract class BaseTransactionGroupUtility {
 		PyList list = new PyList();
 		for (ProjectResource res : project.getResources()) {
 			//log.infof("%s.listTransactionGroups: found project resource: %s.",CLSS,res.getResourceType().getTypeId());
-			if( TRANSACTION_GROUP.equalsIgnoreCase(res.getResourceType().getTypeId()) ) {
+			if( !res.isFolder() && TRANSACTION_GROUP.equalsIgnoreCase(res.getResourceType().getTypeId()) ) {
 				String name = res.getResourceName();
-				log.infof("%s.listTransactionGroups: found transaction group: %s.",CLSS,name);
+				//log.infof("%s.listTransactionGroups: found transaction group: %s.",CLSS,name);
 				ProjectResourceId resId = res.getResourceId();
 				String path = resId.getFolderPath();
 				TransactionGroup tg = new TransactionGroup(name,resId);

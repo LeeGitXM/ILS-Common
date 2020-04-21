@@ -4,17 +4,18 @@ import com.inductiveautomation.factorypmi.application.FPMIApp;
 import com.inductiveautomation.factorysql.common.config.GroupConfig;
 import com.inductiveautomation.factorysql.designer.FSQLDesignerModuleHook;
 import com.inductiveautomation.ignition.client.model.ClientContext;
+import com.inductiveautomation.ignition.common.modules.ModuleInfo;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceId;
 import com.inductiveautomation.ignition.common.xmlserialization.deserialization.XMLDeserializer;
 
 /**
  * This class provides utility methods dealing with transaction groups.
- * These methods must all be invoked in Client/Designer scope.
+ * These methods must all be invoked in Designer scope.
  */
-public class DesignerTransactionGroupUtility extends BaseTransactionGroupUtility
-{
+public class DesignerTransactionGroupUtility extends BaseTransactionGroupUtility {
+	private final static String CLSS = "DesignerTransactionGroupUtility";
 	private final ClientContext context;
-	private final FSQLDesignerModuleHook hook;
+	private FSQLDesignerModuleHook hook;
 	
 	public DesignerTransactionGroupUtility() {
 		@SuppressWarnings("deprecation")
@@ -34,7 +35,8 @@ public class DesignerTransactionGroupUtility extends BaseTransactionGroupUtility
 		String folder = "";
 		int pos = path.lastIndexOf("/");
 		if( pos>0 ) folder = path.substring(0,pos);
-		hook.addResource("group",gc.getName(),gc);
+		log.infof("%s.addResource: path: %s name:%s.",CLSS,folder,gc.getName());
+		hook.addResource(path,gc.getName(),gc);
 		listTransactionGroups(); // Re-populate the lookup maps
 	}
 	
