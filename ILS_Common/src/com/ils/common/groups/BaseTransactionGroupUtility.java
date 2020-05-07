@@ -243,6 +243,7 @@ public abstract class BaseTransactionGroupUtility {
 					//log.infof("%s.propertiesForGroup: %d configured items",CLSS,items.length);
 					for( ItemConfig item:items ) {
 						Map<String,MetaProperty> iprops = item.getProperties().getProperties();
+						if( iprops.get(KEY_TARGET_NAME)==null ) continue;
 						String name = iprops.get(KEY_TARGET_NAME).getValue().toString();
 						//log.infof("%s.propertiesForGroup: %s %s %s",CLSS,iprops.get(KEY_TARGET_NAME).getValue(),iprops.get(KEY_TARGET_DATA_TYPE).getValue(),iprops.get(KEY_DRIVING_TAG_PATH).getValue());
 						if(exclusions.contains(name)) continue;
