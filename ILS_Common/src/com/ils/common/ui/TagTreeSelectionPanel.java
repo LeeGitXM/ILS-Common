@@ -10,10 +10,10 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
 
-import net.miginfocom.swing.MigLayout;
-
 import com.inductiveautomation.ignition.client.sqltags.tree.TagRenderer;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
+
+import net.miginfocom.swing.MigLayout;
 
 /**
  * Display a tag browser in tree form. Clients may subscribe
