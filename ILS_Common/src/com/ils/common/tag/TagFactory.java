@@ -42,7 +42,6 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import com.inductiveautomation.ignition.gateway.sqltags.SQLTagsManager;
 import com.inductiveautomation.ignition.gateway.sqltags.TagProvider;
-import com.inductiveautomation.ignition.gateway.sqltags.simple.WriteHandler;
 
 /**
  *  Provide for the creation, deleting and updating of SQLTags. We handle
@@ -54,36 +53,32 @@ public class TagFactory  {
 	private final LoggerEx log;
 	private final GatewayContext context;
 	private final SimpleDateFormat dateFormat;
-	private final ProviderRegistry providerRegistry;
 	private final SQLTagsManager tagManager;
 	private final List<TagPath> visitOrder;
 	
 	/**
 	 * Constructor.
 	 */
-	public TagFactory(GatewayContext ctxt,ProviderRegistry reg) {
+	public TagFactory(GatewayContext ctxt) {
 		this.context = ctxt;
 		this.dateFormat = new SimpleDateFormat(ILSProperties.TIMESTAMP_FORMAT);
-		this.providerRegistry = reg;
 		this.tagManager = context.getTagManager();
 		this.visitOrder = new ArrayList<>();   // For tag replication
 		log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 	
-	public ProviderRegistry getProviderRegistry() { return providerRegistry; }
-	
 	/**
-	 * An Expression is just a tag with an expression attribute. This method creates a tag that is an
-	 * expression, but the expression is empty. Edit the tag to set an expression.
+	 * An Expression is just a tag with an expression attribute. This method creates a tag with
+	 * the supplied expression.
 	 * The TagPath attribute "source" actually refers to the provider name. A full tag path includes
 	 * the provider in brackets, a partial path does not. 
-	 * @param providerName name of the tag provider (not a simple provider)
+	 * @param providerName name of the tag provider
 	 * @param tagPath
 	 * @param type - data type
 	 */
 	public void createExpression(String providerName, String tagPath, String type, String expr) {
 		tagPath = stripProvider(tagPath);
-		log.debugf("%s.createExpression: [%s] %s (%s) = %s",TAG,providerName,tagPath,type,expr);
+		log.infof("%s.createExpression: [%s] %s (%s) = %s",TAG,providerName,tagPath,type,expr);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
@@ -106,7 +101,7 @@ public class TagFactory  {
 				node.setAttribute(TagProp.ExpressionType, new BasicTagValue(ExpressionType.Expression));
 				node.setAttribute(TagProp.Expression, new BasicTagValue(expr));
 				node.setEnabled(true);
-				node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
+				node.setAccessRights(AccessRightsType.Read_Write);
 				toAdd.add(node);
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
@@ -116,6 +111,58 @@ public class TagFactory  {
 		}
 		else {
 			log.warnf("%s.createExpression: Provider %s does not exist",TAG,providerName);
+		}
+	}
+	
+	/**
+	 * Create an expression that records a history. The supplied history provider
+	 * must already exist as the tag history tables will be created in it.
+	 * The TagPath attribute "source" actually refers to the provider name. A full tag path includes
+	 * the provider in brackets, a partial path does not. 
+	 * @param providerName name of the tag provider
+	 * @param tagPath
+	 * @param type - data type
+	 * @param history
+	 */
+	public void createExpressionWithHistory(String providerName, String tagPath, String type, String expr,String historyProvider) {
+		log.infof("%s.createExpressionWithHistory: [%s]%s (%s) = %s (%s)",TAG,providerName,tagPath,type,expr,historyProvider);
+		tagPath = stripProvider(tagPath);
+		TagPath tp = null;
+		try {
+			tp = TagPathParser.parse(providerName,tagPath);
+		}
+		catch(IOException ioe) {
+			log.warnf("%s.createExpressionWithHistory: Exception parsing tag %s (%s)",TAG,tagPath,ioe.getLocalizedMessage());
+			return;
+		}
+		
+		DataType dataType = dataTypeFromString(type);
+		TagProvider provider = context.getTagManager().getTagProvider(providerName);
+		if( provider != null ) {
+			try {
+				// Guarantee that parent paths exist
+				createParents(tp);
+				List<TagNode> toAdd = new ArrayList<>();
+			
+				TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
+				node.setDataType(dataType);
+				node.setEnabled(true);
+				node.setAttribute(TagProp.ExpressionType, new BasicTagValue(ExpressionType.Expression));
+				node.setAttribute(TagProp.Expression, new BasicTagValue(expr));
+				node.setAccessRights(AccessRightsType.Read_Write); 
+				node.setAttribute(TagProp.HistoryEnabled, new BasicTagValue(Boolean.TRUE));
+				node.setAttribute(TagProp.PrimaryHistoryProvider, new BasicTagValue(historyProvider));
+				node.setAttribute(TagProp.HistoricalScanclass, new BasicTagValue("Default"));
+				node.setAttribute(TagProp.ScanClass, new BasicTagValue("Default"));
+				toAdd.add(node);
+				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+			}
+			catch(Exception ex) {
+				log.warnf("%s.createExpressionWithHistory: Exception creating tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
+			}
+		}
+		else {
+			log.warnf("%s.createExpressionWithHistory: Provider %s does not exist",TAG,providerName);
 		}
 	}
 
@@ -156,33 +203,22 @@ public class TagFactory  {
 			log.warnf("%s.createTag: Exception parsing tag %s (%s)",TAG,tagPath,ioe.getLocalizedMessage());
 			return;
 		}
-		// NOTE: Our experience here is that if we use the simple data provider, then the tags 
+		// NOTE: Our experience here is that if the simple data provider, then the tags 
 		//       show up in the designer SQLTagsBrowser. This is not the case when defining directly
 		//       through the tag manager. Here the calls appear to succeed, but the tags do not show up.
 		// In the cases where we need historical timestamps,  we use the simple tag provider.
 		DataType dataType = dataTypeFromString(type);
-		BasicILSTagProvider simpleProvider = providerRegistry.getSimpleProvider(providerName);
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( simpleProvider!=null) {
-			simpleProvider.configureTag(tp, dataType, TagType.Custom);
-			WriteHandler handler = new BasicWriteHandler(simpleProvider);
-			simpleProvider.registerWriteHandler(tp, handler);
-		}
-		else if( provider != null ) {
+		if( provider != null ) {
 			try {
 				// Guarantee that parent paths exist
 				createParents(tp);
 				List<TagNode> toAdd = new ArrayList<>();
-				
+
 				TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
 				node.setDataType(dataType);
 				node.setEnabled(true);
 				node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
-				// Is this a tag that we need to write to in the history?
-				DatabaseStoringProviderDelegate delegate = providerRegistry.getDatabaseStoringDelegate(providerName);
-				if(delegate!=null) {
-					delegate.configureTag(tp,dataType);
-				}
 				toAdd.add(node);
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
@@ -204,7 +240,7 @@ public class TagFactory  {
 	 */
 	public void createTagWithHistory(String providerName, String tagPath, String type,String historyProvider) {
 		tagPath = stripProvider(tagPath);
-		log.debugf("%s.createTagWithHistory [%s]%s (%s)",TAG,providerName,tagPath,type);
+		log.infof("%s.createTagWithHistory [%s]%s (%s) on %s",TAG,providerName,tagPath,type,historyProvider);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
@@ -227,12 +263,8 @@ public class TagFactory  {
 				node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
 				node.setAttribute(TagProp.HistoryEnabled, new BasicTagValue(Boolean.TRUE));
 				node.setAttribute(TagProp.PrimaryHistoryProvider, new BasicTagValue(historyProvider));
-	
-				// Is this a tag that we need to write to in the history?
-				DatabaseStoringProviderDelegate delegate = providerRegistry.getDatabaseStoringDelegate(providerName);
-				if(delegate!=null) {
-					delegate.configureTag(tp,dataType);
-				}
+				node.setAttribute(TagProp.HistoricalScanclass, new BasicTagValue("Default"));
+				node.setAttribute(TagProp.ScanClass, new BasicTagValue("Default"));
 				toAdd.add(node);
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
@@ -255,26 +287,20 @@ public class TagFactory  {
 			log.warnf("%s: deleteTag: Exception parsing tag %s (%s)",TAG,tagPath,ioe.getLocalizedMessage());
 			return;
 		}
-		
-		BasicILSTagProvider simpleProvider = providerRegistry.getSimpleProvider(providerName);
-		if( simpleProvider!=null) {
-			simpleProvider.removeTag(tp);
+
+		TagProvider provider = context.getTagManager().getTagProvider(providerName);
+		if( provider != null  ) {
+			List<TagPath> tags = new ArrayList<TagPath>();
+			tags.add(tp);
+			try {
+				context.getTagManager().removeTags(tags);
+			}
+			catch(Exception ex) {
+				log.warnf("%s: deleteTag: Exception deleting tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
+			}
 		}
 		else {
-			TagProvider provider = context.getTagManager().getTagProvider(providerName);
-			if( provider != null  ) {
-				List<TagPath> tags = new ArrayList<TagPath>();
-				tags.add(tp);
-				try {
-					context.getTagManager().removeTags(tags);
-				}
-				catch(Exception ex) {
-					log.warnf("%s: deleteTag: Exception deleting tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
-				}
-			}
-			else {
-				log.warnf("%s.deleteTag: Provider %s does not exist",TAG,providerName);
-			}
+			log.warnf("%s.deleteTag: Provider %s does not exist",TAG,providerName);
 		}
 	}
 
@@ -326,14 +352,7 @@ public class TagFactory  {
 			return;
 		}
 
-		// The SimpleTagProvider, does not seem to provide a mechanism to alter the expression,
-		// so we simply delete and create another.
-		BasicILSTagProvider simpleProvider = providerRegistry.getSimpleProvider(providerName);
-		if( simpleProvider!=null) {
-			deleteTag(providerName,tagPath);
-			createExpression(providerName,tagPath,tag.getDataType().toString(),expr);
-		}
-		else if( provider!=null ) { 
+		if( provider!=null ) { 
 			List<TagPath> tags = new ArrayList<TagPath>();
 			tags.add(tp);
 			Quality q = new BasicQuality("ILS",Quality.Level.Good);
@@ -384,8 +403,6 @@ public class TagFactory  {
 		if( source.equalsIgnoreCase(isolationProvider) && destination.equalsIgnoreCase(productionProvider)) fromIsolationToProduction = true;
 				
 		TagProvider sourceProvider = context.getTagManager().getTagProvider(source);
-		BasicILSTagProvider destSimpleProvider = providerRegistry.getSimpleProvider(destination);
-		WriteHandler writeHandler = new BasicWriteHandler(destSimpleProvider);
 		for (TagPath parent : visitOrder) {
 			List<TagPath> paths = nodeMap.get(parent);
 			if( paths!=null )  {
@@ -448,29 +465,8 @@ public class TagFactory  {
 								tv = new BasicTagValue(productionDatabase);
 								node.setAttribute(TagProp.SQLBindingDatasource,tv);
 							}
-						}
-						 
-						if(destSimpleProvider!=null ) {
-							DataType dataType = node.getDataType();
-							TagType ttype = node.getType();
-							if(!ttype.equals(TagType.Folder)) ttype = TagType.Custom;
-							TagPath tp = null;
-							try {
-								tp = TagPathParser.parse(destination,path.toStringPartial());
-							}
-							catch(IOException ioe) {
-								log.warnf("%s.copyTagstoNewProvider: parse error tag=%s (%s)", TAG, 
-										path.toStringPartial(),ioe.getMessage() );
-								continue;
-							}		
-							destSimpleProvider.configureTag(tp, dataType, ttype);
-							destSimpleProvider.registerWriteHandler(tp, writeHandler);
-							tv = node.getValue();
-							if( tv!=null ) writeHandler.write(tp, tv.getValue());
-						}
-						else {
-							toAdd.add(node);
-						}
+						}		 
+						toAdd.add(node);
 					}
 
 					if (log.isTraceEnabled()) {

@@ -37,14 +37,12 @@ public class TagWriter  {
 	protected final LoggerEx log;
 	protected final GatewayContext context;
 	protected final List<WriteRequest<TagPath>> list;
-	private final ProviderRegistry providerRegistry;
 	/**
 	 * Constructor.
 	 */
-	public TagWriter(GatewayContext ctxt,ProviderRegistry reg) {
+	public TagWriter(GatewayContext ctxt) {
 		this.context = ctxt;
 		this.list = new ArrayList<WriteRequest<TagPath>>();
-		this.providerRegistry = reg;
 		log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 	/**
@@ -59,7 +57,6 @@ public class TagWriter  {
 	}
 	
 	public void clear() { getList().clear(); }
-	public ProviderRegistry getProviderRegistry() { return providerRegistry; }
 	
 	/**
 	 * Update the tags already added to the request list. All tags in the list
@@ -86,31 +83,6 @@ public class TagWriter  {
 		    	index++;
 	    	}
 		}
-		else {
-			ILSTagProvider prov = providerRegistry.getSimpleProvider(providerName);
-			if( prov!=null ) {
-				// For a "simple" provider, write a qualified value one by one.
-				for(WriteRequest<TagPath> r:getList()) {
-					if( r instanceof LocalRequest ) {
-						LocalRequest req = (LocalRequest)r;
-						if(!req.isValid ) continue;
-						QualifiedValue qv = req.getQualifiedValue();
-						if( qv!=null ) {
-							prov.updateValue(req.getTarget(), qv);
-						}
-						else {
-							write(prov,req.getTarget(),req.getValue().toString(),null);  // Current time
-						}
-					}
-					else {
-						log.warnf("%s.updateTags: Found %s in list instead of LocalRequest",TAG,r.getClass().getName());
-					}
-				}
-			}
-			else {
-				log.warnf("%s.updateTags: Provider %s not found",TAG,providerName);
-			}
-		}
 		clear();   // Don't attempt to write these again
 	}
 
@@ -130,47 +102,24 @@ public class TagWriter  {
 			updateTags(providerName);  // Use the simpler form.
 		}
 		else {
-			// Try the ILS provider first.
-			ILSTagProvider prov = providerRegistry.getSimpleProvider(providerName);
-			if( prov!=null ) {
-				// For a "simple" provider, write a qualified value one by one.
-				for(WriteRequest<TagPath> r:getList()) {
-					if( r instanceof LocalRequest ) {
-						LocalRequest req = (LocalRequest)r;
-						if(!req.isValid ) continue;
-						QualifiedValue qv = req.getQualifiedValue();
-						if( qv!=null ) {
-							BasicQualifiedValue bqv = new BasicQualifiedValue(qv.getValue(),qv.getQuality(),timestamp);
-							prov.updateValue(req.getTarget(), bqv);
-						}
-						else {
-							write(prov,req.getTarget(),req.getValue().toString(),timestamp); 
-						}
+			// For a "standard" provider, in order to set the time-stamp, the quantities must be a TagValue
+			List<WriteRequest<TagPath>> tagValueList = convertRequests(getList());
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			if( provider != null )  {
+				List<Quality> qualities = provider.write(tagValueList, null, true);    // true-> isSystem to bypass permission checks
+				int index = 0;
+				for(Quality q:qualities) {
+					if(!q.isGood()) {
+						log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", TAG, 
+								getList().get(index).getTarget().toStringFull(), getList().get(index).getValue().toString(), qualities.get(index).getName());
 					}
-					else {
-						log.warnf("%s.updateTags: Found %s in list instead of LocalRequest",TAG,r.getClass().getName());
-					}
+					index++;
 				}
 			}
 			else {
-				// For a "standard" provider, in order to set the time-stamp, the quantities must be a TagValue
-				List<WriteRequest<TagPath>> tagValueList = convertRequests(getList());
-				TagProvider provider = context.getTagManager().getTagProvider(providerName);
-				if( provider != null )  {
-					List<Quality> qualities = provider.write(tagValueList, null, true);    // true-> isSystem to bypass permission checks
-					int index = 0;
-					for(Quality q:qualities) {
-						if(!q.isGood()) {
-							log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", TAG, 
-									getList().get(index).getTarget().toStringFull(), getList().get(index).getValue().toString(), qualities.get(index).getName());
-						}
-						index++;
-					}
-				}
-				else {
-					log.warnf("%s.updateTags: Provider %s not found",TAG,providerName);
-				}	
-			}
+				log.warnf("%s.updateTags: Provider %s not found",TAG,providerName);
+			}	
+
 		}
 		clear();   // Don't attempt to write these again
 	}
@@ -198,24 +147,15 @@ public class TagWriter  {
 	 */
 	public void write(TagPath tagPath,String value,Date timestamp) {
 		String providerName = tagPath.getSource();
-		ILSTagProvider iprovider = providerRegistry.getSimpleProvider(providerName);
-		if( iprovider!=null) {
-			write(iprovider,tagPath, value, timestamp);
-		}
-		else {
-			TagProvider provider = context.getTagManager().getTagProvider(providerName);
-			if( provider!=null ) {
-				if( timestamp!=null || providerRegistry.isTestMode(providerName) ) {
-					TagValue tv = new BasicTagValue(value,DataQuality.GOOD_DATA,timestamp);
-					write(provider,tagPath, tv);
-					DatabaseStoringProviderDelegate delegate = providerRegistry.getDatabaseStoringDelegate(providerName);
-					if(delegate!=null) {
-						delegate.updateValue(tagPath,tv);
-					}
-				}
-				else {
-					write(provider,tagPath, value);
-				}
+
+		TagProvider provider = context.getTagManager().getTagProvider(providerName);
+		if( provider!=null ) {
+			if( timestamp!=null ) {
+				TagValue tv = new BasicTagValue(value,DataQuality.GOOD_DATA,timestamp);
+				write(provider,tagPath, tv);
+			}
+			else {
+				write(provider,tagPath, value);
 			}
 		}
 	}
@@ -317,56 +257,6 @@ public class TagWriter  {
 		}
 	}
 
-	/**
-	 * Update a tag with a single value. If the value is "BAD", then conclude that 
-	 * the quality is bad and do not update the value. This method is exclusively
-	 * for a "Simple" provider.
-	 * 
-	 * @param tagPath
-	 * @param val, the new tag value.
-	 * @param timestamp - the new value will be assigned this timestamp.
-	 */
-	public void write(ILSTagProvider provider,TagPath tagPath, String val,Date timestamp) {
-		if( timestamp==null ) timestamp = new Date();  // Now
-		log.debugf("%s.write %s: %s = %s",TAG,dateFormat.format(timestamp),tagPath.toStringFull(),val);
-		Tag tag = provider.getTag(tagPath);
-		if( tag!=null ) {
-			DataType dtype = tag.getDataType();
-			Object value = val;
-			Quality qual = DataQuality.GOOD_DATA;
-			try {
-				if( val.equalsIgnoreCase("BAD") || val.equalsIgnoreCase("NaN") ) {
-					// leave the value as-is
-					qual = DataQuality.OPC_BAD_DATA;
-				}
-				else if( dtype==DataType.Float4 ||
-						dtype==DataType.Float8 )     value = Double.parseDouble(val);
-				else if( dtype==DataType.Int1 ||
-						dtype==DataType.Int2 ||
-						dtype==DataType.Int4 ||
-						dtype==DataType.Int8   )     value =  (int)Double.parseDouble(val);
-				else if( dtype==DataType.Boolean)    value = Boolean.parseBoolean(val);
-				else if( dtype==DataType.DateTime)   value = dateFormat.parse(val);
-				else value = val.toString();
-
-				QualifiedValue qv = new BasicQualifiedValue(value,qual,timestamp);
-				provider.updateValue(tagPath, qv);
-
-			}
-			catch(ParseException pe) {
-				log.warnf("%s.write: ParseException setting %s(%s) to %s (%s - expecting %s)",TAG,
-						tagPath.toStringFull(),dtype.name(),val,pe.getLocalizedMessage(),
-						DATETIME_FORMAT);
-			}
-			catch(NumberFormatException nfe) {
-				log.warnf("%s.write: NumberFormatException setting %s(%s) to %s (%s)",TAG,
-						tagPath.toStringFull(),dtype.name(),val,nfe.getLocalizedMessage());
-			}
-		}
-		else {
-			log.warnf("%s.write: Tag %s, not found",TAG,tagPath.toString());
-		}
-	}
 	
 	/** 
 	 * Create a list containing a single tag value. (For a standard provider).

@@ -15,6 +15,8 @@ import com.inductiveautomation.ignition.designer.model.DesignerContext;
 
 import net.miginfocom.swing.MigLayout;
 
+
+
 /**
  * Display a tag browser in tree form. Clients may subscribe
  * as selection listener. Only valid in Designer scope.
