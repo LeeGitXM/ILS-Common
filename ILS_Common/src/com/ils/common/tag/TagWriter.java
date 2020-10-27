@@ -16,6 +16,7 @@ import com.inductiveautomation.ignition.common.model.values.Quality;
 import com.inductiveautomation.ignition.common.sqltags.BasicTagValue;
 import com.inductiveautomation.ignition.common.sqltags.model.Tag;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
+import com.inductiveautomation.ignition.common.sqltags.model.TagProp;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataQuality;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataType;
 import com.inductiveautomation.ignition.common.sqltags.model.types.TagValue;
@@ -24,6 +25,7 @@ import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import com.inductiveautomation.ignition.gateway.sqltags.TagProvider;
+import com.inductiveautomation.ignition.gateway.sqltags.execution.tags.StaticTag;
 import com.inductiveautomation.ignition.gateway.sqltags.model.BasicAsyncWriteRequest;
 import com.inductiveautomation.ignition.gateway.sqltags.model.WriteRequest;
 
@@ -31,7 +33,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.model.WriteRequest;
  *  Update a SQLTag.
  */
 public class TagWriter  {
-	protected static final String TAG = "TagWriter";
+	protected static final String CLSS = "TagWriter";
 	private static final String DATETIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT);
 	protected final LoggerEx log;
@@ -77,7 +79,7 @@ public class TagWriter  {
 			int index = 0;
 			for(Quality q:qualities) {
 		    	if(!q.isGood()) {
-		    		log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", TAG, 
+		    		log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", CLSS, 
 		    				getList().get(index).getTarget().toStringFull(), getList().get(index).getValue().toString(), qualities.get(index).getName());
 		    	}
 		    	index++;
@@ -110,14 +112,14 @@ public class TagWriter  {
 				int index = 0;
 				for(Quality q:qualities) {
 					if(!q.isGood()) {
-						log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", TAG, 
+						log.warnf("%s.updateTags: bad write to tag %s; value: %s quality: %s", CLSS, 
 								getList().get(index).getTarget().toStringFull(), getList().get(index).getValue().toString(), qualities.get(index).getName());
 					}
 					index++;
 				}
 			}
 			else {
-				log.warnf("%s.updateTags: Provider %s not found",TAG,providerName);
+				log.warnf("%s.updateTags: Provider %s not found",CLSS,providerName);
 			}	
 
 		}
@@ -136,22 +138,34 @@ public class TagWriter  {
 		Date ts = new Date(timestamp);
 		write(tagPath,value,ts);
 	}
-	
 	/**
-	 * This is the general form of a write. The provider is derived from the 
-	 * path "source". If time-stamp is null, then we get the current time.
-	 * This is the only version (currently) that uses the history delegate. 
+	 * This is the general form of a write, assuming good quality.
 	 * @param tagPath
 	 * @param value
 	 * @param timestamp
 	 */
 	public void write(TagPath tagPath,String value,Date timestamp) {
+		write(tagPath,value,DataQuality.GOOD_DATA,timestamp);
+	}
+	/**
+	 * This is the general form of a write. The provider is derived from the 
+	 * path "source". If time-stamp is null, then we get the current time.
+	 * This is the only version (currently) that uses the history delegate.
+	 * 
+	 * NOTE: We have not been able to set the tag's value to bad. Suggest using a
+	 * null as a marker for a bad value.
+	 * 
+	 * @param tagPath
+	 * @param value
+	 * @param timestamp
+	 */
+	public void write(TagPath tagPath,String value,DataQuality quality,Date timestamp) {
 		String providerName = tagPath.getSource();
 
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
 		if( provider!=null ) {
 			if( timestamp!=null ) {
-				TagValue tv = new BasicTagValue(value,DataQuality.GOOD_DATA,timestamp);
+				TagValue tv = new BasicTagValue(value,quality,timestamp);
 				write(provider,tagPath, tv);
 			}
 			else {
@@ -162,14 +176,14 @@ public class TagWriter  {
 	
 	/**
 	 * Update a tag with a single value at the current time. If the value is "BAD",
-	 * then conclude that the quality is bad and do not update the value. This method
-	 * is exclusively for a "Standard" provider.
+	 * then conclude that the quality is bad. We are unable to actually set the
+	 * tag's quality, so instead we set the value to null.
 	 * 
 	 * @param tagPath
 	 * @param val, the new tag value.
 	 */
 	public void write(TagProvider provider,TagPath tagPath, String val) {
-		log.debugf("%s.write: %s = %s",TAG,tagPath.toStringFull(),val);
+		log.debugf("%s.write: %s = %s",CLSS,tagPath.toStringFull(),val);
 
 		Tag tag  = provider.getTag(tagPath);
 		if( tag!=null ) {
@@ -178,15 +192,14 @@ public class TagWriter  {
 			DataQuality qual = DataQuality.GOOD_DATA;
 			try {
 				if( val.equalsIgnoreCase("BAD") || val.equalsIgnoreCase("NaN") ) {
-					// leave the value as-is
-					qual = DataQuality.OPC_BAD_DATA;
+					val = null;
 				}
 				else if( dtype==DataType.Float4 ||
-						 dtype==DataType.Float8 )     value = Double.parseDouble(val);
+						 dtype==DataType.Float8 )    value = Double.parseDouble(val);
 				else if( dtype==DataType.Int1 ||
 						 dtype==DataType.Int2 ||
 						 dtype==DataType.Int4 ||
-						 dtype==DataType.Int8   )     value =  (int)Double.parseDouble(val);
+						 dtype==DataType.Int8   )    value =  (int)Double.parseDouble(val);
 				else if( dtype==DataType.Boolean)    value = Boolean.parseBoolean(val);
 				else if( dtype==DataType.DateTime)   value = dateFormat.parse(val);
 				else value = val.toString();
@@ -195,30 +208,35 @@ public class TagWriter  {
 				provider.write(singleRequestList, null, true);    // true-> isSystem to bypass permission checks
 			}
 			catch(ParseException pe) {
-				log.warnf("%s.write: ParseException setting %s(%s) to %s (%s - expecting %s)",TAG,
+				log.warnf("%s.write: ParseException setting %s(%s) to %s (%s - expecting %s)",CLSS,
 						tagPath.toStringFull(),dtype.name(),val,pe.getLocalizedMessage(),
 						DATETIME_FORMAT);
 			}
 			catch(NumberFormatException nfe) {
-				log.warnf("%s.write: NumberFormatException setting %s(%s) to %s (%s)",TAG,
+				log.warnf("%s.write: NumberFormatException setting %s(%s) to %s (%s)",CLSS,
 						tagPath.toStringFull(),dtype.name(),val,nfe.getLocalizedMessage());
 			}
 		}
 		else {
-			log.warnf("%s.write: Tag %s, not found",TAG,tagPath.toString());
+			log.warnf("%s.write: Tag %s, not found",CLSS,tagPath.toString());
 		}
 	}
 	
+
 	/**
 	 * Update a tag with a single value at the specified time-stamp (maybe).
 	 * Make sure the data value matches the tag type. The Ignition
 	 * default conversion has trouble with scientific notation.
 	 * 
+	 * NOTE: By using tag.updateCurrentValue() we can set the timestamp to
+	 * something other than NOW. However, we cannot set the quality to other
+	 * then GOOD_DATA.
+	 * 
 	 * @param tagPath
 	 * @param qv, the new tag value. If qv is a TagValue, then the time-stamp is used.
 	 */
 	public void write(TagProvider provider,TagPath tagPath, QualifiedValue qv) {
-		Tag tag = provider.getTag(tagPath);
+		StaticTag tag = (StaticTag)provider.getTag(tagPath);
 		if( tag!=null ) {
 			DataType dt = tag.getDataType();
 			if( qv.getValue() instanceof String ) {
@@ -226,7 +244,6 @@ public class TagWriter  {
 				Object obj = qv.getValue().toString();
 				try {
 					if( dt.equals(DataType.Float4) || dt.equals(DataType.Float8)) {
-						double dbl = Double.NaN;
 						obj = new Double(Double.parseDouble(obj.toString()));
 					}
 					else if( dt==DataType.Int1 || dt==DataType.Int2 ||
@@ -239,21 +256,28 @@ public class TagWriter  {
 					else if( dt==DataType.DateTime)  {
 						obj = dateFormat.parse(obj.toString());
 					}
-					qv = new BasicQualifiedValue(obj,qv.getQuality(),qv.getTimestamp()); 
-					List<WriteRequest<TagPath>> singleRequestList = createTagList(tagPath,qv);
-					provider.write(singleRequestList, null, true);    // true-> isSystem to bypass permission checks
+					TagValue tv = new BasicTagValue(obj,DataQuality.GOOD_DATA,qv.getTimestamp());
+					tag.updateCurrentValue(tv);
+					//log.infof("%s.write: %s value: %s at %s", CLSS, tagPath.toStringFull(),tv.getValue(),tv.getTimestamp());
+					
 				}
 				catch(ParseException pe) {
-					log.warnf("%s.write: ParseException setting %s(%s) to %s (%s - expecting %s)",TAG,
+					log.warnf("%s.write: ParseException setting %s(%s) to %s (%s - expecting %s)",CLSS,
 							tagPath.toStringFull(),dt.name(),obj,pe.getLocalizedMessage(),DATETIME_FORMAT);
 				}
 				catch(NumberFormatException nfe ) {
-					log.warnf("%s.write: Attempt to write %s to %s, a numeric tag",TAG,qv.getValue().toString(),tagPath.toString());
+					log.warnf("%s.write: Attempt to write %s to %s, a numeric tag",CLSS,qv.getValue().toString(),tagPath.toString());
 				}
+			}
+			// Attempt to write the object as-is
+			else {
+				//log.infof("%s.write: %s value: %s at %s", CLSS, tagPath.toStringFull(),qv.getValue(),qv.getTimestamp());
+				TagValue tv = new BasicTagValue(qv.getValue(),DataQuality.GOOD_DATA,qv.getTimestamp());
+				tag.updateCurrentValue(tv);
 			}
 		}
 		else {
-			log.warnf("%s.write: Tag %s, not found",TAG,tagPath.toString());
+			log.warnf("%s.write: Tag %s, not found",CLSS,tagPath.toString());
 		}
 	}
 
@@ -317,13 +341,13 @@ public class TagWriter  {
 				initialize(tp,val);
 			}
 			catch( IOException ioe) {
-				log.warnf("%s.localRequest: Exception parsing %s (%s)",TAG,path,ioe.getMessage());
+				log.warnf("%s.localRequest: Exception parsing %s (%s)",CLSS,path,ioe.getMessage());
 			}
 		}
 
 
 		private void initialize(TagPath tp,Object value) {
-			if( log.isTraceEnabled()) log.tracef("%s: localRequest; adding %s",TAG,tp.toStringFull());
+			if( log.isTraceEnabled()) log.tracef("%s: localRequest; adding %s",CLSS,tp.toStringFull());
 			if( value!=null && value instanceof QualifiedValue  ) {
 				this.qv = (QualifiedValue)value;
 				this.setTarget(tp);
