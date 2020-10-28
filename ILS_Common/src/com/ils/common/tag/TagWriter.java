@@ -188,21 +188,34 @@ public class TagWriter  {
 		Tag tag  = provider.getTag(tagPath);
 		if( tag!=null ) {
 			DataType dtype = tag.getDataType();
-			Object value = val;
-			DataQuality qual = DataQuality.GOOD_DATA;
+			
 			try {
-				if( val.equalsIgnoreCase("BAD") || val.equalsIgnoreCase("NaN") ) {
+				if( val!=null && (val.equalsIgnoreCase("BAD") || val.equalsIgnoreCase("NaN")) ) {
 					val = null;
 				}
-				else if( dtype==DataType.Float4 ||
-						 dtype==DataType.Float8 )    value = Double.parseDouble(val);
+				Object value = val;
+				
+				if( dtype==DataType.Float4 ||
+						 dtype==DataType.Float8 )    {
+					if( val==null ) value = Double.NaN;
+					else value = Double.parseDouble(val);
+				}
 				else if( dtype==DataType.Int1 ||
 						 dtype==DataType.Int2 ||
 						 dtype==DataType.Int4 ||
-						 dtype==DataType.Int8   )    value =  (int)Double.parseDouble(val);
-				else if( dtype==DataType.Boolean)    value = Boolean.parseBoolean(val);
-				else if( dtype==DataType.DateTime)   value = dateFormat.parse(val);
-				else value = val.toString();
+						 dtype==DataType.Int8   )  {
+					if( val==null ) value = (int) Double.NaN;
+					value =  (int)Double.parseDouble(val);
+				}
+				else if( dtype==DataType.Boolean)  {
+					if( val!=null ) value = Boolean.parseBoolean(val);
+				}
+				else if( dtype==DataType.DateTime)  {
+					if( val!=null ) value = dateFormat.parse(val);
+				}
+				else {
+					if(val!=null) value = val.toString();
+				}
 
 				List<WriteRequest<TagPath>> singleRequestList = createTagList(tagPath,value);
 				provider.write(singleRequestList, null, true);    // true-> isSystem to bypass permission checks
@@ -233,25 +246,40 @@ public class TagWriter  {
 	 * then GOOD_DATA.
 	 * 
 	 * @param tagPath
-	 * @param qv, the new tag value. If qv is a TagValue, then the time-stamp is used.
+	 * @param qv, the new tag value. Use the time-stamp, but ignore the quality.
 	 */
 	public void write(TagProvider provider,TagPath tagPath, QualifiedValue qv) {
 		StaticTag tag = (StaticTag)provider.getTag(tagPath);
 		if( tag!=null ) {
 			DataType dt = tag.getDataType();
-			if( qv.getValue() instanceof String ) {
-				// Do our own conversion 
-				Object obj = qv.getValue().toString();
+			Object obj = qv.getValue();
+			if( obj !=null && obj instanceof String ) {
+				if( obj!=null && (obj.toString().equalsIgnoreCase("BAD") || 
+						          obj.toString().equalsIgnoreCase("NaN")) ) {
+					obj = null;
+				}
+				// Do our own conversion to match tag type
 				try {
 					if( dt.equals(DataType.Float4) || dt.equals(DataType.Float8)) {
-						obj = new Double(Double.parseDouble(obj.toString()));
+						if( obj==null) {
+							obj = Double.NaN;
+						}
+						else {
+							obj = Double.parseDouble(obj.toString());
+						}
+						
 					}
 					else if( dt==DataType.Int1 || dt==DataType.Int2 ||
 							dt==DataType.Int4 || dt==DataType.Int8   )    {
-						obj =  new Integer((int)Double.parseDouble(obj.toString()));
+						if( obj==null) {
+							obj = (int)Double.NaN;
+						}
+						else {
+							obj =  (int)Double.parseDouble(obj.toString());
+						}
 					}
 					else if( dt==DataType.Boolean)    {
-						obj = new Boolean(Boolean.parseBoolean(obj.toString()));
+						if(obj!=null) obj = Boolean.parseBoolean(obj.toString());
 					}
 					else if( dt==DataType.DateTime)  {
 						obj = dateFormat.parse(obj.toString());
