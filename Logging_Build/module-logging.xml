@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modules>
+	<module>
+		<id>logging</id>
+		<name>@NAME@</name>
+		<description>@DESCRIPTION@</description>
+		<version>@VERSION@</version>
+		<license>license.html</license>
+		<requiredignitionversion>7.9.0</requiredignitionversion>
+		<requiredframeworkversion>8</requiredframeworkversion>
+		<freemodule>true</freemodule>
+
+		<!-- Add the module dependencies for each scope -->
+		<!-- Load in our jars for each scope -->
+		<jar scope="CD">logging-client.jar.pack.gz</jar>
+		<jar scope="D">logging-designer.jar.pack.gz</jar>
+		<jar scope="DC">logging-common.jar.pack.gz</jar>
+		<jar scope="CD">ils-common.jar.pack.gz</jar>
+		<jar scope="G">logging-gateway.jar</jar>
+		<jar scope="G">logging-common.jar</jar>
+		<export scope="G">ils-common.jar</export>
+		<!-- Tell the Gateway and/or Designer where to find the hooks -->
+		<hook scope="G">com.ils.log.gateway.LoggingGatewayHook</hook>
+		<hook scope="D">com.ils.log.designer.LoggingDesignerHook</hook>
+		<hook scope="C">com.ils.log.client.LoggingClientHook</hook>
+	</module>
+</modules>

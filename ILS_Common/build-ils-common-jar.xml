@@ -66,5 +66,10 @@
 				<include name="ils-common*" />
 			</fileset>
 		</copy>
+		<echo message="Updating catapult.jar for logging support" />
+		<!-- Update catapult.jar 
+		<jar destfile="${ignition.py.lib}/../../lib/catapult.jar" update="true" includes="com/ils/common/log/appender/*.class" basedir="bin"/>
+		<jar destfile="${ignition.py.lib}/../../lib/catapult.jar" update="true" includes="com/ils/common/db/DBUtility.class" basedir="bin"/>
+		-->
 	</target>	
 </project>

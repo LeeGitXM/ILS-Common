@@ -14,6 +14,7 @@ import com.inductiveautomation.ignition.common.datasource.DatasourceStatus;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.datasource.Datasource;
+import com.inductiveautomation.ignition.gateway.datasource.SRConnection;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 
@@ -67,6 +68,7 @@ public class DBUtility {
 			try {
 				Statement stmt = cxn.createStatement();
 				stmt.executeUpdate(sql);
+				stmt.close();
 			}
 			catch(SQLException sqle) {
 				log.warnf("%s.executeSQL: Exception executing %s (%s)",TAG,sql,sqle.getMessage());
