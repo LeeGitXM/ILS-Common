@@ -14,7 +14,6 @@ import com.inductiveautomation.ignition.common.datasource.DatasourceStatus;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.datasource.Datasource;
-import com.inductiveautomation.ignition.gateway.datasource.SRConnection;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 

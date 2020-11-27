@@ -28,7 +28,7 @@
   <property name="IGNITION_HOME" value="C:\ignition" />
   -->
   <property name="IGNITION_HOME" value="/usr/local/ignition-7.9.14" />
-  <property name="LOGGING_CONNECTION" value="Logs" />
+  <property name="LOGGING_DATASOURCE" value="Logs" />
 
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>${IGNITION_HOME}/logs/aed.log</file>

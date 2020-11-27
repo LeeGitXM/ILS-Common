@@ -16,13 +16,10 @@ package com.ils.logging.gateway.appender;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Map;
 
-import com.ils.common.db.DBUtility;
 import com.ils.common.log.LogMaker;
-import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 import ch.qos.logback.classic.spi.CallerData;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -32,27 +29,17 @@ import ch.qos.logback.core.UnsynchronizedAppenderBase;
 /**
  * This DBAppender inserts logging events into a single database table.
  */
-public class SingleTableDBAppender<E> extends UnsynchronizedAppenderBase<E> {
-	private final static String CLSS = "SingleTableDBAppender";
-	private final DBUtility dbUtil;
-	private Connection cxn = null;
-	private final GatewayContext context;
-	private final String db;               // Database connection 
-	private PreparedStatement ps  = null;
-	private final StackTraceElement EMPTY_CALLER_DATA = CallerData.naInstance();
+public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedAppenderBase<E> {
+	private final static String CLSS = "AbstractSingleTableDBAppender";
+	protected Connection cxn = null;       // Database connection 
+	protected PreparedStatement ps  = null;
+	protected final StackTraceElement EMPTY_CALLER_DATA = CallerData.naInstance();
 
-	public SingleTableDBAppender(String connect,GatewayContext ctx) {
-		this.context = ctx;
-		this.db = connect;
-		this.dbUtil = new DBUtility(context);
-
-
-	}
 
 	/** 
 	 * Create the table if it doesn't exist. We simply ignore any error
 	 */
-	private void initializeTable(String source, Connection connection) {
+	protected String getTableCreateString() {
 		String SQL = "CREATE TABLE log (" +
 				"id int PRIMARY KEY auto_increment not null,"+
 				"process_id int NULL," +
@@ -72,33 +59,20 @@ public class SingleTableDBAppender<E> extends UnsynchronizedAppenderBase<E> {
 				"line_number int NULL,"+
 				"retain_until datetime NOT NULL" +
 				")";
-		
-		dbUtil.executeSQL(SQL, source, connection);
+		return SQL;
 	}
+	
+	protected String getInsertString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("INSERT INTO log ");
+		sb.append("(process_id,thread,project,scope,client_id,thread_name,module,logger_name,timestamp, ");
+		sb.append("log_level,log_level_name,log_message,function_name,filename,line_number,retain_until) ");
+		sb.append("VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		return sb.toString();
+	}
+	
 	@Override
 	public void start() {
-		System.out.println(CLSS+""
-				+ ""
-				+ ".start ");
-		cxn = dbUtil.getConnection(db);
-		if( cxn!=null ) {
-			try {
-				initializeTable(db,cxn);
-				StringBuilder sb = new StringBuilder();
-				sb.append("INSERT INTO log ");
-				sb.append("(process_id,thread,project,scope,client_id,thread_name,module,logger_name,timestamp, ");
-				sb.append("log_level,log_level_name,log_message,function_name,filename,line_number,retain_until) ");
-				sb.append("VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-				String SQL = sb.toString();
-				ps = cxn.prepareStatement(SQL);
-			}
-			catch(SQLException sqle) {
-				System.out.println(String.format("%s.start: Error creating prepared statement (%s)",CLSS,sqle.getLocalizedMessage()));
-			}
-		}
-		else {
-			System.out.println(String.format("%s.start: Failed to open datasource connection(%s)",CLSS,db));
-		}
 		super.start();
 	}
 
@@ -115,10 +89,42 @@ public class SingleTableDBAppender<E> extends UnsynchronizedAppenderBase<E> {
 		super.stop();
 	}
 
-	private StackTraceElement extractFirstCaller() {
+	protected StackTraceElement extractFirstCaller() {
 		StackTraceElement[] callerDataArray = Thread.currentThread().getStackTrace();
 		StackTraceElement caller = EMPTY_CALLER_DATA;
-		if( callerDataArray.length>0) caller = callerDataArray[0];
+		if( callerDataArray!=null ) {
+			// Search through the stack until we find an element that does not involve logging
+			for(StackTraceElement e:callerDataArray) {
+				String method = e.getClassName();
+				if( method.contains("SingleTableDBAppender")||
+						method.contains("qos.logback.") 			||
+						method.contains("util.Logger.") 			||
+						method.contains("Thread") ) continue;
+				else {
+					caller = e;
+					break;
+				}
+			}
+		}
+		return caller;
+	}
+	
+	protected StackTraceElement extractFirstCaller(StackTraceElement[] callerDataArray) {
+		StackTraceElement caller = EMPTY_CALLER_DATA;
+		// Search through the stack until we find an element that does not involve logging
+		if( callerDataArray!=null ) {
+			for(StackTraceElement e:callerDataArray) {
+				String method = e.getClassName();
+				if( method.contains("SingleTableDBAppender")||
+						method.contains("qos.logback.") 			||
+						method.contains("util.Logger.") 			||
+						method.contains("Thread") ) continue;
+				else {
+					caller = e;
+					break;
+				}
+			}
+		}
 		return caller;
 	}
 
@@ -133,27 +139,29 @@ public class SingleTableDBAppender<E> extends UnsynchronizedAppenderBase<E> {
 
 			try {
 				Map<String, String> map = event.getMDCPropertyMap();
-				StackTraceElement caller = extractFirstCaller();
+				StackTraceElement caller = null;
+				if( event.hasCallerData() ) caller = extractFirstCaller(event.getCallerData());
+				else caller = extractFirstCaller(event.getCallerData());
 				ps.setInt(1, 0 );   											// pid
 				ps.setLong(2, Thread.currentThread().getId() );   			// thread
-				ps.setString(3, map.get(LogMaker.PROJECT_KEY));             // project
+				ps.setString(3, truncate(map.get(LogMaker.PROJECT_KEY),25)); // project
 				ps.setString(4, "gateway");   								// scope
 				ps.setInt(5, -1 );   										// client
-				ps.setString(6, event.getThreadName());   					// thread name
-				ps.setString(7, caller.getClassName() );   					// module
-				ps.setString(8, event.getLoggerName() );   					// logger
+				ps.setString(6, truncate(event.getThreadName(),50));   		// thread name
+				ps.setString(7, truncate(caller.getClassName(),50) );   	// module
+				ps.setString(8, truncate(event.getLoggerName(),50) );   	// logger
 				ps.setTimestamp(9, new Timestamp(event.getTimeStamp()));   	// timestamp
 				ps.setInt(10,event.getLevel().levelInt);   					// level
 				ps.setString(11, event.getLevel().levelStr );   				// level name
 				ps.setString(12, event.getFormattedMessage() );   			// log message
-				ps.setString(13, caller.getMethodName());   					// function name
+				ps.setString(13, truncate(caller.getMethodName(),25));   	// function name
 				ps.setString(14, truncate(caller.getFileName(),25));   		// filename
 				ps.setInt(15, caller.getLineNumber() );   					// line number
-				ps.setTimestamp(16, computeRetentionTIme(event));   			// retain until
+				ps.setTimestamp(16, computeRetentionTIme(event));   		// retain until
 				ps.execute();
 			}
 			catch( SQLException sqle ) {
-				System.out.println(String.format("%s.append: Exception setting prepared statement (%s)",CLSS,sqle.getMessage()));
+				System.out.println(String.format("%s.append: SQL exception setting prepared statement (%s)",CLSS,sqle.getMessage()));
 			}
 		}
 	}
@@ -161,14 +169,14 @@ public class SingleTableDBAppender<E> extends UnsynchronizedAppenderBase<E> {
 	/**
 	 * Compute a retention date dependent on the severity of the message
 	 */
-	private Timestamp computeRetentionTIme(ILoggingEvent event) {
+	protected Timestamp computeRetentionTIme(ILoggingEvent event) {
 		long time = event.getTimeStamp();
 		return new Timestamp(time);
 	}
 	/**
 	 * Limit a string's length
 	 */
-	private String truncate(String in,int limit) {
+	protected String truncate(String in,int limit) {
 		String out = "";
 		if( in!=null ) {
 			if( in.length()< limit) {

@@ -6,13 +6,15 @@
  */
 package com.ils.log.common;
 
-import java.io.File;
-
 /**
  *  Define the methods supported by both client and gateway sides of this feature.
  *  These are all properties configured in the gateway module properties page.
  */
 public interface SystemPropertiesInterface   { 
+	/**
+	 * @return the datasource string
+	 */
+	public String getLoggingDatasource();
 	/**
 	 */
 	public String getLibDir();

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.io.Files;
 import com.ils.common.log.LogMaker;
 import com.ils.log.common.LoggingProperties;
-import com.ils.logging.gateway.appender.SingleTableDBAppender;
+import com.ils.logging.gateway.appender.GatewaySingleTableDBAppender;
 import com.inductiveautomation.ignition.common.expressions.ExpressionFunctionManager;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
 import com.inductiveautomation.ignition.common.script.ScriptManager;
@@ -47,21 +47,20 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
 	private Logger log = null;
+	private String loggingDatasource = "";
 
-	
 	public LoggingGatewayHook() {
 		System.out.println(String.format("%s.LoggingGatewayHook: Initializing...",CLSS));
 	}
 	
 	// NOTE: During this period, the module status is LOADED, not RUNNING
-	//       Use the context to configure logging
+	// Database facilities are not available yet.
 	@Override
 	public void setup(GatewayContext ctxt) {
 		this.context = ctxt;
-		// Configure logging
-		configureLogging();
 		dispatcher = new GatewayRpcDispatcher(context,this);
 		GatewaySystemPropertyFunctions.setContext(context); 
+		GatewaySystemPropertyFunctions.setHook(this);
 	}
 		
 	@Override
@@ -69,7 +68,8 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	
 	@Override
 	public void startup(LicenseState licenseState) {
-		// Check license state here
+		// Accessing the database should now succeed.
+		configureLogging();
 	}
 	@Override
 	public List<ConfigCategory> getConfigCategories() {
@@ -83,6 +83,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		return panels;
 	}
 	
+	public String getLoggingDatasource() { return loggingDatasource; }
 	
 	@Override
 	public void initializeScriptManager(ScriptManager mgr) {
@@ -103,7 +104,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		return dispatcher;
 	}
 	/**
-	 * Configure the application logging for the database appender.
+	 * Configure application logging for the database appender.
 	 * Even if the configuration fails, we still have the default configuration.
 	 */
 	private void configureLogging() {
@@ -117,14 +118,14 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		try {
 			byte[] bytes = Files.toByteArray(configPath.toFile());
 			configurator.doConfigure(new ByteArrayInputStream(bytes));
-			String connection = configurator.getInterpretationContext().getProperty(LoggingProperties.LOGGING_CONNECTION);
-			System.out.println(String.format("%s.configureLogging: Configured gateway logger from %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),connection));
-			if( connection!=null ) {
+			loggingDatasource = configurator.getInterpretationContext().getProperty(LoggingProperties.LOGGING_DATASOURCE);
+			System.out.println(String.format("%s.configureLogging: Configured gateway logger from %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),loggingDatasource));
+			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
-				installDatabaseAppender(root,connection);
+				installDatabaseAppender(root,loggingDatasource);
 			}
 			else {
-				System.out.println(String.format("%s: WARNING: %s must contain a %s property in order to create a DB appender",CLSS,configPath.toFile().getAbsolutePath(),LoggingProperties.LOGGING_CONNECTION));
+				System.out.println(String.format("%s: WARNING: %s must contain a %s property in order to create a DB appender",CLSS,configPath.toFile().getAbsolutePath(),LoggingProperties.LOGGING_DATASOURCE));
 			}
 		}
 		catch(IOException ioe) {
@@ -139,7 +140,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	}
 	
 	private void installDatabaseAppender(Logger root,String connection) {
-		Appender<ILoggingEvent> appender = new SingleTableDBAppender<ILoggingEvent>(connection,context);
+		Appender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
 		appender.setContext(root.getLoggerContext());
 		appender.start();
 		root.addAppender(appender);

@@ -26,7 +26,20 @@ public class SystemPropertiesScriptFunctions  {
 	static {
 		log = LogMaker.getLogger(SystemPropertiesScriptFunctions.class.getCanonicalName());
 	}
-
+	/**
+	 * @return the datasource holding the logging database.
+	 */
+	public static String getLoggingDatasource()throws Exception{
+		String type = "";
+		try {
+			type = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
+					LoggingProperties.MODULE_ID, "getLoggingDatasource" );
+		}
+		catch(Exception ge) {
+			log.debug(CLSS+"getLoggingDatasource: GatewayException ("+ge.getMessage()+")");
+		}
+		return type;
+	}
 	/**
 	 * @return the directory path to the Ignition installation directory holding jar files.
 	 */

@@ -33,5 +33,11 @@ public class GatewayRpcDispatcher implements SystemPropertiesInterface {
 	/**
 	 */
 	public String getUserLibDir() { return context.getUserlibDir().getAbsolutePath(); }
+
+
+	@Override
+	public String getLoggingDatasource() {
+		return hook.getLoggingDatasource();
+	}
 	
 }

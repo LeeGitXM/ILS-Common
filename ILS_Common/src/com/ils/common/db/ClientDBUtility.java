@@ -33,4 +33,11 @@ public class ClientDBUtility extends ClientDBUtilities {
 		return ds;
 	}
 	 
+	public int executeUpdateQuery(String SQL,String datasource) throws Exception {
+		return _runUpdateQuery(SQL,datasource,"",false,false);
+	}
+	
+	public int executePreparedStatement(String SQL,String datasource,Object[] args) throws Exception {
+		return _runPrepStmt(SQL,datasource,"",false,false, args);
+	}
 }

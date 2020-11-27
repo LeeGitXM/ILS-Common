@@ -15,6 +15,7 @@ import ch.qos.logback.classic.LoggerContext;
  *
  */
 public class LogMaker {
+	public static final String CLIENT_KEY = "client";     // client id
 	public static final String PROJECT_KEY = "project";   // Project name
 	private static final LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 	
