@@ -153,7 +153,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				ps.setTimestamp(9, new Timestamp(event.getTimeStamp()));   	// timestamp
 				ps.setInt(10,event.getLevel().levelInt);   					// level
 				ps.setString(11, event.getLevel().levelStr );   				// level name
-				ps.setString(12, event.getFormattedMessage() );   			// log message
+				ps.setString(12, truncate(event.getFormattedMessage(),4000) );   // log message
 				ps.setString(13, truncate(caller.getMethodName(),25));   	// function name
 				ps.setString(14, truncate(caller.getFileName(),25));   		// filename
 				ps.setInt(15, caller.getLineNumber() );   					// line number
