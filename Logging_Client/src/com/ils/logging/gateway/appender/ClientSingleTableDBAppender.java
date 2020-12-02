@@ -19,6 +19,7 @@ import java.util.Map;
 
 import com.ils.common.db.ClientDBUtility;
 import com.ils.common.log.LogMaker;
+import com.ils.logging.common.appender.AbstractSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 
 import ch.qos.logback.classic.spi.LoggingEvent;
@@ -38,7 +39,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 	 * 
 	 * @param connect
 	 * @param ctx
-	 * @param s scope (clinet of designer)
+	 * @param s scope (client or designer)
 	 */
 	public ClientSingleTableDBAppender(String connect,AbstractClientContext ctx,String s) {
 		this.db = connect;  // Datasource
@@ -50,7 +51,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 
 	@Override
 	public void start() {
-		System.out.println(CLSS+ ".start ");
+		//System.out.println(CLSS+ ".start ");
 		try {
 			String SQL = getTableCreateString();
 			dbUtil.executeUpdateQuery(SQL,db);
@@ -72,7 +73,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 	protected void append(E e) {
 		if( e instanceof LoggingEvent) {
 			LoggingEvent event = (LoggingEvent)e;
-			System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
+			//System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
 			Object[] args = new Object[16];
 			try {
 				Map<String, String> map = event.getMDCPropertyMap();
@@ -83,7 +84,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				args[1] = Thread.currentThread().getId();   		  // thread
 				args[2] = truncate(map.get(LogMaker.PROJECT_KEY),25); // project
 				args[3] = scope;   								      // scope
-				args[4] = truncate(map.get(LogMaker.CLIENT_KEY),25);  // client
+				args[4] = truncate(map.get(LogMaker.CLIENT_KEY),25);  // clien
 				args[5] = truncate(event.getThreadName(),50);   	// thread name
 				args[6] = truncate(caller.getClassName(),50);   	// module
 				args[7] = truncate(event.getLoggerName(),50);   	// logger

@@ -39,5 +39,11 @@ public class GatewayRpcDispatcher implements SystemPropertiesInterface {
 	public String getLoggingDatasource() {
 		return hook.getLoggingDatasource();
 	}
+
+
+	@Override
+	public int getCrashBufferSize() {
+		return hook.getCrashBufferSize();
+	}
 	
 }

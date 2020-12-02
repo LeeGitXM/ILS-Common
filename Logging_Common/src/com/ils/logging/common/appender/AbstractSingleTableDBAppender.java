@@ -11,7 +11,7 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package com.ils.logging.gateway.appender;
+package com.ils.logging.common.appender;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -116,8 +116,8 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 			for(StackTraceElement e:callerDataArray) {
 				String method = e.getClassName();
 				if( method.contains("SingleTableDBAppender")||
-						method.contains("qos.logback.") 			||
-						method.contains("util.Logger.") 			||
+						method.contains("qos.logback.") 	||
+						method.contains("util.Logger") 		||  // Includes LoggerEx
 						method.contains("Thread") ) continue;
 				else {
 					caller = e;

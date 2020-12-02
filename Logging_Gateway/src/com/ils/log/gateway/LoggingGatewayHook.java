@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.io.Files;
 import com.ils.common.log.LogMaker;
 import com.ils.log.common.LoggingProperties;
+import com.ils.logging.common.filter.BypassFilter;
+import com.ils.logging.gateway.appender.GatewayCrashAppender;
 import com.ils.logging.gateway.appender.GatewaySingleTableDBAppender;
 import com.inductiveautomation.ignition.common.expressions.ExpressionFunctionManager;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
@@ -25,10 +27,12 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import com.inductiveautomation.ignition.gateway.web.models.ConfigCategory;
 import com.inductiveautomation.ignition.gateway.web.models.IConfigTab;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.joran.spi.JoranException;
 
@@ -47,6 +51,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
 	private Logger log = null;
+	private int crashBufferSize = -1;
 	private String loggingDatasource = "";
 
 	public LoggingGatewayHook() {
@@ -83,6 +88,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		return panels;
 	}
 	
+	public int getCrashBufferSize() { return crashBufferSize; }
 	public String getLoggingDatasource() { return loggingDatasource; }
 	
 	@Override
@@ -118,11 +124,14 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		try {
 			byte[] bytes = Files.toByteArray(configPath.toFile());
 			configurator.doConfigure(new ByteArrayInputStream(bytes));
+			crashBufferSize = Integer.parseInt(configurator.getInterpretationContext().getProperty(LoggingProperties.CRASH_BUFFER_SIZE));
 			loggingDatasource = configurator.getInterpretationContext().getProperty(LoggingProperties.LOGGING_DATASOURCE);
 			System.out.println(String.format("%s.configureLogging: Configured gateway logger from %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),loggingDatasource));
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				installDatabaseAppender(root,loggingDatasource);
+				
+				installCrashAppender(root,loggingDatasource,crashBufferSize);
 			}
 			else {
 				System.out.println(String.format("%s: WARNING: %s must contain a %s property in order to create a DB appender",CLSS,configPath.toFile().getAbsolutePath(),LoggingProperties.LOGGING_DATASOURCE));
@@ -145,6 +154,16 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		appender.start();
 		root.addAppender(appender);
 		root.info("Installed database appender ...");
+	}
+	private void installCrashAppender(Logger root,String connection,int bufferSize) {
+		Appender<ILoggingEvent> appender = new GatewayCrashAppender(connection,context,bufferSize);
+		appender.setContext(root.getLoggerContext());
+		BypassFilter filter = new BypassFilter();
+		filter.setThreshold(Level.TRACE);
+		appender.addFilter(filter);
+		appender.start();
+		root.addAppender(appender);
+		root.info(CLSS+":Installed database appender ...");
 	}
 
 }

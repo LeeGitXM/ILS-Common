@@ -27,6 +27,20 @@ public class SystemPropertiesScriptFunctions  {
 		log = LogMaker.getLogger(SystemPropertiesScriptFunctions.class.getCanonicalName());
 	}
 	/**
+	 * @return the desired buffer size for the crash logging appender.
+	 */
+	public static int getCrashBufferSize()throws Exception{
+		int size = -1;
+		try {
+			size = (int)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
+					LoggingProperties.MODULE_ID, "getCrashBufferSize" );
+		}
+		catch(Exception ge) {
+			log.debug(CLSS+"getCrashBufferSize: GatewayException ("+ge.getMessage()+")");
+		}
+		return size;
+	}
+	/**
 	 * @return the datasource holding the logging database.
 	 */
 	public static String getLoggingDatasource()throws Exception{

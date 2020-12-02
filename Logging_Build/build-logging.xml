@@ -9,7 +9,7 @@
 	<property name="LoggingModule.name" value="Logging" />
 	<property name="LoggingModule.release" value="0.5" />
 	<property name="LoggingModule.description" value="Common Logging Module" />
-	<property name="root.dir" value="${basedir}/../../git" />
+	<property name="root.dir" value="${basedir}/.." />
 	<property name="jar.dir" value="${root.dir}/external/lib" />
 	<property name="sdk.dir" value="${root.dir}/ignition-79/lib" />
 	<property name="common.jar.name" value="ils-common.jar" />

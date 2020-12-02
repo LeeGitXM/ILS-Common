@@ -28,6 +28,7 @@
   <property name="IGNITION_HOME" value="C:\ignition" />
   -->
   <property name="IGNITION_HOME" value="/usr/local/ignition-7.9.14" />
+  <property name="CRASH_BUFFER_SIZE" value="500" />
   <property name="LOGGING_DATASOURCE" value="Logs" />
 
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -46,7 +47,7 @@
           <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
     </encoder>
   </appender>
-  
+
   <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
     <discriminator>
       	<defaultValue>unknown</defaultValue>
@@ -62,7 +63,22 @@
       </appender>
      </sift>
    </appender>
-   
+   <appender name="CRASH" class="ch.qos.logback.classic.sift.SiftingAppender">
+    <discriminator>
+      	<defaultValue>unknown</defaultValue>
+		<key>project</key>
+    </discriminator>
+    <sift>
+      <appender name="FILE-${project}" class="ch.qos.logback.core.FileAppender">
+        <file>${IGNITION_HOME}/logs/aed-${project}.log</file>
+    	<prudent>true</prudent>
+        <encoder>
+          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+         </encoder>
+      </appender>
+     </sift>
+   </appender>
+
   <logger name="com">
     <appender-ref ref="FILE" />
   </logger>

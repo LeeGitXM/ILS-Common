@@ -16,6 +16,7 @@ package com.ils.logging.gateway.appender;
 import java.sql.SQLException;
 
 import com.ils.common.db.DBUtility;
+import com.ils.logging.common.appender.AbstractSingleTableDBAppender;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 /**
@@ -23,7 +24,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  * in gateway scope
  */
 public class GatewaySingleTableDBAppender<E> extends AbstractSingleTableDBAppender<E> {
-	private final static String CLSS = "SingleTableDBAppender";
+	private final static String CLSS = "GatewaySingleTableDBAppender";
 	private final DBUtility dbUtil;
 	private final GatewayContext context;
 	private final String db;               // Database connection 

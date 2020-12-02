@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import com.ils.common.log.LogMaker;
 import com.ils.log.client.SystemPropertiesScriptFunctions;
 import com.ils.log.common.LoggingProperties;
+import com.ils.logging.common.filter.BypassFilter;
+import com.ils.logging.gateway.appender.ClientCrashAppender;
 import com.ils.logging.gateway.appender.ClientSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 import com.inductiveautomation.ignition.common.expressions.ExpressionFunctionManager;
@@ -21,6 +23,7 @@ import com.inductiveautomation.ignition.common.xmlserialization.deserialization.
 import com.inductiveautomation.ignition.designer.model.AbstractDesignerModuleHook;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -85,6 +88,9 @@ public class LoggingDesignerHook extends AbstractDesignerModuleHook  {
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				installDatabaseAppender(root,loggingDatasource);
+				
+				int bufferSize = SystemPropertiesScriptFunctions.getCrashBufferSize();
+				installCrashAppender(root,loggingDatasource,bufferSize);
 			}
 			else {
 				System.out.println(String.format("%s: WARNING: Creation of DB appender failed",CLSS));
@@ -101,6 +107,17 @@ public class LoggingDesignerHook extends AbstractDesignerModuleHook  {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,"designer");
 		appender.setContext(root.getLoggerContext());
+		appender.start();
+		root.addAppender(appender);
+		root.info(CLSS+":Installed database appender ...");
+	}
+	private void installCrashAppender(Logger root,String connection,int bufferSize) {
+		AbstractClientContext acc = (AbstractClientContext)context;
+		Appender<ILoggingEvent> appender = new ClientCrashAppender(connection,acc,"designer",bufferSize);
+		appender.setContext(root.getLoggerContext());
+		BypassFilter filter = new BypassFilter();
+		filter.setThreshold(Level.TRACE);
+		appender.addFilter(filter);
 		appender.start();
 		root.addAppender(appender);
 		root.info(CLSS+":Installed database appender ...");

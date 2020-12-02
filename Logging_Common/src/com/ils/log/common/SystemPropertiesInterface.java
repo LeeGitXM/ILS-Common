@@ -16,6 +16,10 @@ public interface SystemPropertiesInterface   {
 	 */
 	public String getLoggingDatasource();
 	/**
+	 * @return the desired buffer size for the crash appender
+	 */
+	public int getCrashBufferSize();
+	/**
 	 */
 	public String getLibDir();
 	/**
