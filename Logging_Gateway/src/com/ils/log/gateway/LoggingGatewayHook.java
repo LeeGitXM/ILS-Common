@@ -16,6 +16,7 @@ import com.google.common.io.Files;
 import com.ils.common.log.LogMaker;
 import com.ils.log.common.LoggingProperties;
 import com.ils.logging.common.filter.BypassFilter;
+import com.ils.logging.common.filter.PassThruFilter;
 import com.ils.logging.gateway.appender.GatewayCrashAppender;
 import com.ils.logging.gateway.appender.GatewaySingleTableDBAppender;
 import com.inductiveautomation.ignition.common.expressions.ExpressionFunctionManager;
@@ -32,11 +33,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.joran.spi.JoranException;
-
-
 
 /**
  * This is root node for specialty code dealing with the gateway. On startup
@@ -53,6 +51,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	private Logger log = null;
 	private int crashBufferSize = -1;
 	private String loggingDatasource = "";
+	private final PassThruFilter passThruFilter = new PassThruFilter();
 
 	public LoggingGatewayHook() {
 		System.out.println(String.format("%s.LoggingGatewayHook: Initializing...",CLSS));
@@ -64,8 +63,8 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	public void setup(GatewayContext ctxt) {
 		this.context = ctxt;
 		dispatcher = new GatewayRpcDispatcher(context,this);
-		GatewaySystemPropertyFunctions.setContext(context); 
-		GatewaySystemPropertyFunctions.setHook(this);
+		GatewayScriptFunctions.setContext(context);
+		GatewayScriptFunctions.setHook(this);
 	}
 		
 	@Override
@@ -90,11 +89,12 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	
 	public int getCrashBufferSize() { return crashBufferSize; }
 	public String getLoggingDatasource() { return loggingDatasource; }
+	public PassThruFilter getPassThruFilter() { return passThruFilter; }
 	
 	@Override
 	public void initializeScriptManager(ScriptManager mgr) {
 		super.initializeScriptManager(mgr);
-		mgr.addScriptModule(LoggingProperties.PROPERTIES_SCRIPT_PACKAGE,GatewaySystemPropertyFunctions.class);
+		mgr.addScriptModule(LoggingProperties.PROPERTIES_SCRIPT_PACKAGE,GatewayScriptFunctions.class);
 	}
 	@Override
 	public void configureFunctionFactory(ExpressionFunctionManager factory) {
@@ -151,6 +151,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	private void installDatabaseAppender(Logger root,String connection) {
 		Appender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
 		appender.setContext(root.getLoggerContext());
+		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
 		root.info("Installed database appender ...");

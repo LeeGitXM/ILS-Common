@@ -10,9 +10,10 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.LogMaker;
-import com.ils.log.client.SystemPropertiesScriptFunctions;
+import com.ils.log.client.ClientScriptFunctions;
 import com.ils.log.common.LoggingProperties;
 import com.ils.logging.common.filter.BypassFilter;
+import com.ils.logging.common.filter.PassThruFilter;
 import com.ils.logging.gateway.appender.ClientCrashAppender;
 import com.ils.logging.gateway.appender.ClientSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
@@ -32,13 +33,15 @@ import ch.qos.logback.core.Appender;
 public class LoggingDesignerHook extends AbstractDesignerModuleHook  {
 	private static final String CLSS = "LoggingDesignerHook";
 	private DesignerContext context = null;
+	private static PassThruFilter passThruFilter = new PassThruFilter();
 
 	/**
 	 * Make the interface script functions available.
 	 */
 	@Override
 	public void initializeScriptManager(ScriptManager mgr) {
-		mgr.addScriptModule(LoggingProperties.PROPERTIES_SCRIPT_PACKAGE,SystemPropertiesScriptFunctions.class);
+		ClientScriptFunctions.setFilter(passThruFilter);
+		mgr.addScriptModule(LoggingProperties.PROPERTIES_SCRIPT_PACKAGE,ClientScriptFunctions.class);
 	}
 
 	@Override
@@ -84,12 +87,12 @@ public class LoggingDesignerHook extends AbstractDesignerModuleHook  {
 		System.out.println(String.format("%s: LoggerContext is %s",CLSS,logContext.getClass().getCanonicalName()));
 		logContext.reset();
 		try {
-			String loggingDatasource = SystemPropertiesScriptFunctions.getLoggingDatasource();
+			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				installDatabaseAppender(root,loggingDatasource);
 				
-				int bufferSize = SystemPropertiesScriptFunctions.getCrashBufferSize();
+				int bufferSize = ClientScriptFunctions.getCrashBufferSize();
 				installCrashAppender(root,loggingDatasource,bufferSize);
 			}
 			else {
@@ -107,6 +110,7 @@ public class LoggingDesignerHook extends AbstractDesignerModuleHook  {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,"designer");
 		appender.setContext(root.getLoggerContext());
+		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
 		root.info(CLSS+":Installed database appender ...");
