@@ -28,12 +28,12 @@
 
 	<!-- SDK jar classpath. This classpath includes all the jars needed to build a module against the SDK. -->
 	<path id="ignition-sdk.classpath">
-		<fileset dir="${basedir}/../../git/ignition-79/lib" includes="*.jar" />
+		<fileset dir="${basedir}/../ignition-79/lib" includes="*.jar" />
 	</path>
 	
 	<!-- External jar classpath. This classpath includes all the jars needed to build a module against the SDK. -->
 	<path id="ExternalJar.classpath">
-		 <fileset dir="${basedir}/../../git/external/lib" includes="*.jar" />
+		 <fileset dir="${basedir}/../external/lib" includes="*.jar" />
 	</path>
 	
 	<!-- Generic Buildfile (reference via Antcalls) -->
@@ -87,12 +87,12 @@
 	<!-- Generic SignModule (reference via Antcalls) -->
 	<target name="SignModule">
 		<echo message="Signing ${moduleName}" />
-		<java jar="${basedir}/../../git/external/lib/module-signer.jar"  fork="true">
-			<arg value="-keystore=${basedir}/../../git/tools/keys/ILSA-keystore"/>
+		<java jar="${basedir}/../external/lib/module-signer.jar"  fork="true">
+			<arg value="-keystore=${basedir}/../tools/keys/ILSA-keystore"/>
 			<arg value="-keystore-pwd=ILS-Automation"/>
 			<arg value="-alias=ILSAutomationKey"/>
 			<arg value="-alias-pwd=chromsmart" />
-			<arg value="-chain=${basedir}/../../git/tools/keys/ilsautomationcertificate.p7b"/>
+			<arg value="-chain=${basedir}/../tools/keys/ilsautomationcertificate.p7b"/>
 			<arg value="-module-in=${modulein}"/>
 			<arg value="-module-out=${moduleout}"/>
 		</java>
