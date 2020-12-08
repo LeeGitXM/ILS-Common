@@ -49,7 +49,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
 	private Logger log = null;
-	private int crashBufferSize = -1;
+	private int crashBufferSize = LoggingProperties.DEFAULT_CRASH_BUFFER_SIZE;
 	private String loggingDatasource = "";
 	private final PassThruFilter passThruFilter = new PassThruFilter();
 
@@ -124,7 +124,15 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		try {
 			byte[] bytes = Files.toByteArray(configPath.toFile());
 			configurator.doConfigure(new ByteArrayInputStream(bytes));
-			crashBufferSize = Integer.parseInt(configurator.getInterpretationContext().getProperty(LoggingProperties.CRASH_BUFFER_SIZE));
+			try {
+				String sizeString = configurator.getInterpretationContext().getProperty(LoggingProperties.CRASH_BUFFER_SIZE);
+				if( sizeString!=null ) {
+					crashBufferSize = Integer.parseInt(sizeString);
+				}
+			}
+			catch(NumberFormatException nfe) {
+				System.out.println(String.format("%s: %s is not a number in logback.xml (%s)",CLSS,LoggingProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
+			}
 			loggingDatasource = configurator.getInterpretationContext().getProperty(LoggingProperties.LOGGING_DATASOURCE);
 			System.out.println(String.format("%s.configureLogging: Configured gateway logger from %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),loggingDatasource));
 			if( loggingDatasource!=null ) {
@@ -166,5 +174,4 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		root.addAppender(appender);
 		root.info(CLSS+":Installed database appender ...");
 	}
-
 }

@@ -13,4 +13,6 @@ public interface LoggingProperties   {
 	public final static String PROPERTIES_SCRIPT_PACKAGE = "system.ils.log.properties";
 	public final static String CRASH_BUFFER_SIZE = "CRASH_BUFFER_SIZE";
 	public final static String LOGGING_DATASOURCE = "LOGGING_DATASOURCE";
+	
+	public final static int DEFAULT_CRASH_BUFFER_SIZE = 500;
 }

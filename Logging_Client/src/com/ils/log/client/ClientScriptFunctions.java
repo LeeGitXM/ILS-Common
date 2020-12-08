@@ -126,10 +126,14 @@ public class ClientScriptFunctions  {
 	 *         gateway in a single comma-separated string.
 	 */
 	public static List<String> getGatewayLoggerNames() {
-		List<String> list = new ArrayList<>();;
+		List<String> list = new ArrayList<>();
 		try {
-			list = (List<String>)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getGatewayLoggerNames" );
+			String concatentedNames = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
+					LoggingProperties.MODULE_ID, "getGatewayLoggerNamesAsString" );
+			String[] names = concatentedNames.split(",");
+			for(  String name:names) {
+				list.add(name);
+			}
 		}
 		catch(Exception ge) {
 			log.debug(CLSS+"getGatewayLoggerNames: GatewayException ("+ge.getMessage()+")");

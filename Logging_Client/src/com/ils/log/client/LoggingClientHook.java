@@ -32,6 +32,7 @@ public class LoggingClientHook implements ClientModuleHook {
 	private static final String CLSS = "LoggingClientHook";
 	private ClientContext context = null;
 	private final PassThruFilter passThruFilter = new PassThruFilter();
+	private int crashBufferSize = LoggingProperties.DEFAULT_CRASH_BUFFER_SIZE;
 	/**
 	 * Make the interface script functions available.
 	 */

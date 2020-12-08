@@ -33,12 +33,12 @@ public interface SystemPropertiesInterface   {
 	/**
 	 * @return a list of names of loggers known in your current scope
 	 */
-	public List getLoggerNames();
+	public List<String> getLoggerNames();
 
 	/**
 	 * @return a list of names of loggers known to the Gateway scope
 	 */
-	public List getGatewayLoggerNames();
+	public List<String> getGatewayLoggerNames();
 	/**
 	 * @param loggerName
 	 * @return the current level of a logger

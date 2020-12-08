@@ -56,7 +56,19 @@ public class GatewayRpcDispatcher implements SystemPropertiesInterface {
 	public List<String> getLoggerNames() {
 		return getGatewayLoggerNames();
 	}
-
+	/**
+	 * @return a string of comma-separated logger names
+	 */
+	public String getGatewayLoggerNamesAsString() {
+		LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		List<Logger> loggers = logContext.getLoggerList();
+		StringBuffer buf = new StringBuffer();
+		for(Logger lgr:loggers) {
+			if(buf.length()>0) buf.append(",");
+			buf.append(lgr.getName());
+		}
+		return buf.toString();
+	}
 	@Override
 	public List<String> getGatewayLoggerNames() {
 		LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
