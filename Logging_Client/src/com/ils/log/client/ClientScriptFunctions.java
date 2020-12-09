@@ -149,7 +149,8 @@ public class ClientScriptFunctions  {
 		String result = "";
 		Logger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
-			result = lgr.getLevel().toString();
+			Level level = lgr.getLevel();
+			if( level!=null ) result = level.toString();
 		}
 		return result;
 	}
