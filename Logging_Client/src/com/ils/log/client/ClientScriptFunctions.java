@@ -185,7 +185,7 @@ public class ClientScriptFunctions  {
 	}
 	/**
 	 * All log messages from loggers whose name contains the supplied string will be sent to the appender, regardless of level.  
-	 * (We could get fancier and use a regular ecxpression, but I think this is easier on the user). 
+	 * (We could get fancier and use a regular expression, but I think this is easier on the user). 
 	 * Multiple calls just add more messages. This state persists until the whole filter is reset. An empty string will pass all messages. 
 	 * It doesn'f matter if the same logger matches multiple criteria, only one message will be sent to the appender
 	 * @param pattern

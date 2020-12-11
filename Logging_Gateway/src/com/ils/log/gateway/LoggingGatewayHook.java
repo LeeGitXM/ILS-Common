@@ -103,6 +103,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	
 	@Override
 	public void shutdown() {
+		shutdownLogging();
 	}
 
 	@Override
@@ -118,7 +119,9 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 
 		System.out.println(String.format("%s: LoggerContext is %s",CLSS,logContext.getClass().getCanonicalName()));
 		JoranConfigurator configurator = new JoranConfigurator();
-		logContext.reset();
+		// Resetting the context clears all logger properties and closes existing appenders
+		// It also sets all loggers to DEBUG.
+		//logContext.reset();
 		configurator.setContext(logContext);
 		Path configPath = Paths.get(context.getLibDir().getAbsolutePath(),"..","data","logback.xml");
 		try {
@@ -159,6 +162,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	private void installDatabaseAppender(Logger root,String connection) {
 		Appender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
 		appender.setContext(root.getLoggerContext());
+		appender.setName(LoggingProperties.DB_APPENDER_NAME);
 		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
@@ -167,11 +171,22 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	private void installCrashAppender(Logger root,String connection,int bufferSize) {
 		Appender<ILoggingEvent> appender = new GatewayCrashAppender(connection,context,bufferSize);
 		appender.setContext(root.getLoggerContext());
+		appender.setName(LoggingProperties.CRASH_APPENDER_NAME);
 		BypassFilter filter = new BypassFilter();
 		filter.setThreshold(Level.TRACE);
 		appender.addFilter(filter);
 		appender.start();
 		root.addAppender(appender);
 		root.info(CLSS+":Installed database appender ...");
+	}
+	
+	/**
+	 * Remove the logging appenders that we created on startup.
+	 * They have all been appended to the root logger.
+	 */
+	private void shutdownLogging() {
+		Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+		root.detachAppender(LoggingProperties.CRASH_APPENDER_NAME);
+		root.detachAppender(LoggingProperties.DB_APPENDER_NAME);
 	}
 }
