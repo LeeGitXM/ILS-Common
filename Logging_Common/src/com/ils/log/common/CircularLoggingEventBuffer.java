@@ -64,7 +64,6 @@ public class CircularLoggingEventBuffer implements RandomAccess {
 		int i = wrapIndex(leader-size);
 		int index = 0;
 		while(i != leader){
-			//log.trace(String.format("%s getValues %f at %d", TAG,buf[i],i));
 			values[index] = buf[i];
 			index++;
 			i = wrapIndex(++i);
@@ -80,7 +79,6 @@ public class CircularLoggingEventBuffer implements RandomAccess {
 		int i = wrapIndex(leader-count);
 		int index = 0;
 		while(i != leader){
-			//log.trace(String.format("%s getValues %f at %d", TAG,buf[i],i));
 			values[index] = buf[i];
 			index++;
 			i = wrapIndex(++i);

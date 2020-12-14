@@ -102,8 +102,7 @@ public class LoggingClientHook implements ClientModuleHook {
 		catch(Exception ioe) {
 			System.out.println(String.format("%s: Failed to read gateway logger configuration (%s)",CLSS,ioe.getMessage()));
 		}
-		Logger log = LogMaker.getLogger(this);
-		log.info("Created designer logger");
+		System.out.println(String.format("%s: Configured client logging ...",CLSS));
 		
 	}
 	private void installDatabaseAppender(Logger root,String connection) {
@@ -114,7 +113,7 @@ public class LoggingClientHook implements ClientModuleHook {
 		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
-		root.info(CLSS+":Installed database appender ...");
+		System.out.println(String.format("%s: Installed database appender ...",CLSS));
 	}
 	private void installCrashAppender(Logger root,String connection,int bufferSize) {
 		AbstractClientContext acc = (AbstractClientContext)context;
@@ -126,7 +125,7 @@ public class LoggingClientHook implements ClientModuleHook {
 		appender.addFilter(filter);
 		appender.start();
 		root.addAppender(appender);
-		root.info(CLSS+":Installed database appender ...");
+		System.out.println(String.format("%s: Installed crash appender ...",CLSS));
 	}
 	
 	/**

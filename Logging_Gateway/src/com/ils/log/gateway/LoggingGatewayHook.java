@@ -48,7 +48,6 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 	private static final String CLSS = "LoggingGatewayHook";
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
-	private Logger log = null;
 	private int crashBufferSize = LoggingProperties.DEFAULT_CRASH_BUFFER_SIZE;
 	private String loggingDatasource = "";
 	private final PassThruFilter passThruFilter = new PassThruFilter();
@@ -154,8 +153,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		catch(JoranException je) {
 			System.out.println(String.format("%s: Failed to configure gateway logger (%s)",CLSS,je.getMessage()));
 		}			
-		log = LogMaker.getLogger(this);
-		log.info("Created gateway logger");
+		System.out.println(String.format("%s: Configured gateway logger",CLSS));
 		
 	}
 	
@@ -166,7 +164,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
-		root.info("Installed database appender ...");
+		System.out.println(String.format("%s: Installed database appender ..",CLSS));
 	}
 	private void installCrashAppender(Logger root,String connection,int bufferSize) {
 		Appender<ILoggingEvent> appender = new GatewayCrashAppender(connection,context,bufferSize);
@@ -177,7 +175,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		appender.addFilter(filter);
 		appender.start();
 		root.addAppender(appender);
-		root.info(CLSS+":Installed database appender ...");
+		System.out.println(String.format("%s: Installed crash appender ..",CLSS));
 	}
 	
 	/**
