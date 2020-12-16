@@ -31,9 +31,11 @@ public class ClientScriptFunctions  {
 	private static String CLSS = "GatewayDelegate: ";
 	private static final Logger log;
 	private static PassThruFilter filter = null;
+	private static List<String> verboten = new ArrayList<>();
 	
 	static {
 		log = LogMaker.getLogger(ClientScriptFunctions.class.getCanonicalName());
+		verboten.add("OutputConsole");
 	}
 	
 	public static void setFilter(PassThruFilter f ) { filter = f; }
@@ -157,10 +159,16 @@ public class ClientScriptFunctions  {
 
 	/**
 	 * Set a level: ERROR, WARN, INFO, DEBUG, TRACE in your current scope on the named logger.
+	 * There is a list of loggers that cause system hangs, if changed to more verbose that INFO.
+	 * Do not allow these loggers to be set at all.
 	 * @param loggerName
 	 * @param level name
 	 */
 	public static void setLoggingLevel(String loggerName, String level) {
+		if( verboten.contains(loggerName)) {
+			log.warn(String.format("%s.setLoggingLevel Setting the level of %s is prohibited",CLSS,loggerName));
+			return;
+		}
 		Logger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
 			Level lvl = Level.toLevel(level.toUpperCase());
@@ -185,7 +193,7 @@ public class ClientScriptFunctions  {
 	}
 	/**
 	 * All log messages from loggers whose name contains the supplied string will be sent to the appender, regardless of level.  
-	 * (We could get fancier and use a regular ecxpression, but I think this is easier on the user). 
+	 * (We could get fancier and use a regular expression, but I think this is easier on the user). 
 	 * Multiple calls just add more messages. This state persists until the whole filter is reset. An empty string will pass all messages. 
 	 * It doesn'f matter if the same logger matches multiple criteria, only one message will be sent to the appender
 	 * @param pattern

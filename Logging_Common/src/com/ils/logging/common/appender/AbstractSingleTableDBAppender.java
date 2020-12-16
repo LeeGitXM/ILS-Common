@@ -132,7 +132,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 	 * This is where the work gets done to 
 	 */
 	@Override
-	protected void append(E e) {
+	protected synchronized void append(E e) {
 		if( e instanceof LoggingEvent) {
 			LoggingEvent event = (LoggingEvent)e;
 			System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));

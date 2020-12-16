@@ -67,12 +67,13 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 	}
 	
 	/**
-	 * This is where the work gets done to 
+	 * This is where the work gets done 
 	 */
 	@Override
-	protected void append(E e) {
+	protected synchronized void append(E e) {
 		if( e instanceof LoggingEvent) {
 			LoggingEvent event = (LoggingEvent)e;
+			if( event.getLoggerName().equalsIgnoreCase("OutputConsole")) return;
 			//System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
 			Object[] args = new Object[16];
 			try {

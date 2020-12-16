@@ -15,4 +15,7 @@ public interface LoggingProperties   {
 	public final static String LOGGING_DATASOURCE = "LOGGING_DATASOURCE";
 	
 	public final static int DEFAULT_CRASH_BUFFER_SIZE = 500;
+	
+	public final static String CRASH_APPENDER_NAME = "CrashAppender";
+	public final static String DB_APPENDER_NAME    = "DBAppender"; 
 }

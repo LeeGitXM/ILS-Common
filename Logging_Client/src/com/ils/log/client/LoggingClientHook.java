@@ -32,7 +32,6 @@ public class LoggingClientHook implements ClientModuleHook {
 	private static final String CLSS = "LoggingClientHook";
 	private ClientContext context = null;
 	private final PassThruFilter passThruFilter = new PassThruFilter();
-	private int crashBufferSize = LoggingProperties.DEFAULT_CRASH_BUFFER_SIZE;
 	/**
 	 * Make the interface script functions available.
 	 */
@@ -57,6 +56,7 @@ public class LoggingClientHook implements ClientModuleHook {
 
 	@Override
 	public void shutdown() {
+		shutdownLogging();
 	}
 
 	/**
@@ -82,7 +82,9 @@ public class LoggingClientHook implements ClientModuleHook {
 	private void configureLogging() {
 		LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		System.out.println(String.format("%s: LoggerContext is %s",CLSS,logContext.getClass().getCanonicalName()));
-		logContext.reset();
+		// Resetting the context clears all logger properties and closes existing appenders
+		// It also sets all loggers to DEBUG.
+		//logContext.reset();
 		try {
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
@@ -100,28 +102,39 @@ public class LoggingClientHook implements ClientModuleHook {
 		catch(Exception ioe) {
 			System.out.println(String.format("%s: Failed to read gateway logger configuration (%s)",CLSS,ioe.getMessage()));
 		}
-		Logger log = LogMaker.getLogger(this);
-		log.info("Created designer logger");
+		System.out.println(String.format("%s: Configured client logging ...",CLSS));
 		
 	}
 	private void installDatabaseAppender(Logger root,String connection) {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,"client");
 		appender.setContext(root.getLoggerContext());
+		appender.setName(LoggingProperties.DB_APPENDER_NAME);
 		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
-		root.info(CLSS+":Installed database appender ...");
+		System.out.println(String.format("%s: Installed database appender ...",CLSS));
 	}
 	private void installCrashAppender(Logger root,String connection,int bufferSize) {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		Appender<ILoggingEvent> appender = new ClientCrashAppender(connection,acc,"designer",bufferSize);
 		appender.setContext(root.getLoggerContext());
+		appender.setName(LoggingProperties.CRASH_APPENDER_NAME);
 		BypassFilter filter = new BypassFilter();
 		filter.setThreshold(Level.TRACE);
 		appender.addFilter(filter);
 		appender.start();
 		root.addAppender(appender);
-		root.info(CLSS+":Installed database appender ...");
+		System.out.println(String.format("%s: Installed crash appender ...",CLSS));
+	}
+	
+	/**
+	 * Remove the logging appenders that we created on startup.
+	 * They have all been appended to the root logger.
+	 */
+	private void shutdownLogging() {
+		Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+		root.detachAppender(LoggingProperties.CRASH_APPENDER_NAME);
+		root.detachAppender(LoggingProperties.DB_APPENDER_NAME);
 	}
 }
