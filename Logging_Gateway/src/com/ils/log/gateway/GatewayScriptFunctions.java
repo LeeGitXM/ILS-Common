@@ -10,7 +10,6 @@ import java.util.List;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.LogMaker;
-import com.ils.logging.common.filter.PassThruFilter;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 import ch.qos.logback.classic.Level;
@@ -18,9 +17,17 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 
 public class GatewayScriptFunctions  {
+	private static String CLSS = "GatewayScriptFunctions: ";
 	private static GatewayContext context = null;
 	private static LoggingGatewayHook hook = null;
-
+	private static final Logger log;
+	private static List<String> verboten = new ArrayList<>();
+			
+	static {
+		log = LogMaker.getLogger(GatewayScriptFunctions.class.getCanonicalName());
+		verboten.add("OutputConsole");
+	}
+	
 	public static void setContext(GatewayContext ctx) {
 		context = ctx;
 	}
@@ -93,6 +100,10 @@ public class GatewayScriptFunctions  {
 	 * @param level name
 	 */
 	public static void setGatewayLoggingLevel(String loggerName, String level) {
+		if( verboten.contains(loggerName)) {
+			log.warn(String.format("%s.setLoggingLevel Setting the level of %s is prohibited",CLSS,loggerName));
+			return;
+		}
 		Logger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
 			Level lvl = Level.toLevel(level.toUpperCase());

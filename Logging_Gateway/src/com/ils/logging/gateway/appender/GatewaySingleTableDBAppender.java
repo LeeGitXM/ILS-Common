@@ -37,9 +37,6 @@ public class GatewaySingleTableDBAppender<E> extends AbstractSingleTableDBAppend
 
 	@Override
 	public void start() {
-		System.out.println(CLSS+""
-				+ ""
-				+ ".start ");
 		cxn = dbUtil.getConnection(db);
 		if( cxn!=null ) {
 			try {
@@ -50,7 +47,7 @@ public class GatewaySingleTableDBAppender<E> extends AbstractSingleTableDBAppend
 				ps = cxn.prepareStatement(SQL);
 			}
 			catch(SQLException sqle) {
-				System.out.println(String.format("%s.start: Error creating prepared statement (%s)",CLSS,sqle.getLocalizedMessage()));
+				System.out.println(String.format("%s.start: Error creating prepared statement (%s)",CLSS,sqle.getCause()));
 			}
 		}
 		else {

@@ -89,6 +89,7 @@ public class LoggingClientHook implements ClientModuleHook {
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+				root.getLoggerContext().addTurboFilter(passThruFilter);
 				installDatabaseAppender(root,loggingDatasource);
 				
 				int bufferSize = ClientScriptFunctions.getCrashBufferSize();
@@ -110,7 +111,6 @@ public class LoggingClientHook implements ClientModuleHook {
 		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,"client");
 		appender.setContext(root.getLoggerContext());
 		appender.setName(LoggingProperties.DB_APPENDER_NAME);
-		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed database appender ...",CLSS));

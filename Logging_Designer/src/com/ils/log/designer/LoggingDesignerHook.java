@@ -93,6 +93,7 @@ public class LoggingDesignerHook extends AbstractDesignerModuleHook  {
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+				root.getLoggerContext().addTurboFilter(passThruFilter);
 				installDatabaseAppender(root,loggingDatasource);
 				
 				int bufferSize = ClientScriptFunctions.getCrashBufferSize();
@@ -113,7 +114,6 @@ public class LoggingDesignerHook extends AbstractDesignerModuleHook  {
 		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,"designer");
 		appender.setContext(root.getLoggerContext());
 		appender.setName(LoggingProperties.DB_APPENDER_NAME);
-		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed databse appender ...",CLSS));

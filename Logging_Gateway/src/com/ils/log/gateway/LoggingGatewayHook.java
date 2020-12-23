@@ -139,6 +139,7 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 			System.out.println(String.format("%s.configureLogging: Configured gateway logger from %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),loggingDatasource));
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+				root.getLoggerContext().addTurboFilter(passThruFilter);
 				installDatabaseAppender(root,loggingDatasource);
 				
 				installCrashAppender(root,loggingDatasource,crashBufferSize);
@@ -161,7 +162,6 @@ public class LoggingGatewayHook extends AbstractGatewayModuleHook {
 		Appender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
 		appender.setContext(root.getLoggerContext());
 		appender.setName(LoggingProperties.DB_APPENDER_NAME);
-		appender.addFilter(passThruFilter);
 		appender.start();
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed database appender ..",CLSS));

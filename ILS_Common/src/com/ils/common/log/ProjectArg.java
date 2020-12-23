@@ -1,5 +1,5 @@
 /**
- *   (c) 2018  ILS Automation. All rights reserved.
+ *   (c) 2018-2020  ILS Automation. All rights reserved.
  */
 package com.ils.common.log;
 
@@ -19,6 +19,4 @@ public class ProjectArg {
 	
 	public void setProject(String name) { this.projectName=name; }
 	public String getProjectName() { return this.projectName; }
-	
-	// These are the equivalent of extended messages
 }

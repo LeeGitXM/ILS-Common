@@ -80,7 +80,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				Map<String, String> map = event.getMDCPropertyMap();
 				StackTraceElement caller = null;
 				if( event.hasCallerData() ) caller = extractFirstCaller(event.getCallerData());
-				else caller = extractFirstCaller(event.getCallerData());
+				else caller = extractFirstCaller();
 				args[0] = 0;   										  // pid
 				args[1] = Thread.currentThread().getId();   		  // thread
 				args[2] = truncate(map.get(LogMaker.PROJECT_KEY),25); // project
@@ -100,7 +100,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				dbUtil.executePreparedStatement(insertString, db, args);
 			}
 			catch( Exception sqle ) {
-				System.out.println(String.format("%s.append: Exception setting prepared statement (%s)",CLSS,sqle.getMessage()));
+				System.out.println(String.format("%s.append: Exception setting prepared statement (%s)",CLSS,sqle.getCause()));
 			}
 		}
 	}

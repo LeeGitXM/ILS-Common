@@ -141,7 +141,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				Map<String, String> map = event.getMDCPropertyMap();
 				StackTraceElement caller = null;
 				if( event.hasCallerData() ) caller = extractFirstCaller(event.getCallerData());
-				else caller = extractFirstCaller(event.getCallerData());
+				else caller = extractFirstCaller();
 				ps.setInt(1, 0 );   											// pid
 				ps.setLong(2, Thread.currentThread().getId() );   			// thread
 				ps.setString(3, truncate(map.get(LogMaker.PROJECT_KEY),25)); // project
@@ -161,7 +161,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				ps.execute();
 			}
 			catch( SQLException sqle ) {
-				System.out.println(String.format("%s.append: SQL exception setting prepared statement (%s)",CLSS,sqle.getMessage()));
+				System.out.println(String.format("%s.append: SQL exception setting prepared statement (%s)",CLSS,sqle.getCause()));
 			}
 		}
 	}

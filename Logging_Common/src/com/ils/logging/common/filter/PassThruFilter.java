@@ -17,13 +17,11 @@ package com.ils.logging.common.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.filter.Filter;
+import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 
 /**
@@ -34,10 +32,8 @@ import ch.qos.logback.core.spi.FilterReply;
  *	b) a message on one of the named threads
  *	c) a message from a logger whoss name matches one of the patterns
  */
-public class PassThruFilter extends Filter<ILoggingEvent> {
+public class PassThruFilter extends TurboFilter {
 	private final static String CLSS = "PassThruFilter";
-	private static long NO_THREAD = -1;
-	private long currentThreadId = NO_THREAD;
 	private final List<String> patterns;
 	private final List<String> threadNames;
 	
@@ -52,41 +48,33 @@ public class PassThruFilter extends Filter<ILoggingEvent> {
 	public void addThread(String name) {
 		threadNames.add(name);
 	}
-	public void setCurrentThread(long id) { this.currentThreadId = id; }
-
+	public void passCurrentThread() {
+		threadNames.add(Thread.currentThread().getName());
+	}
 	/**
-	 *  If the event has the configured level or more, pass it
-	 *  irrespective of the logger configuration.
+	 *  If the logger name matches the pattern or the 
+	 *  irrespective of the logger level.
 	 */
 	@Override
-	public FilterReply decide(ILoggingEvent e) {
-		if( e instanceof LoggingEvent) {
-			LoggingEvent event= (LoggingEvent) e;
-			if( currentThreadId!=NO_THREAD  ||
-				threadNames.contains(event.getThreadName()) ||
-				patternInName() ){
-				return FilterReply.ACCEPT;
-			}
+	public FilterReply decide(Marker marker, Logger logger, Level level,String format, Object[] params, Throwable t) {
+		String threadName = Thread.currentThread().getName();
+		if( threadNames.contains(threadName) ||
+				patternInName(logger) ){
+			return FilterReply.ACCEPT;
 		}
 		return FilterReply.NEUTRAL;  // Normal comparison applies.
 	}
-	
-	private boolean patternInName() {
-		if( patterns.size()>0 ) {
-			LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-			for( String pattern:patterns ) {
-				for(Logger lgr:logContext.getLoggerList()) {
-					if( lgr.getName().contains(pattern)) {
-						return true;
-					}
-				}
+
+	private boolean patternInName(Logger lgr) {
+		for( String pattern:patterns ) {
+			if( lgr.getName().contains(pattern)) {
+				return true;
 			}
 		}
 		return false;
 	}
 	
 	public void reset() {
-		currentThreadId = NO_THREAD;
 		patterns.clear();
 		threadNames.clear();
 	}

@@ -19,6 +19,7 @@ import com.inductiveautomation.ignition.client.gateway_interface.GatewayConnecti
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.turbo.TurboFilter;
 
 /**
  *  This class exposes functions to access Gateway parameters from
@@ -28,7 +29,7 @@ import ch.qos.logback.classic.LoggerContext;
  *  Remote procedure calls are made to the Gateway scope to produce the changes.
  */
 public class ClientScriptFunctions  {
-	private static String CLSS = "GatewayDelegate: ";
+	private static String CLSS = "ClientScriptFunctions: ";
 	private static final Logger log;
 	private static PassThruFilter filter = null;
 	private static List<String> verboten = new ArrayList<>();
@@ -156,7 +157,20 @@ public class ClientScriptFunctions  {
 		}
 		return result;
 	}
-
+	/**
+	 * All log messages on the same thread as the caller regardless of level will be sent to the log context filtered by the PassThru filter. 
+	 * We expect this to be applied to the database appender.
+	 */
+	public static void passAllLogsOnCurrentThread() {
+		LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+		List<TurboFilter> list = logContext.getTurboFilterList();
+		for(TurboFilter filter:list) {
+			if( filter instanceof PassThruFilter ) {
+				((PassThruFilter)filter).passCurrentThread();
+				break;
+			}
+		}
+	}
 	/**
 	 * Set a level: ERROR, WARN, INFO, DEBUG, TRACE in your current scope on the named logger.
 	 * There is a list of loggers that cause system hangs, if changed to more verbose that INFO.
@@ -174,13 +188,6 @@ public class ClientScriptFunctions  {
 			Level lvl = Level.toLevel(level.toUpperCase());
 			lgr.setLevel(lvl);
 		}
-	}
-	/**
-	 * All log messages on the same thread as the caller regardless of level will be sent to the appender filtered by the PassThru filter. 
-	 * We expect this to be applied to the database appender.
-	 */
-	public static void passAllLogsOnCurrentThread() {
-		filter.setCurrentThread(Thread.currentThread().getId());
 	}
 
 	/**
