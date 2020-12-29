@@ -21,7 +21,7 @@ public class LogMaker {
 	
 	public static Logger getLogger(Object source) {	
 		if( source instanceof String) {
-			return logContext.getLogger(source.toString());
+			return logContext.getLogger((String)source);
 		}
 		return logContext.getLogger(source.getClass());
 	}
@@ -29,7 +29,7 @@ public class LogMaker {
 	public static Logger getLogger(Object source,String project) {	
 		MDC.put(PROJECT_KEY, project);
 		if( source instanceof String) {
-			return logContext.getLogger(source.toString());
+			return logContext.getLogger((String)source);
 		}
 		return logContext.getLogger(source.getClass());
 	}

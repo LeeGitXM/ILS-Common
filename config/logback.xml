@@ -86,6 +86,7 @@
     <appender-ref ref="SIFT" />
   </logger>
 
+<logger name="org.apache" level="INFO" />
   <root level="INFO">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="DB" />
