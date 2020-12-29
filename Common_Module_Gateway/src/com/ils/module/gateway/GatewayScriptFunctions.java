@@ -123,7 +123,7 @@ public class GatewayScriptFunctions  {
 	 * @param threadName
 	 */
 	public static void passAllGatewayLogsOnThread(String threadName) {
-		//hook.getPassThruFilter().addThread(threadName);
+		hook.getPassThruFilter().addThread(threadName);
 	}
 	
 	/**
@@ -142,7 +142,7 @@ public class GatewayScriptFunctions  {
 	 * @param pattern
 	 */
 	public static void passAllGatewayLogs(String pattern)  {
-		//hook.getPassThruFilter().addPattern(pattern);
+		hook.getPassThruFilter().addPattern(pattern);
 	}
 	/**
 	 * Reset the "PassAll" filter to again respect logging levels
@@ -154,6 +154,6 @@ public class GatewayScriptFunctions  {
 	 * Reset the Gateway "PassAll" filter to again respect logging levels
 	 */
 	public static void resetGatewayPassAllFilter() {
-		//hook.getPassThruFilter().reset();
+		hook.getPassThruFilter().reset();
 	}
 }

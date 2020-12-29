@@ -5,6 +5,7 @@
 package com.ils.log.designer;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
@@ -86,15 +87,22 @@ public class LoggingDesignerHook extends AbstractDesignerModuleHook  {
 		System.out.println(String.format("%s: LoggerContext is %s",CLSS,logContext.getClass().getCanonicalName()));
 		// Resetting the context clears all logger properties and closes existing appenders
 		// It also sets all loggers to DEBUG.
-		//logContext.reset();
+		logContext.reset();
 		try {
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
-				//installDatabaseAppender(root,loggingDatasource);
+				root.setLevel(Level.INFO);
+				installDatabaseAppender(root,loggingDatasource);
 				
 				int bufferSize = ClientScriptFunctions.getCrashBufferSize();
-				//installCrashAppender(root,loggingDatasource,bufferSize);
+				installCrashAppender(root,loggingDatasource,bufferSize);
+				
+				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
+				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
+				while(iterator.hasNext()) {
+					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,iterator.next().getName() ));
+				}
 			}
 			else {
 				System.out.println(String.format("%s: WARNING: Creation of DB appender failed",CLSS));

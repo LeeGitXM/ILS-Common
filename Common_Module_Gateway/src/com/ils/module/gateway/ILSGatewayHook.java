@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 import com.ils.common.log.LogMaker;
+import com.ils.common.log.filter.PassThruFilter;
 import com.ils.log.common.LoggingProperties;
 import com.ils.module.gateway.appender.GatewayCrashAppender;
 import com.ils.module.gateway.appender.GatewaySingleTableDBAppender;
@@ -32,9 +33,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.joran.spi.InterpretationContext;
 import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
@@ -51,10 +51,13 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private GatewayRpcDispatcher dispatcher = null;
 	private int crashBufferSize = LoggingProperties.DEFAULT_CRASH_BUFFER_SIZE;
 	private String loggingDatasource = "";
+	private PassThruFilter passThruFilter = null;
 
 	public ILSGatewayHook() {
 		System.out.println(String.format("%s.LoggingGatewayHook: Initializing...",CLSS));
 	}
+	
+	public PassThruFilter getPassThruFilter() { return this.passThruFilter; }
 	
 	// NOTE: During this period, the module status is LOADED, not RUNNING
 	// Database facilities are not available yet.
@@ -137,7 +140,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			String loggingDatasource = configurator.getInterpretationContext().getProperty(LoggingProperties.LOGGING_DATASOURCE);
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
-				
+				root.setLevel(Level.INFO);
 				System.out.println(String.format("%s.configureLogging: Reconfigured gateway logger from %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),loggingDatasource));
 				installDatabaseAppender(root,loggingDatasource);
 				installCrashAppender(root,loggingDatasource,crashBufferSize);
@@ -146,7 +149,13 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 				while(iterator.hasNext()) {
 					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,iterator.next().getName() ));
 				}
-				root.setLevel(Level.INFO);
+				// Search for the PassThru filter
+				List<TurboFilter> filters = logContext.getTurboFilterList();
+				for(TurboFilter filter: filters) {
+					if( filter instanceof PassThruFilter) {
+						passThruFilter = (PassThruFilter)filter;
+					}
+				}
 			}
 			else {
 				System.out.println(String.format("%s: WARNING: logback.xml must contain a %s property in order to create a DB appender",CLSS,LoggingProperties.LOGGING_DATASOURCE));

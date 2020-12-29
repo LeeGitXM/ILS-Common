@@ -97,7 +97,7 @@ public class GatewayRpcDispatcher implements SystemPropertiesInterface {
 	}
 	@Override
 	public void passAllLogsOnCurrentThread() {
-		//hook.getPassThruFilter().passCurrentThread();
+		hook.getPassThruFilter().passCurrentThread();
 	}
 	@Override
 	public void setLoggingLevel(String loggerName, String level) {
@@ -115,12 +115,12 @@ public class GatewayRpcDispatcher implements SystemPropertiesInterface {
 
 	@Override
 	public void passAllLogsOnThread(String threadName) {
-		//hook.getPassThruFilter().addThread(threadName);
+		hook.getPassThruFilter().addThread(threadName);
 		
 	}
 	@Override
 	public void passAllGatewayLogsOnThread(String threadName) {
-		//hook.getPassThruFilter().addThread(threadName);
+		hook.getPassThruFilter().addThread(threadName);
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class GatewayRpcDispatcher implements SystemPropertiesInterface {
 	}
 	@Override
 	public void passAllGatewayLogs(String pattern) {
-		//hook.getPassThruFilter().addPattern(pattern);
+		hook.getPassThruFilter().addPattern(pattern);
 	}
 
 	@Override
@@ -139,6 +139,6 @@ public class GatewayRpcDispatcher implements SystemPropertiesInterface {
 
 	@Override
 	public void resetGatewayPassAllFilter() {
-		//hook.getPassThruFilter().reset();
+		hook.getPassThruFilter().reset();
 	}
 }
