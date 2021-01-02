@@ -33,6 +33,7 @@
   -->
   <property name="IGNITION_HOME" value="/usr/local/ignition-7.9.14" />
   <property name="CRASH_BUFFER_SIZE" value="500" />
+  <property name="CRASH_APPENDER_THRESHOLD" value="debug" />
   <property name="LOGGING_DATASOURCE" value="Logs" />
 
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -90,10 +91,7 @@
       For this it will need to load the logger classes. Doing that ... you see where this is getting. Setting the log level to INFO 
 	  supresses the debug log entry -> loop avoided.
   -->
-   <turboFilter class="com.ils.common.log.filter.PassThruFilter">
-   </turboFilter>
-
-   <turboFilter class="com.ils.common.log.filter.BypassFilter">
+   <turboFilter class="com.ils.common.log.filter.PatternFilter">
    </turboFilter>
 
   <root name="ROOT" level="info">

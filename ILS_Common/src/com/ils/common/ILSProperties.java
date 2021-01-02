@@ -11,6 +11,7 @@ package com.ils.common;
  */
 public interface ILSProperties   {
 	// These are the standard node names for the Gateway module configuration menus
-	public static String ROOT                   = "ILS";                      // Root of Gateway menu tree
-	public final static String TIMESTAMP_FORMAT = "yyyy.MM.dd HH:mm:ss.SSS";  // Format for writing timestamp
+	public static String ROOT                     = "ILS";                      // Root of Gateway menu tree
+	public final static String LOOP_PREVENTION_MARKER_NAME  = "no-loop";        // Used to prevent circular processing during logging
+	public final static String TIMESTAMP_FORMAT   = "yyyy.MM.dd HH:mm:ss.SSS";  // Format for writing timestamp
 }

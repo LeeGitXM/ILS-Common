@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modules>
+	<module>
+		<id>ils.common</id>
+		<name>@NAME@</name>
+		<description>@DESCRIPTION@</description>
+		<version>@VERSION@</version>
+		<license>license.html</license>
+		<requiredignitionversion>7.9.12</requiredignitionversion>
+		<requiredframeworkversion>8</requiredframeworkversion>
+		<freemodule>true</freemodule>
+
+		<!-- Add the module dependencies for each scope -->
+		<!-- Load in our jars for each scope -->
+		<jar scope="CD">common-module-client.jar.pack.gz</jar>
+		<jar scope="D">common-module-designer.jar.pack.gz</jar>
+		<jar scope="DC">common-module-common.jar.pack.gz</jar>
+		<jar scope="CD">ils-common.jar.pack.gz</jar>
+		<jar scope="G">common-module-gateway.jar</jar>
+		<jar scope="G">common-module-common.jar</jar>
+		<export scope="G">ils-common.jar</export>
+		<!-- Tell the Gateway and/or Designer where to find the hooks -->
+		<hook scope="G">com.ils.module.gateway.ILSGatewayHook</hook>
+		<hook scope="D">com.ils.log.designer.ILSDesignerHook</hook>
+		<hook scope="C">com.ils.module.client.ILSClientHook</hook>
+	</module>
+</modules>
