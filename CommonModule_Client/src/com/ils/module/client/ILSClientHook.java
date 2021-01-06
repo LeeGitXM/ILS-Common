@@ -36,7 +36,6 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	private static final String CLSS = "LoggingClientHook";
 	private ClientContext context = null;
 	private ClientCrashAppender crashAppender = null;
-	private String loggingDatasource = "";
 	private final CrashFilter crashFilter;
 	private PatternFilter patternFilter = null;
 	

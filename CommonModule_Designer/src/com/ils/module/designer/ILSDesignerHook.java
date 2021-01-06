@@ -2,7 +2,7 @@
  *   (c) 2020  ILS Automation. All rights reserved.
  */
 
-package com.ils.log.designer;
+package com.ils.module.designer;
 
 import java.util.HashMap;
 import java.util.Iterator;

@@ -10,8 +10,6 @@ import java.util.List;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.LogMaker;
-import com.ils.logging.common.LoggingProperties;
-import com.inductiveautomation.ignition.client.gateway_interface.GatewayConnectionManager;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 import ch.qos.logback.classic.Level;
@@ -33,7 +31,12 @@ public class GatewayScriptFunctions  {
 	}
 	public static void setHook(ILSGatewayHook h ) { hook = h; }
 
-
+	/**
+	 * @return the named logger
+	 */
+	public static Logger getLogger(String name) {
+		return LogMaker.getLogger(name);
+	}
 	/**
 	 * @return the buffer size for the crash logging appender.
 	 */

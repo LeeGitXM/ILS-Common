@@ -166,15 +166,14 @@
 		<!-- Pack200 and then copy the designer, client jars -->
 		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Client/dist/common-module-client.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-client.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
 		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Designer/dist/common-module-designer.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-designer.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
+		<!--
 		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Common/dist/common-module-common.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-common.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
 		<pack200 src="${jar.dir}/${common.jar.name}" destfile="${basedir}/CommonModule_Build/temp_modl/ils-common.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
+		-->
 		
 		<!-- Copy gateway jar -->
 		<copy file="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Gateway/dist/common-module-gateway.jar" todir="${basedir}/CommonModule_Build/temp_modl/" />
 		<copy file="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Common/dist/common-module-common.jar" todir="${basedir}/CommonModule_Build/temp_modl/" />
-		
-		<!-- Copy dependent jars -->
-		<copy file="${jar.dir}/${common.jar.name}" todir="${basedir}/CommonModule_Build/temp_modl/" />
 
 		<!-- Copy license file into the bundle -->
 		<copy file="${basedir}/CommonModule_Build/license.html" todir="${basedir}/CommonModule_Build/temp_modl/" />

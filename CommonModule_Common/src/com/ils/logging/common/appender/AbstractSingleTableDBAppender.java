@@ -161,7 +161,12 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				ps.execute();
 			}
 			catch( SQLException sqle ) {
-				System.out.println(String.format("%s.append: SQL exception setting prepared statement (%s)",CLSS,sqle.getCause()));
+				Object msg = sqle.getLocalizedMessage();
+				if( msg == null )  msg = sqle.getCause();
+				if( msg == null )  msg = event.getFormattedMessage();
+				if( msg!=null) {
+					System.out.println(String.format("%s.append: Exception setting prepared statement (%s)",CLSS,msg.toString()));
+				}
 			}
 		}
 	}

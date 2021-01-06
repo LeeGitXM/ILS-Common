@@ -41,6 +41,12 @@ public class ClientScriptFunctions  {
 	public static void setHook(LoggingHookInterface h ) { hook = h; }
 	
 	/**
+	 * @return the named logger
+	 */
+	public static Logger getLogger(String name) {
+		return LogMaker.getLogger(name);
+	}
+	/**
 	 * @return the buffer size for the crash logging appender.
 	 */
 	public static int getCrashAppenderBufferSize()throws Exception{

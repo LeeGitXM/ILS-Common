@@ -74,7 +74,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 		if( e instanceof LoggingEvent) {
 			LoggingEvent event = (LoggingEvent)e;
 			if( event.getLoggerName().equalsIgnoreCase("OutputConsole")) return;
-			//System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
+			System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
 			Object[] args = new Object[16];
 			try {
 				Map<String, String> map = event.getMDCPropertyMap();
@@ -92,7 +92,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				args[8] =  new Timestamp(event.getTimeStamp());   	// timestamp
 				args[9] = event.getLevel().levelInt;   				// level
 				args[10]= event.getLevel().levelStr;   				// level name
-				args[11]= event.getFormattedMessage();   			// log message
+				args[11]= truncate(event.getFormattedMessage(),4000);  // log message
 				args[12]= truncate(caller.getMethodName(),25);   	// function name
 				args[13]= truncate(caller.getFileName(),25);   		// filename
 				args[14]= caller.getLineNumber();   				// line number
@@ -100,7 +100,12 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				dbUtil.executePreparedStatement(insertString, db, args);
 			}
 			catch( Exception sqle ) {
-				System.out.println(String.format("%s.append: Exception setting prepared statement (%s)",CLSS,sqle.getCause()));
+				Object msg = sqle.getLocalizedMessage();
+				if( msg == null )  msg = sqle.getCause();
+				if( msg == null )  msg = event.getFormattedMessage();
+				if( msg!=null) {
+					System.out.println(String.format("%s.append: Exception setting prepared statement (%s)",CLSS,msg.toString()));
+				}
 			}
 		}
 	}

@@ -67,8 +67,13 @@ public class PatternFilter extends TurboFilter {
 	 */
 	@Override
 	public FilterReply decide(Marker marker, Logger logger, Level level,String format, Object[] params, Throwable t) {
-		if( marker.contains(loggingMarker)) return FilterReply.DENY;  // We've seen this already
-		marker.add(loggingMarker);
+		if( marker!=null ) {
+			if(marker.contains(loggingMarker)) return FilterReply.DENY;  // We've seen this already
+			marker.add(loggingMarker);
+		}
+		else {
+			marker = loggingMarker;
+		}
 		String threadName = Thread.currentThread().getName();
 		if( threadNames.contains(threadName) ||
 				patternInName(logger) ){
@@ -79,6 +84,7 @@ public class PatternFilter extends TurboFilter {
 		if( format==null || logger==null || logger.getName().isEmpty() ) {
 			return FilterReply.NEUTRAL;
 		}
+
 		return FilterReply.NEUTRAL;  // Normal comparison applies.
 	}
 

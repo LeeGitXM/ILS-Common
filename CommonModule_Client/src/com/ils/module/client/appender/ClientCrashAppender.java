@@ -22,6 +22,7 @@ import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.spi.FilterReply;
 
 /**
  * The crash appender stores logging events in a circular buffer
@@ -66,8 +67,16 @@ public class ClientCrashAppender extends ClientSingleTableDBAppender<ILoggingEve
 		LoggingEvent[] events = buffer.getValues();
 		System.out.println(String.format("%s.flush: Flushing %d messages to main database",CLSS,events.length));
 		for( LoggingEvent event:events) {
-			event.setMarker(logMarker);
-			super.append(event);
+			Marker marker = event.getMarker();
+			if( marker!=null ) {
+				if(marker.contains(logMarker)) continue;  // We've seen this already, ignore
+				marker.add(logMarker);
+			}
+			else {
+				marker = logMarker;
+			}
+			event.setMarker(marker);
+			super.append(event);                          // Write to database
 		}
 		buffer.clear();
 	}

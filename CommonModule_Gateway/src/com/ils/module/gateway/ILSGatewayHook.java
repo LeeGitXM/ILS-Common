@@ -1,5 +1,5 @@
 /**
- *   (c) 2020  ILS Automation. All rights reserved. 
+ *   (c) 2020-2021  ILS Automation. All rights reserved. 
  */
 package com.ils.module.gateway;
 
@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,12 +15,16 @@ import java.util.List;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
+import com.ils.common.ILSProperties;
 import com.ils.common.log.LogMaker;
 import com.ils.common.log.filter.PatternFilter;
 import com.ils.logging.common.LoggingProperties;
 import com.ils.logging.common.filter.CrashFilter;
 import com.ils.module.gateway.appender.GatewayCrashAppender;
 import com.ils.module.gateway.appender.GatewaySingleTableDBAppender;
+import com.ils.module.gateway.meta.HelpParameterEditPage;
+import com.ils.module.gateway.meta.HelpRecord;
+import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.expressions.ExpressionFunctionManager;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
 import com.inductiveautomation.ignition.common.script.ScriptManager;
@@ -48,12 +53,22 @@ import ch.qos.logback.core.joran.spi.JoranException;
  */
 public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private static final String CLSS = "LoggingGatewayHook";
+	public static final String BUNDLE_NAME = "HelpRecord";         // Properties file is HelpRecord.properties
+	private static final String CATEGORY_NAME = "CustomSettings";  // Left side group name
+	private static final String PREFIX = "help";                   // Name of the bundle
+	public static final ConfigCategory helpCategory = new ConfigCategory(CATEGORY_NAME,"aed.menu.property");
+	private static HelpRecord helpRec = null;
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
 	private GatewayCrashAppender crashAppender = null;
 	private String loggingDatasource = "";
 	private final CrashFilter crashFilter;
 	private PatternFilter patternFilter = null;
+	
+	static {
+		// Access the resource bundle
+		BundleUtil.get().addBundle(PREFIX,ILSGatewayHook.class,BUNDLE_NAME);
+	}
 
 	public ILSGatewayHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
@@ -71,6 +86,14 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		dispatcher = new GatewayRpcDispatcher(context,this);
 		GatewayScriptFunctions.setContext(context);
 		GatewayScriptFunctions.setHook(this);
+		// Register the help parameter record - this creates a table in the internal
+        // database if necessary. Force there to be a single row.
+        try {
+            context.getSchemaUpdater().updatePersistentRecords(HelpRecord.META);
+        }
+        catch (SQLException e) {
+        	System.out.println(String.format("%s.setup: Error registering settings record type.",CLSS, e.getLocalizedMessage()));
+        }
 	}
 		
 	@Override
@@ -80,16 +103,35 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	public void startup(LicenseState licenseState) {
 		// Accessing the database should now succeed.
 		configureLogging();
+		// Configure the help record. Create a default value, then call "make
+        // sure this record exists". That works based on the id, which we're
+        // defining to be 0. The license statement is read-only. Otherwise
+		// things are writable. If not valid, a message is logged.
+		// Force there to be a single row.
+
+		try {
+			helpRec = context.getPersistenceInterface().createNew(HelpRecord.META);
+			helpRec.setLong(HelpRecord.Id, 0L);   
+			String currentPath = helpRec.getReportServerAddress();
+			if( currentPath==null || currentPath.isEmpty() ) currentPath = ILSProperties.DEFAULT_WINDOWS_BROWSER_PATH;
+			helpRec.setString(HelpRecord.reportServerAddress, currentPath);
+			context.getSchemaUpdater().ensureRecordExists(helpRec);
+		}
+		catch(Exception ex) {
+			System.out.println(String.format("%s.startup: Failed to create persistant record (%s)",CLSS, ex.getLocalizedMessage()));;
+		}
 	}
 	@Override
 	public List<ConfigCategory> getConfigCategories() {
 		List<ConfigCategory> categories = new ArrayList<>();
+		categories.add(helpCategory);
 		return categories;
 	}
 	
 	@Override 
 	public List<IConfigTab> getConfigPanels() {
 		List<IConfigTab> panels = new ArrayList<>();
+		panels.add(HelpParameterEditPage.MENU_ENTRY);
 		return panels;
 	}
 	
