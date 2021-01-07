@@ -5,14 +5,13 @@ package com.ils.module.client;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
 
+import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.LoggingHookInterface;
-import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.filter.CrashFilter;
 import com.ils.logging.common.filter.PatternFilter;
 import com.ils.module.client.appender.ClientCrashAppender;
@@ -29,6 +28,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.TurboFilterList;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.Appender;
 
@@ -37,12 +37,11 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	private ClientContext context = null;
 	private ClientCrashAppender crashAppender = null;
 	private final CrashFilter crashFilter;
-	private final PatternFilter patternFilter;
+	private PatternFilter patternFilter= null;
 	
 	public ILSClientHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
 		crashFilter = new CrashFilter();
-		patternFilter = new PatternFilter();
 	}
 	
 	public CrashFilter getCrashFilter() { return this.crashFilter; }
@@ -118,11 +117,20 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,iterator.next().getName() ));
 				}
 			}
+			// Find the pattern filter
+			TurboFilterList list = logContext.getTurboFilterList();
+			Iterator<TurboFilter> iter  = list.iterator();
+			while( iter.hasNext()) {
+				TurboFilter filter = iter.next();
+				if( filter instanceof PatternFilter ) {
+					patternFilter = (PatternFilter)filter;
+					break;
+				}
+			}
 		}
 		catch(Exception ex) {
 			System.out.println(String.format("%s.configureLogging: Exception (%s)",CLSS,ex.getMessage()));
 		}
-		//logContext.addTurboFilter(patternFilter);
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 
 	}

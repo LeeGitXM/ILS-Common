@@ -11,9 +11,9 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
+import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.LoggingHookInterface;
-import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.filter.PatternFilter;
 import com.inductiveautomation.ignition.client.gateway_interface.GatewayConnectionManager;
 

@@ -39,6 +39,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.TurboFilterList;
+import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.joran.spi.JoranException;
 
@@ -61,7 +63,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private GatewayCrashAppender crashAppender = null;
 	private String loggingDatasource = "";
 	private final CrashFilter crashFilter;
-	private final PatternFilter patternFilter;
+	private PatternFilter patternFilter = null;
 	
 	static {
 		// Access the resource bundle
@@ -71,7 +73,6 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	public ILSGatewayHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
 		crashFilter = new CrashFilter();
-		patternFilter = new PatternFilter();
 	}
 	
 	public CrashFilter getCrashFilter() { return this.crashFilter; }
@@ -169,7 +170,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		// It also sets all loggers to DEBUG. We will reset here.
 		logContext.reset();
 		configurator.setContext(logContext);
-		Path configPath = Paths.get(context.getLibDir().getAbsolutePath(),"..","data","logback.xml");
+		Path configPath = Paths.get(context.getLibDir().getAbsolutePath(),"..","data","ils_logback.xml");
 		try {
 			byte[] bytes = Files.toByteArray(configPath.toFile());
 			configurator.doConfigure(new ByteArrayInputStream(bytes));
@@ -181,7 +182,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 					crashBufferSize = Integer.parseInt(sizeString);
 				}
 				catch(NumberFormatException nfe) {
-					System.out.println(String.format("%s: %s is not a number in logback.xml (%s)",CLSS,CommonProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
+					System.out.println(String.format("%s: %s is not a number in ils_logback.xml (%s)",CLSS,CommonProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
 				}
 			}
 			String threshold = configurator.getInterpretationContext().getProperty(CommonProperties.CRASH_APPENDER_THRESHOLD);
@@ -203,9 +204,19 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 				}
 			}
 			else {
-				System.out.println(String.format("%s: WARNING: logback.xml must contain a %s property in order to create a DB appender",CLSS,CommonProperties.LOGGING_DATASOURCE));
+				System.out.println(String.format("%s: WARNING: ils_logback.xml must contain a %s property in order to create a DB appender",CLSS,CommonProperties.LOGGING_DATASOURCE));
 			}
-			//logContext.addTurboFilter(patternFilter);
+			// Find the pattern filter
+			TurboFilterList list = logContext.getTurboFilterList();
+			Iterator<TurboFilter> iter  = list.iterator();
+			while( iter.hasNext()) {
+				TurboFilter filter = iter.next();
+				if( filter instanceof PatternFilter ) {
+					patternFilter = (PatternFilter)filter;
+					break;
+				}
+			}
+			
 		}
 		catch(IOException ioe) {
 			System.out.println(String.format("%s: Failed to read gateway logger configuration (%s)",CLSS,ioe.getMessage()));
