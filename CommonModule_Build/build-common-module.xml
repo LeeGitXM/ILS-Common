@@ -168,6 +168,7 @@
 		<replace file="${basedir}/CommonModule_Build/temp_modl/module.xml" token="@VERSION@" value="${CommonModule.version}" />
 
 		<!-- Pack200 and then copy the designer, client jars -->
+		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Common/dist/common-module-common.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-common.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
 		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Client/dist/common-module-client.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-client.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
 		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Designer/dist/common-module-designer.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-designer.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
 		

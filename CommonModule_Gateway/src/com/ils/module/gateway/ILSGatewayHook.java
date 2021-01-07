@@ -205,7 +205,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			else {
 				System.out.println(String.format("%s: WARNING: logback.xml must contain a %s property in order to create a DB appender",CLSS,CommonProperties.LOGGING_DATASOURCE));
 			}
-			logContext.addTurboFilter(patternFilter);
+			//logContext.addTurboFilter(patternFilter);
 		}
 		catch(IOException ioe) {
 			System.out.println(String.format("%s: Failed to read gateway logger configuration (%s)",CLSS,ioe.getMessage()));

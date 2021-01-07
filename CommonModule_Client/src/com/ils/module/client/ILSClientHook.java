@@ -122,7 +122,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		catch(Exception ex) {
 			System.out.println(String.format("%s.configureLogging: Exception (%s)",CLSS,ex.getMessage()));
 		}
-		logContext.addTurboFilter(patternFilter);
+		//logContext.addTurboFilter(patternFilter);
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 
 	}

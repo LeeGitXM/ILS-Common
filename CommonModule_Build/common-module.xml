@@ -15,13 +15,11 @@
 		<jar scope="CD">common-module-client.jar.pack.gz</jar>
 		<jar scope="D">common-module-designer.jar.pack.gz</jar>
 		<jar scope="DC">common-module-common.jar.pack.gz</jar>
-		<jar scope="CD">ils-common.jar.pack.gz</jar>
 		<jar scope="G">common-module-gateway.jar</jar>
 		<jar scope="G">common-module-common.jar</jar>
-		<export scope="G">ils-common.jar</export>
 		<!-- Tell the Gateway and/or Designer where to find the hooks -->
 		<hook scope="G">com.ils.module.gateway.ILSGatewayHook</hook>
-		<hook scope="D">com.ils.log.designer.ILSDesignerHook</hook>
+		<hook scope="D">com.ils.module.designer.ILSDesignerHook</hook>
 		<hook scope="C">com.ils.module.client.ILSClientHook</hook>
 	</module>
 </modules>

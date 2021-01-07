@@ -126,7 +126,7 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 		catch(Exception ex) {
 			System.out.println(String.format("%s: Failed to create logging appenders (%s)",CLSS,ex.getMessage()));
 		}
-		logContext.addTurboFilter(patternFilter);
+		//logContext.addTurboFilter(patternFilter);
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 		
 	}
