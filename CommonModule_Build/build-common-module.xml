@@ -38,7 +38,7 @@
 	</path>
 	
 	<!-- Common jar classpath -->
-	<!--    Classpath needed to build the common code -->
+	<!--    Classpath needed to build the common code, when complete, it will contain ils-common.jar -->
 	<path id="CommonModule_Common.classpath">
 		<path refid="ignition-sdk.classpath" />
 		<path refid="ExternalJar.classpath" />
@@ -47,13 +47,13 @@
 	<!-- The gateway, designer and clients depend on the Common -->
 	<!-- Gateway jar classpath -->
 	<path id="CommonModule_Gateway.classpath">
-		<path refid="CommonModule_Common.classpath" />
 		<fileset dir="${basedir}/CommonModule_Build/bin/CommonModule_Common/dist/" includes="*.jar" />
+		<path refid="CommonModule_Common.classpath" />
 	</path>	
 	<!-- Client jar classpath -->
 	<path id="CommonModule_Client.classpath">
-		<path refid="CommonModule_Common.classpath" />
 		<fileset dir="${basedir}/CommonModule_Build/bin/CommonModule_Common/dist/" includes="*.jar" />
+		<path refid="CommonModule_Common.classpath" />
 	</path>
 	
 	<!-- Designer jar classpath -->
