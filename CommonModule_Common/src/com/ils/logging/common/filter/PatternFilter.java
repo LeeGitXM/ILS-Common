@@ -11,7 +11,7 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package com.ils.common.log.filter;
+package com.ils.logging.common.filter;
 
 
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import java.util.List;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import com.ils.common.ILSProperties;
+import com.ils.logging.common.CommonProperties;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -48,7 +48,7 @@ public class PatternFilter extends TurboFilter {
 	public PatternFilter() {
 		this.patterns = new ArrayList<>();
 		this.threadNames = new ArrayList<>();
-		this.loggingMarker = MarkerFactory.getMarker(ILSProperties.LOOP_PREVENTION_MARKER_NAME);
+		this.loggingMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
 	}
 	
 	public void addPattern(String pattern) {

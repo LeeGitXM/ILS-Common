@@ -1,7 +1,7 @@
 /**
  *   (c) 2020  ILS Automation. All rights reserved.
  */
-package com.ils.common.log;
+package com.ils.logging.common;
 
 import org.apache.log4j.MDC;
 import org.slf4j.LoggerFactory;

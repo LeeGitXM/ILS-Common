@@ -3,8 +3,8 @@
  */
 package com.ils.logging.common;
 
-import com.ils.common.log.filter.PatternFilter;
 import com.ils.logging.common.filter.CrashFilter;
+import com.ils.logging.common.filter.PatternFilter;
 
 /**
  *  Define the methods shared by the client and designer hook classes and used by the

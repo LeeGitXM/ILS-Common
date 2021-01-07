@@ -16,13 +16,12 @@ package com.ils.module.client.appender;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import com.ils.common.ILSProperties;
 import com.ils.logging.common.CircularLoggingEventBuffer;
+import com.ils.logging.common.CommonProperties;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.spi.FilterReply;
 
 /**
  * The crash appender stores logging events in a circular buffer
@@ -42,7 +41,7 @@ public class ClientCrashAppender extends ClientSingleTableDBAppender<ILoggingEve
 	public ClientCrashAppender(String connect,AbstractClientContext ctx,String s,int bufferSize) {
 		super(connect,ctx,s);
 		this.buffer = new CircularLoggingEventBuffer(bufferSize);
-		this.logMarker = MarkerFactory.getMarker(ILSProperties.LOOP_PREVENTION_MARKER_NAME);
+		this.logMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
 	}
 	
 	/**

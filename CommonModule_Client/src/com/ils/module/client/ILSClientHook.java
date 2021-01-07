@@ -10,11 +10,11 @@ import java.util.Map;
 
 import org.slf4j.LoggerFactory;
 
-import com.ils.common.log.LogMaker;
-import com.ils.common.log.filter.PatternFilter;
+import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.LoggingHookInterface;
-import com.ils.logging.common.LoggingProperties;
+import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.filter.CrashFilter;
+import com.ils.logging.common.filter.PatternFilter;
 import com.ils.module.client.appender.ClientCrashAppender;
 import com.ils.module.client.appender.ClientSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
@@ -37,11 +37,12 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	private ClientContext context = null;
 	private ClientCrashAppender crashAppender = null;
 	private final CrashFilter crashFilter;
-	private PatternFilter patternFilter = null;
+	private final PatternFilter patternFilter;
 	
 	public ILSClientHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
 		crashFilter = new CrashFilter();
+		patternFilter = new PatternFilter();
 	}
 	
 	public CrashFilter getCrashFilter() { return this.crashFilter; }
@@ -53,7 +54,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	 */
 	@Override
 	public void initializeScriptManager(ScriptManager mgr) {
-		mgr.addScriptModule(LoggingProperties.PROPERTIES_SCRIPT_PACKAGE,ClientScriptFunctions.class);
+		mgr.addScriptModule(CommonProperties.PROPERTIES_SCRIPT_PACKAGE,ClientScriptFunctions.class);
 	}
 
 	@Override
@@ -116,20 +117,12 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 				while(iterator.hasNext()) {
 					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,iterator.next().getName() ));
 				}
-
-				// Search for the Pattern filter
-				List<TurboFilter> filters = logContext.getTurboFilterList();
-				for(TurboFilter filter: filters) {
-					if( filter instanceof PatternFilter) {
-						patternFilter = (PatternFilter)filter;
-						break;
-					}
-				}
 			}
 		}
 		catch(Exception ex) {
 			System.out.println(String.format("%s.configureLogging: Exception (%s)",CLSS,ex.getMessage()));
 		}
+		logContext.addTurboFilter(patternFilter);
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 
 	}
@@ -137,7 +130,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,"client");
 		appender.setContext(root.getLoggerContext());
-		appender.setName(LoggingProperties.DB_APPENDER_NAME);
+		appender.setName(CommonProperties.DB_APPENDER_NAME);
 		appender.start();
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed databse appender ...",CLSS));
@@ -146,7 +139,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		crashAppender = new ClientCrashAppender(connection,acc,"client",bufferSize);
 		crashAppender.setContext(root.getLoggerContext());
-		crashAppender.setName(LoggingProperties.CRASH_APPENDER_NAME);
+		crashAppender.setName(CommonProperties.CRASH_APPENDER_NAME);
 		crashAppender.addFilter(crashFilter);
 		crashAppender.start();
 		root.addAppender(crashAppender);
@@ -159,7 +152,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	 */
 	private void shutdownLogging() {
 		Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
-		root.detachAppender(LoggingProperties.CRASH_APPENDER_NAME);
-		root.detachAppender(LoggingProperties.DB_APPENDER_NAME);
+		root.detachAppender(CommonProperties.CRASH_APPENDER_NAME);
+		root.detachAppender(CommonProperties.DB_APPENDER_NAME);
 	}
 }

@@ -87,13 +87,6 @@
      </sift>
    </appender>
 
-  <!-- A  Circularity Error occurs when the class loader loads the logger classes. Doing that, it outputs a debug message to the log. 
-      For this it will need to load the logger classes. Doing that ... you see where this is getting. Setting the log level to INFO 
-	  supresses the debug log entry -> loop avoided.
-  -->
-   <turboFilter class="com.ils.common.log.filter.PatternFilter">
-   </turboFilter>
-
   <root name="ROOT" level="info">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="DB" />
@@ -103,7 +96,6 @@
   </root>
 
   <logger name="org.apache" level="INFO"></logger>
-
   <logger name="com" level="INFO" >
     <appender-ref ref="FILE" />
   </logger>

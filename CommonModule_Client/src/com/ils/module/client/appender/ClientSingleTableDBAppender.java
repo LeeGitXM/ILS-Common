@@ -18,7 +18,7 @@ import java.sql.Timestamp;
 import java.util.Map;
 
 import com.ils.common.db.ClientDBUtility;
-import com.ils.common.log.LogMaker;
+import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.appender.AbstractSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 

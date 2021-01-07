@@ -1,4 +1,6 @@
-package com.ils.common.log;
+package com.ils.logging.common.test;
+
+import com.ils.logging.common.LogMaker;
 
 import ch.qos.logback.classic.Logger;
 

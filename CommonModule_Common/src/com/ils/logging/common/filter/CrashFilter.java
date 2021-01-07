@@ -17,8 +17,7 @@ package com.ils.logging.common.filter;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import com.ils.common.ILSProperties;
-import com.ils.logging.common.LoggingProperties;
+import com.ils.logging.common.CommonProperties;
 
 import ch.qos.logback.classic.filter.ThresholdFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -36,8 +35,8 @@ public class CrashFilter extends ThresholdFilter {
 	
 
 	public CrashFilter() {
-		this.logMarker = MarkerFactory.getMarker(ILSProperties.LOOP_PREVENTION_MARKER_NAME);
-		this.setLevel(LoggingProperties.CRASH_APPENDER_THRESHOLD);
+		this.logMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
+		this.setLevel(CommonProperties.CRASH_APPENDER_THRESHOLD);
 	}
 	public String getLevel() { return this.getLevel(); }
 	/**

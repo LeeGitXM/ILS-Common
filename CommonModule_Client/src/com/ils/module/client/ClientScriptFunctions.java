@@ -11,10 +11,10 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
-import com.ils.common.log.LogMaker;
-import com.ils.common.log.filter.PatternFilter;
+import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.LoggingHookInterface;
-import com.ils.logging.common.LoggingProperties;
+import com.ils.logging.common.CommonProperties;
+import com.ils.logging.common.filter.PatternFilter;
 import com.inductiveautomation.ignition.client.gateway_interface.GatewayConnectionManager;
 
 import ch.qos.logback.classic.Level;
@@ -53,7 +53,7 @@ public class ClientScriptFunctions  {
 		int size = -1;
 		try {
 			size = (int)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getCrashBufferSize" );
+					CommonProperties.MODULE_ID, "getCrashBufferSize" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getCrashAppenderBufferSize: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -74,7 +74,7 @@ public class ClientScriptFunctions  {
 		int size = -1;
 		try {
 			size = (int)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getGatewayCrashAppenderBufferSize" );
+					CommonProperties.MODULE_ID, "getGatewayCrashAppenderBufferSize" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getGatewayCrashAppenderBufferSize GatewayException (%s)",CLSS,ge.getMessage()));
@@ -88,7 +88,7 @@ public class ClientScriptFunctions  {
 		String result = null;
 		try {
 			result = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getGatewayCrashAppenderThreshold" );
+					CommonProperties.MODULE_ID, "getGatewayCrashAppenderThreshold" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getGatewayCrashAppenderThreshold: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -103,7 +103,7 @@ public class ClientScriptFunctions  {
 		List<String> list = new ArrayList<>();
 		try {
 			String concatentedNames = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getGatewayLoggerNamesAsString" );
+					CommonProperties.MODULE_ID, "getGatewayLoggerNamesAsString" );
 			String[] names = concatentedNames.split(",");
 			for(  String name:names) {
 				list.add(name);
@@ -122,7 +122,7 @@ public class ClientScriptFunctions  {
 		String level = "";
 		try {
 			level = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getGatewayLoggingLevel", loggerName);
+					CommonProperties.MODULE_ID, "getGatewayLoggingLevel", loggerName);
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getGatewayLoggingLevel: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -136,7 +136,7 @@ public class ClientScriptFunctions  {
 		String type = "";
 		try {
 			type = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getLibDir" );
+					CommonProperties.MODULE_ID, "getLibDir" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getLibDir: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -176,7 +176,7 @@ public class ClientScriptFunctions  {
 		String type = "";
 		try {
 			type = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getLoggingDatasource" );
+					CommonProperties.MODULE_ID, "getLoggingDatasource" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getLoggingDatasource: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -190,7 +190,7 @@ public class ClientScriptFunctions  {
 		String type = "";
 		try {
 			type = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getLogsDir" );
+					CommonProperties.MODULE_ID, "getLogsDir" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getLogsDir: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -204,7 +204,7 @@ public class ClientScriptFunctions  {
 		String type = "";
 		try {
 			type = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "getUserLibDir" );
+					CommonProperties.MODULE_ID, "getUserLibDir" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getUserLibDir: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -217,7 +217,7 @@ public class ClientScriptFunctions  {
 	public static void passGatewayLogsOnThread(String threadName) {
 		try {
 			GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "passGatewayLogsOnThread", threadName );
+					CommonProperties.MODULE_ID, "passGatewayLogsOnThread", threadName );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.passGatewayLogsOnThread: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -231,7 +231,7 @@ public class ClientScriptFunctions  {
 	public static void passGatewayPattern(String pattern)  {
 		try {
 			GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "passGatewayPattern", pattern );
+					CommonProperties.MODULE_ID, "passGatewayPattern", pattern );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.passGatewayPattern: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -275,7 +275,7 @@ public class ClientScriptFunctions  {
 	public static void resetGatewayPatternFilter() {
 		try {
 			GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "resetGatewayPatternFilter" );
+					CommonProperties.MODULE_ID, "resetGatewayPatternFilter" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.resetGatewayPatternFilter: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -299,7 +299,7 @@ public class ClientScriptFunctions  {
 	public static void setGatewayCrashAppenderBufferSize(int size) {
 		try {
 			GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "setGatewayCrashAppenderBufferSize",size );
+					CommonProperties.MODULE_ID, "setGatewayCrashAppenderBufferSize",size );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.setGatewayCrashAppenderBufferSize: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -312,7 +312,7 @@ public class ClientScriptFunctions  {
 	public static void setCrashAppenderThreshold(String level) {
 		try {
 			GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "setCrashAppenderThreshld",level );
+					CommonProperties.MODULE_ID, "setCrashAppenderThreshld",level );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.setCrashAppenderThreshld: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -332,7 +332,7 @@ public class ClientScriptFunctions  {
 	public static void setGatewayLoggingLevel(String loggerName, String level) {
 		try {
 			GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					LoggingProperties.MODULE_ID, "setGatewayLoggingLevel", loggerName, level );
+					CommonProperties.MODULE_ID, "setGatewayLoggingLevel", loggerName, level );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.setGatewayLoggingLevel: GatewayException (%s)",CLSS,ge.getMessage()));

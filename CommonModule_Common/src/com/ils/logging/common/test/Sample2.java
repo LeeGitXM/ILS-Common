@@ -1,6 +1,8 @@
-package com.ils.common.log;
+package com.ils.logging.common.test;
 
 import org.apache.log4j.MDC;
+
+import com.ils.logging.common.LogMaker;
 
 import ch.qos.logback.classic.Logger;
 

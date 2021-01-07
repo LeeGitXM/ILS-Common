@@ -32,7 +32,6 @@ public class ClientDBUtility extends ClientDBUtilities {
 		}
 		return ds;
 	}
-	 
 	public int executeUpdateQuery(String SQL,String datasource) throws Exception {
 		return _runUpdateQuery(SQL,datasource,"",false,false);
 	}

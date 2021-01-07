@@ -3,7 +3,7 @@
  */
 package com.ils.module.gateway.meta;
 
-import com.ils.common.ILSProperties;
+import com.ils.logging.common.CommonProperties;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.Category;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.IdentityField;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistentRecord;
@@ -19,7 +19,7 @@ import simpleorm.dataset.SFieldFlags;
 @SuppressWarnings("serial")
 public class HelpRecord extends PersistentRecord  {
 	public final static RecordMeta<HelpRecord> META = new RecordMeta<HelpRecord>(
-			HelpRecord.class, ILSProperties.HELP_CONFIGURATION_RECORD_CLASS);
+			HelpRecord.class, CommonProperties.HELP_CONFIGURATION_RECORD_CLASS);
 
 	public final static IdentityField Id = new IdentityField(META);
 	

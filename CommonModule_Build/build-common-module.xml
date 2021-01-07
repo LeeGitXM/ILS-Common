@@ -14,11 +14,13 @@
 	<property name="CommonModule.release" value="0.5" />
 	<property name="CommonModule.description" value="ILS Common Module" />
 	<property name="root.dir" value="${basedir}/.." />
-	<property name="jar.dir" value="${root.dir}/external/lib" />
+	<property name="external.dir" value="${root.dir}/external/lib" />
 	<property name="sdk.dir" value="${root.dir}/ignition-79/lib" />
 	<property name="common.jar.name" value="ils-common.jar" />
+	<property name="common.module.jar.name" value="common-module-common.jar" />
 	<property name="common.bin.dir" value="${root.dir}/ils-common/bin" />
 	<property name="common.src.dir" value="${root.dir}/ils-common/ILS_Common/src" />
+	<property name="common.module.src.dir" value="${root.dir}/ils-common/CommonModule_Common/src" />
 
 	
 	<property name="ant.build.javac.source" value="1.8"/>
@@ -26,7 +28,7 @@
 		
 	<!-- External jar classpath -->
 	<path id="ils-classpath">
-	   <fileset dir="${jar.dir}">
+	   <fileset dir="${external.dir}">
 	      <include name="*.jar"/>
 	   </fileset>
 		<fileset dir="${sdk.dir}">
@@ -36,23 +38,22 @@
 	</path>
 	
 	<!-- Common jar classpath -->
-		<!-- The gateway, designer and clients depend on the Common -->
-		<path id="CommonModule_Common.classpath">
-			<path refid="ignition-sdk.classpath" />
-			<path refid="ExternalJar.classpath" />
-		</path>
-		
+	<!--    Classpath needed to build the common code -->
+	<path id="CommonModule_Common.classpath">
+		<path refid="ignition-sdk.classpath" />
+		<path refid="ExternalJar.classpath" />
+	</path>
+	
+	<!-- The gateway, designer and clients depend on the Common -->
 	<!-- Gateway jar classpath -->
 	<path id="CommonModule_Gateway.classpath">
 		<path refid="CommonModule_Common.classpath" />
 		<fileset dir="${basedir}/CommonModule_Build/bin/CommonModule_Common/dist/" includes="*.jar" />
-		<fileset dir="${jar.dir}" includes="${block.jar.name}" />
 	</path>	
 	<!-- Client jar classpath -->
 	<path id="CommonModule_Client.classpath">
 		<path refid="CommonModule_Common.classpath" />
 		<fileset dir="${basedir}/CommonModule_Build/bin/CommonModule_Common/dist/" includes="*.jar" />
-		<fileset dir="${jar.dir}" includes="${block.jar.name}" />
 	</path>
 	
 	<!-- Designer jar classpath -->
@@ -60,7 +61,6 @@
 		<path refid="CommonModule_Common.classpath" />
 		<fileset dir="${basedir}/CommonModule_Build/bin/CommonModule_Common/dist/" includes="*.jar" />
 		<fileset dir="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Client/dist/" includes="*.jar" />
-		<fileset dir="${jar.dir}" includes="${block.jar.name}" />
 	</path>
 	
 	<!-- This target will build the toolkit module and deploy it to the local Ignition gateway -->
@@ -69,7 +69,9 @@
 	<!-- Clean ILS common -->
 	<target name="clean.common" >
 		<mkdir dir="${common.bin.dir}"/>
-		<delete file="${jar.dir}/${common.jar.name}" />
+		<delete file="${external.dir}/${common.jar.name}" />
+		<delete file="${external.dir}/${common.jar.name}.pack.gz" />
+		<delete file="${external.dir}/ils-common-j7.jar" />
 		<delete>
 		    <fileset dir="${common.bin.dir}">
 		        <include name="**/*.class"/>
@@ -88,7 +90,7 @@
 	
 	
 	<!-- Compile the Common library -->
-	<target name="common.build" description="Compile the source">
+	<target name="common.build" description="Compile ILS Common in 2 trees">
 		<echo  message="Using Java version ${ant.java.version}."/>
 		<mkdir dir="${common.bin.dir}/images"/>
 		<javac destdir="${common.bin.dir}" debug="true" target="1.8" includeantruntime="false">
@@ -98,30 +100,32 @@
 		<copy todir="${common.bin.dir}/images" >
 			<fileset dir="${common.src.dir}/images"/>
 		</copy>
-	</target>
-	<target name ="common.jar" description="Create a jar for the ILS Common library">
-	    <jar destfile="${jar.dir}/${common.jar.name}" includes="**/*.class,**/*.png" basedir="${common.bin.dir}"/>
+		<echo  message="Using Java version ${ant.java.version}."/>
+		<mkdir dir="${common.bin.dir}/images"/>
+		<javac destdir="${common.bin.dir}" debug="true" target="1.8" includeantruntime="false">
+			<src path="${common.module.src.dir}"/>
+			<classpath refid="CommonModule_Common.classpath"/>
+		</javac>
+		<copy todir="${common.bin.dir}/images" >
+			<fileset dir="${common.src.dir}/images"/>
+		</copy>
 	</target>
 
 	<!-- Builds the toolkit module jars and the final .modl file -->
-	<target name="build" depends="common.build,common.jar" description="Compile the source">
+	<target name="build" depends="common.build" description="Compile the source">
 		<echo message="${CommonModule.name} ${CommonModule.version}" />	
 		<delete dir="${basedir}/CommonModule_Build/temp_modl" />	
 		
 		<!-- build.date and version.build are both defined in build.xml -->
 		<echo message="Build date: ${build.date}" />
 		<echo message="Build version: ${version.build}" />	
-				
+			
 		<!-- Common Module Common jar -->
-		<antcall target="MakeProject">
-			<param name="modName" value="${CommonModule.name}_Common" />
-			<param name="sourceDirFolder" value="${CommonModule.name}_Common" />
-			<param name="jarName" value="common-module-common" />
-			<param name="javacSource" value="1.8" />
-			<param name="module.build.classpath" value="${CommonModule.name}_Common.classpath"/>
-		</antcall>
+		<jar destfile="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Common/dist/${common.module.jar.name}">
+			<fileset dir="${common.bin.dir}" />
+		</jar>
 		
-		<!-- Common Modul Gateway jar -->
+		<!-- Common Module Gateway jar -->
 		<antcall target="MakeProject">
 			<param name="modName" value="${CommonModule.name}_Gateway" />
 			<param name="sourceDirFolder" value="${CommonModule.name}_Gateway" />
@@ -132,7 +136,7 @@
 			<param name="module.build.classpath" value="${CommonModule.name}_Gateway.classpath"/>
 		</antcall>
 
-		<!-- Common Modul Client jar -->
+		<!-- Common Module Client jar -->
 		<antcall target="MakeProject">
 			<param name="modName" value="${CommonModule.name}_Client" />
 			<param name="sourceDirFolder" value="${CommonModule.name}_Client" />
@@ -141,7 +145,7 @@
 			<param name="module.build.classpath" value="${CommonModule.name}_Client.classpath"/>
 		</antcall>
 		
-		<!-- Common Modul Designer jar -->
+		<!-- Common Module Designer jar -->
 		<antcall target="MakeProject">
 			<param name="modName" value="${CommonModule.name}_Designer" />
 			<param name="sourceDirFolder" value="${CommonModule.name}_Designer" />
@@ -166,14 +170,10 @@
 		<!-- Pack200 and then copy the designer, client jars -->
 		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Client/dist/common-module-client.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-client.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
 		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Designer/dist/common-module-designer.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-designer.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
-		<!--
-		<pack200 src="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Common/dist/common-module-common.jar" destfile="${basedir}/CommonModule_Build/temp_modl/common-module-common.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
-		<pack200 src="${jar.dir}/${common.jar.name}" destfile="${basedir}/CommonModule_Build/temp_modl/ils-common.jar.pack.gz" gzipoutput="true" configfile="${p200props}" />
-		-->
 		
 		<!-- Copy gateway jar -->
 		<copy file="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Gateway/dist/common-module-gateway.jar" todir="${basedir}/CommonModule_Build/temp_modl/" />
-		<copy file="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Common/dist/common-module-common.jar" todir="${basedir}/CommonModule_Build/temp_modl/" />
+		<copy file="${basedir}/CommonModule_Build/bin/${CommonModule.name}_Common/dist/${common.module.jar.name}" todir="${basedir}/CommonModule_Build/temp_modl/" />
 
 		<!-- Copy license file into the bundle -->
 		<copy file="${basedir}/CommonModule_Build/license.html" todir="${basedir}/CommonModule_Build/temp_modl/" />

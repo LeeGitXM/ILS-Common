@@ -16,10 +16,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 import com.ils.common.ILSProperties;
-import com.ils.common.log.LogMaker;
-import com.ils.common.log.filter.PatternFilter;
-import com.ils.logging.common.LoggingProperties;
+import com.ils.logging.common.CommonProperties;
+import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.filter.CrashFilter;
+import com.ils.logging.common.filter.PatternFilter;
 import com.ils.module.gateway.appender.GatewayCrashAppender;
 import com.ils.module.gateway.appender.GatewaySingleTableDBAppender;
 import com.ils.module.gateway.meta.HelpParameterEditPage;
@@ -39,7 +39,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.joran.spi.JoranException;
 
@@ -54,16 +53,15 @@ import ch.qos.logback.core.joran.spi.JoranException;
 public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private static final String CLSS = "LoggingGatewayHook";
 	public static final String BUNDLE_NAME = "HelpRecord";         // Properties file is HelpRecord.properties
-	private static final String CATEGORY_NAME = "CustomSettings";  // Left side group name
 	private static final String PREFIX = "help";                   // Name of the bundle
-	public static final ConfigCategory helpCategory = new ConfigCategory(CATEGORY_NAME,"aed.menu.property");
+	public static final ConfigCategory helpCategory = new ConfigCategory(ILSProperties.ROOT,"aed.menu.property");
 	private static HelpRecord helpRec = null;
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
 	private GatewayCrashAppender crashAppender = null;
 	private String loggingDatasource = "";
 	private final CrashFilter crashFilter;
-	private PatternFilter patternFilter = null;
+	private final PatternFilter patternFilter;
 	
 	static {
 		// Access the resource bundle
@@ -73,6 +71,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	public ILSGatewayHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
 		crashFilter = new CrashFilter();
+		patternFilter = new PatternFilter();
 	}
 	
 	public CrashFilter getCrashFilter() { return this.crashFilter; }
@@ -113,7 +112,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			helpRec = context.getPersistenceInterface().createNew(HelpRecord.META);
 			helpRec.setLong(HelpRecord.Id, 0L);   
 			String currentPath = helpRec.getReportServerAddress();
-			if( currentPath==null || currentPath.isEmpty() ) currentPath = ILSProperties.DEFAULT_WINDOWS_BROWSER_PATH;
+			if( currentPath==null || currentPath.isEmpty() ) currentPath = CommonProperties.DEFAULT_WINDOWS_BROWSER_PATH;
 			helpRec.setString(HelpRecord.reportServerAddress, currentPath);
 			context.getSchemaUpdater().ensureRecordExists(helpRec);
 		}
@@ -141,7 +140,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	@Override
 	public void initializeScriptManager(ScriptManager mgr) {
 		super.initializeScriptManager(mgr);
-		mgr.addScriptModule(LoggingProperties.PROPERTIES_SCRIPT_PACKAGE,GatewayScriptFunctions.class);
+		mgr.addScriptModule(CommonProperties.PROPERTIES_SCRIPT_PACKAGE,GatewayScriptFunctions.class);
 	}
 	@Override
 	public void configureFunctionFactory(ExpressionFunctionManager factory) {
@@ -175,22 +174,22 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			byte[] bytes = Files.toByteArray(configPath.toFile());
 			configurator.doConfigure(new ByteArrayInputStream(bytes));
 			
-			String sizeString = configurator.getInterpretationContext().getProperty(LoggingProperties.CRASH_BUFFER_SIZE);
-			int crashBufferSize = LoggingProperties.DEFAULT_CRASH_BUFFER_SIZE;
+			String sizeString = configurator.getInterpretationContext().getProperty(CommonProperties.CRASH_BUFFER_SIZE);
+			int crashBufferSize = CommonProperties.DEFAULT_CRASH_BUFFER_SIZE;
 			if( sizeString!=null ) {
 				try {
 					crashBufferSize = Integer.parseInt(sizeString);
 				}
 				catch(NumberFormatException nfe) {
-					System.out.println(String.format("%s: %s is not a number in logback.xml (%s)",CLSS,LoggingProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
+					System.out.println(String.format("%s: %s is not a number in logback.xml (%s)",CLSS,CommonProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
 				}
 			}
-			String threshold = configurator.getInterpretationContext().getProperty(LoggingProperties.CRASH_APPENDER_THRESHOLD);
+			String threshold = configurator.getInterpretationContext().getProperty(CommonProperties.CRASH_APPENDER_THRESHOLD);
 			if( threshold!=null ) {
 				crashFilter.setLevel(threshold);
 			}
 			
-			String loggingDatasource = configurator.getInterpretationContext().getProperty(LoggingProperties.LOGGING_DATASOURCE);
+			String loggingDatasource = configurator.getInterpretationContext().getProperty(CommonProperties.LOGGING_DATASOURCE);
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
@@ -202,19 +201,11 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 				while(iterator.hasNext()) {
 					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,iterator.next().getName() ));
 				}
-
-				// Search for the Pattern filter
-				List<TurboFilter> filters = logContext.getTurboFilterList();
-				for(TurboFilter filter: filters) {
-					if( filter instanceof PatternFilter) {
-						patternFilter = (PatternFilter)filter;
-						break;
-					}
-				}
 			}
 			else {
-				System.out.println(String.format("%s: WARNING: logback.xml must contain a %s property in order to create a DB appender",CLSS,LoggingProperties.LOGGING_DATASOURCE));
+				System.out.println(String.format("%s: WARNING: logback.xml must contain a %s property in order to create a DB appender",CLSS,CommonProperties.LOGGING_DATASOURCE));
 			}
+			logContext.addTurboFilter(patternFilter);
 		}
 		catch(IOException ioe) {
 			System.out.println(String.format("%s: Failed to read gateway logger configuration (%s)",CLSS,ioe.getMessage()));
@@ -231,7 +222,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private void installDatabaseAppender(Logger root,String connection) {
 		Appender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
 		appender.setContext(root.getLoggerContext());
-		appender.setName(LoggingProperties.DB_APPENDER_NAME);
+		appender.setName(CommonProperties.DB_APPENDER_NAME);
 		root.addAppender(appender);
 		appender.start();
 		System.out.println(String.format("%s: Installed database appender ..",CLSS));
@@ -239,7 +230,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private void installCrashAppender(Logger root,String connection,int bufferSize) {
 		crashAppender = new GatewayCrashAppender(connection,context,bufferSize);
 		crashAppender.setContext(root.getLoggerContext());
-		crashAppender.setName(LoggingProperties.CRASH_APPENDER_NAME);
+		crashAppender.setName(CommonProperties.CRASH_APPENDER_NAME);
 		crashAppender.addFilter(crashFilter);
 		crashAppender.start();
 		root.addAppender(crashAppender);
@@ -252,7 +243,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	 */
 	private void shutdownLogging() {
 		Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
-		root.detachAppender(LoggingProperties.CRASH_APPENDER_NAME);
-		root.detachAppender(LoggingProperties.DB_APPENDER_NAME);
+		root.detachAppender(CommonProperties.CRASH_APPENDER_NAME);
+		root.detachAppender(CommonProperties.DB_APPENDER_NAME);
 	}
 }

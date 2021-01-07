@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
-import com.ils.common.log.LogMaker;
+import com.ils.logging.common.LogMaker;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 import ch.qos.logback.classic.Level;

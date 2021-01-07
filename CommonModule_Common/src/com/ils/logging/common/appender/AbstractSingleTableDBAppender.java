@@ -19,7 +19,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
 
-import com.ils.common.log.LogMaker;
+import com.ils.logging.common.LogMaker;
 
 import ch.qos.logback.classic.spi.CallerData;
 import ch.qos.logback.classic.spi.ILoggingEvent;
