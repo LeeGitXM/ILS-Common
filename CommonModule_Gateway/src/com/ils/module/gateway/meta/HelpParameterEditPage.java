@@ -20,10 +20,11 @@ public class HelpParameterEditPage extends RecordEditForm {
 	private static final long serialVersionUID = 9167269039342984188L;
 	
 	// This gets added as the panel for the help category
+	// The bundle name is "ils"
 	public static IConfigTab MENU_ENTRY = com.inductiveautomation.ignition.gateway.web.models.DefaultConfigTab.builder()
 			.category(ILSGatewayHook.helpCategory)
 			.name("settings")
-			.i18n("browser.path")
+			.i18n("ils.help.settings")
 			.page(HelpParameterEditPage.class)
 			.terms(new String[] {"path"})
 			.build();

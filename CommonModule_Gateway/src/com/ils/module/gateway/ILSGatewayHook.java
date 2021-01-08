@@ -108,7 +108,6 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
         // defining to be 0. The license statement is read-only. Otherwise
 		// things are writable. If not valid, a message is logged.
 		// Force there to be a single row.
-
 		try {
 			helpRec = context.getPersistenceInterface().createNew(HelpRecord.META);
 			helpRec.setLong(HelpRecord.Id, 0L);   
