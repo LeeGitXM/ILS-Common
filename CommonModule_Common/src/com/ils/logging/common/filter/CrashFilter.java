@@ -19,8 +19,9 @@ import org.slf4j.MarkerFactory;
 
 import com.ils.logging.common.CommonProperties;
 
-import ch.qos.logback.classic.filter.ThresholdFilter;
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 
 /**
@@ -29,25 +30,30 @@ import ch.qos.logback.core.spi.FilterReply;
  * It also stops re-propagation of messages created during debugging from, for example,
  * the pattern appender, or the crash appender itself.
  */
-public class CrashFilter extends ThresholdFilter {
+public class CrashFilter extends Filter<ILoggingEvent> {
 	private final static String CLSS = "CrashFilter";
 	private final Marker logMarker;
+	private Level threshold;
 	
 
 	public CrashFilter() {
 		this.logMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
-		this.setLevel(CommonProperties.CRASH_APPENDER_THRESHOLD);
+		this.threshold = CommonProperties.DEFAULT_CRASH_APPENDER_THRESHOLD;
 	}
-	public String getLevel() { return this.getLevel(); }
+	public String getThreshold() { return this.threshold.levelStr; }
+	public void setThreshold(String thresh) { this.threshold = Level.toLevel(thresh.toLowerCase()); }
 	/**
 	 *  If the event has the configured level or more, pass it
 	 *  irrespective of the logger configuration.
 	 */
 	@Override
 	public FilterReply decide(ILoggingEvent event) {
+		FilterReply result = FilterReply.NEUTRAL;
 		// First check level
-		FilterReply result = super.decide(event);
-		if( !result.equals(FilterReply.DENY)) {
+		if( !event.getLevel().isGreaterOrEqual(threshold) ) {
+			result = FilterReply.DENY;
+		}
+		else  {
 			Marker eventMarkers = event.getMarker();
 			if( eventMarkers!=null && eventMarkers.contains(logMarker)) {
 				result = FilterReply.DENY;

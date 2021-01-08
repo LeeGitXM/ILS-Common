@@ -1,5 +1,5 @@
 /**
- *   (c) 2012-2016  ILS Automation. All rights reserved. 
+ *   (c) 2021  ILS Automation. All rights reserved. 
  */
 package com.ils.module.gateway.meta;
 
@@ -14,7 +14,7 @@ import simpleorm.dataset.SFieldFlags;
 
 /**
  * A PersistentRecord class defines a record for persistent storage. Here we define
- * properties for the RAP module.
+ * properties for the ILS Common module.
  */
 @SuppressWarnings("serial")
 public class HelpRecord extends PersistentRecord  {
@@ -24,15 +24,13 @@ public class HelpRecord extends PersistentRecord  {
 	public final static IdentityField Id = new IdentityField(META);
 	
 	// On the configuration page, we configure:
-	// - report server address (temporary)
-	// - smtp server host-name and from user address 
-	// - from email address
+	// - path to the windows browser
 	
-	public final static StringField reportServerAddress = new StringField(META,
-			"ReportServerAddress", SFieldFlags.SMANDATORY).setDefault("localhost");
+	public final static StringField windowsBrowserPath = new StringField(META,
+			"WindowsBrowserPath", SFieldFlags.SMANDATORY).setDefault(CommonProperties.DEFAULT_WINDOWS_BROWSER_PATH);
 
 	public final static Category configurationCategory = new Category(
-			"AEDConfigurationRecord.Categories.AED_Configuration", 0).include(reportServerAddress);
+			"ilsmodule.Categories.ILS_Configuration", 0).include(windowsBrowserPath);
 	
 	
 	@Override
@@ -41,7 +39,7 @@ public class HelpRecord extends PersistentRecord  {
 	}
 
 	/** @return the hostname of the site that generates reports. */
-	public String getReportServerAddress() {
-		return getString(reportServerAddress);
+	public String getWindowsBrowserPath() {
+		return getString(windowsBrowserPath);
 	}
 }

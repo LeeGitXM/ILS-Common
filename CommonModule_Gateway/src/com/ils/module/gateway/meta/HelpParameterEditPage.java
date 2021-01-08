@@ -1,5 +1,5 @@
 /**
- *   (c) 2012-2021  ILS Automation. All rights reserved. 
+ *   (c) 2021  ILS Automation. All rights reserved. 
  */
 package com.ils.module.gateway.meta;
 
@@ -19,16 +19,17 @@ import com.inductiveautomation.ignition.gateway.web.models.IConfigTab;
 public class HelpParameterEditPage extends RecordEditForm {
 	private static final long serialVersionUID = 9167269039342984188L;
 	
+	// This gets added as the panel for the help category
 	public static IConfigTab MENU_ENTRY = com.inductiveautomation.ignition.gateway.web.models.DefaultConfigTab.builder()
 			.category(ILSGatewayHook.helpCategory)
 			.name("settings")
-			.i18n("aed.settings.title")
+			.i18n("browser.path")
 			.page(HelpParameterEditPage.class)
-			.terms(new String[] {"email","smtp","from address"})
+			.terms(new String[] {"path"})
 			.build();
 
 	public HelpParameterEditPage() {
-		super(null, null, Model.of("AED Module Properties"),
+		super(null, null, Model.of("Browser Execution Path (Windows only)"),
 				((GatewayContext) Application.get()).getPersistenceInterface()
 						.find(HelpRecord.META, 0L));
 	}

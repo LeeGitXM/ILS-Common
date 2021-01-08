@@ -11,7 +11,7 @@ import java.util.List;
 /**
  *  Define the methods that support the ILS CommonModule. Most of these deal with logging.
  */
-public interface LoggingPropertiesInterface   { 
+public interface ModulePropertiesInterface   { 
 	/**
 	 * @return the datasource string for the database connection that will hold
 	 *         the log messages
@@ -57,7 +57,14 @@ public interface LoggingPropertiesInterface   {
 	/**
 	 * @return the absolute path to the "logs" sub-directory of the current Ignition installation
 	 */
-	public String getLogsDir();  
+	public String getLogsDir();
+	/**
+	 * The browser path is used for Windows systems only. Mac and Linux systems used the default browser
+	 * and require no configuration.
+	 * 
+	 * @return the execution path for the browser used to display context-sensitive help.
+	 */
+	public String getWindowsBrowserPath();
 	/**
 	 * @return the absolute path to the "user-lib" sub-directory of the current Ignition installation
 	 */

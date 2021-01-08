@@ -15,9 +15,8 @@ import java.util.List;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
-import com.ils.common.ILSProperties;
+import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
-import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.filter.CrashFilter;
 import com.ils.logging.common.filter.PatternFilter;
 import com.ils.module.gateway.appender.GatewayCrashAppender;
@@ -54,9 +53,10 @@ import ch.qos.logback.core.joran.spi.JoranException;
  */
 public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private static final String CLSS = "LoggingGatewayHook";
-	public static final String BUNDLE_NAME = "HelpRecord";         // Properties file is HelpRecord.properties
-	private static final String PREFIX = "help";                   // Name of the bundle
-	public static final ConfigCategory helpCategory = new ConfigCategory(ILSProperties.ROOT,"aed.menu.property");
+	public static final String BUNDLE_NAME = "ilsmodule";       // Properties file is ilsmodule.properties
+	public static final String BUNDLE_ROOT = "ils";             // Name of the bundle
+	private static final String CATEGORY_NAME = "ILSParameters";
+	public static final ConfigCategory helpCategory = new ConfigCategory(CATEGORY_NAME,BUNDLE_ROOT+".menu.category");
 	private static HelpRecord helpRec = null;
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
@@ -67,7 +67,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	
 	static {
 		// Access the resource bundle
-		BundleUtil.get().addBundle(PREFIX,ILSGatewayHook.class,BUNDLE_NAME);
+		BundleUtil.get().addBundle(BUNDLE_ROOT,ILSGatewayHook.class,BUNDLE_NAME);
 	}
 
 	public ILSGatewayHook() {
@@ -112,9 +112,9 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		try {
 			helpRec = context.getPersistenceInterface().createNew(HelpRecord.META);
 			helpRec.setLong(HelpRecord.Id, 0L);   
-			String currentPath = helpRec.getReportServerAddress();
+			String currentPath = helpRec.getWindowsBrowserPath();
 			if( currentPath==null || currentPath.isEmpty() ) currentPath = CommonProperties.DEFAULT_WINDOWS_BROWSER_PATH;
-			helpRec.setString(HelpRecord.reportServerAddress, currentPath);
+			helpRec.setString(HelpRecord.windowsBrowserPath, currentPath);
 			context.getSchemaUpdater().ensureRecordExists(helpRec);
 		}
 		catch(Exception ex) {
@@ -157,6 +157,10 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	public Object getRPCHandler(ClientReqSession session, Long projectID) {
 		return dispatcher;
 	}
+	
+	public String getWindowsBrowserPath() {
+		return "";
+	}
 	/**
 	 * Configure application logging for the database and crash appenders.
 	 * The root logger has already been configured. The pattern filter is
@@ -186,15 +190,15 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 				}
 			}
 			String threshold = configurator.getInterpretationContext().getProperty(CommonProperties.CRASH_APPENDER_THRESHOLD);
+			if( threshold==null) threshold = "debug";
 			if( threshold!=null ) {
-				crashFilter.setLevel(threshold);
+				crashFilter.setThreshold(threshold);
 			}
 			
 			String loggingDatasource = configurator.getInterpretationContext().getProperty(CommonProperties.LOGGING_DATASOURCE);
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
-				System.out.println(String.format("%s.configureLogging: Reconfigured gateway logger from %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),loggingDatasource));
 				installDatabaseAppender(root,loggingDatasource);
 				installCrashAppender(root,loggingDatasource,crashBufferSize);
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
@@ -216,7 +220,8 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 					break;
 				}
 			}
-			
+			System.out.println(String.format("%s.configureLogging: Reconfigured gateway logger from %s, threshold %s for %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),
+					threshold,sizeString,loggingDatasource));
 		}
 		catch(IOException ioe) {
 			System.out.println(String.format("%s: Failed to read gateway logger configuration (%s)",CLSS,ioe.getMessage()));

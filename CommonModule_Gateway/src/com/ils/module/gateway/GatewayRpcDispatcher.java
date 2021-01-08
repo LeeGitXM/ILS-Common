@@ -8,8 +8,8 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
-import com.ils.logging.common.LogMaker;
-import com.ils.logging.common.LoggingPropertiesInterface;
+import com.ils.common.log.LogMaker;
+import com.ils.logging.common.ModulePropertiesInterface;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 import ch.qos.logback.classic.Level;
@@ -20,7 +20,7 @@ import ch.qos.logback.classic.LoggerContext;
 /**
  *  The RPC Dispatcher is the point of entry for incoming RCP requests.
  */
-public class GatewayRpcDispatcher implements LoggingPropertiesInterface {
+public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 
 	private final GatewayContext context;
 	private final ILSGatewayHook hook;
@@ -48,7 +48,7 @@ public class GatewayRpcDispatcher implements LoggingPropertiesInterface {
 	 */
 	@Override
 	public String getCrashAppenderThreshold() {
-		return hook.getCrashFilter().getLevel();
+		return hook.getCrashFilter().getThreshold();
 	}
 	@Override
 	public int getGatewayCrashAppenderBufferSize() {
@@ -60,7 +60,7 @@ public class GatewayRpcDispatcher implements LoggingPropertiesInterface {
 	 */
 	@Override
 	public String getGatewayCrashAppenderThreshold() {
-		return hook.getCrashFilter().getLevel();
+		return hook.getCrashFilter().getThreshold();
 	}
 	@Override
 	public String getGatewayLoggingLevel(String loggerName) {
@@ -109,7 +109,13 @@ public class GatewayRpcDispatcher implements LoggingPropertiesInterface {
 	/**
 	 */
 	@Override
-	public String getLogsDir() { return context.getLogsDir().getAbsolutePath(); }  
+	public String getLogsDir() { return context.getLogsDir().getAbsolutePath(); } 
+	/**
+	 * @return the execution path for the browser used to display context-sensitive help.
+	 */
+	public String getWindowsBrowserPath() {
+		return hook.getWindowsBrowserPath();
+	}
 	/**
 	 */
 	public String getUserLibDir() { return context.getUserlibDir().getAbsolutePath(); }
@@ -149,7 +155,7 @@ public class GatewayRpcDispatcher implements LoggingPropertiesInterface {
 	}
 	@Override
 	public void setCrashAppenderThreshold(String threshold) {
-		hook.getCrashFilter().setLevel(threshold);
+		hook.getCrashFilter().setThreshold(threshold);
 	}
 	@Override
 	public void setGatewayCrashAppenderBufferSize(int size) {
@@ -158,7 +164,7 @@ public class GatewayRpcDispatcher implements LoggingPropertiesInterface {
 	}
 	@Override
 	public void setGatewayCrashAppenderThreshold(String threshold) {
-		hook.getCrashFilter().setLevel(threshold);	
+		hook.getCrashFilter().setThreshold(threshold);	
 	}
 	@Override
 	public void setGatewayLoggingLevel(String loggerName, String level) {

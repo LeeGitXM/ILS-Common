@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
-import com.ils.logging.common.LogMaker;
+import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 import ch.qos.logback.classic.Level;
@@ -47,7 +47,7 @@ public class GatewayScriptFunctions  {
 	 * @return the buffer size for the crash appender in the current scope
 	 */
 	public static String getCrashAppenderThreshold() {
-		return hook.getCrashFilter().getLevel();
+		return hook.getCrashFilter().getThreshold();
 	}
 	/**
 	 * @return the buffer size for the crash logging appender.
@@ -59,7 +59,7 @@ public class GatewayScriptFunctions  {
 	 * @return the buffer size for the crash appender in the current scope
 	 */
 	public static String getGatewayCrashAppenderThreshold() {
-		return hook.getCrashFilter().getLevel();
+		return hook.getCrashFilter().getThreshold();
 	}
 	/**
 	 * @return a list of names of loggers known to the Gateway scope.
@@ -105,7 +105,10 @@ public class GatewayScriptFunctions  {
 	public static String getLoggingDatasource() { return hook.getLoggingDatasource(); }
 	/**
 	 */
-	public static String getLogsDir() { return context.getLogsDir().getAbsolutePath(); }  
+	public static String getLogsDir() { return context.getLogsDir().getAbsolutePath(); }
+	/**
+	 */
+	public static String getWindowsBrowserPath() { return hook.getWindowsBrowserPath(); }
 	/**
 	 */
 	public static String getUserLibDir() { return context.getUserlibDir().getAbsolutePath(); }
@@ -183,13 +186,13 @@ public class GatewayScriptFunctions  {
 	 * Specify the threshold level for message retention by the local crash appender
 	 */
 	public static void setCrashAppenderThreshold(String level) {
-		hook.getCrashFilter().setLevel(level);
+		hook.getCrashFilter().setThreshold(level);
 	}
 	/**
 	 * Specify the threshold level for message retention by the gateway crash appender
 	 */
 	public static void setGatewayCrashAppenderThreshold(String level) {
-		hook.getCrashFilter().setLevel(level);
+		hook.getCrashFilter().setThreshold(level);
 	}
 	/**
 	 * Set a level: ERROR, WARN, INFO, DEBUG, TRACE in your current scope on the named logger.

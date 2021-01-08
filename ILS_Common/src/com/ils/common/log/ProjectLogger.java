@@ -1,7 +1,7 @@
 /**
  *   (c) 2018  ILS Automation. All rights reserved.
  */
-package com.ils.logging.common;
+package com.ils.common.log;
 
 import ch.qos.logback.classic.Logger;
 

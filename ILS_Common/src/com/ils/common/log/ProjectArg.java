@@ -1,7 +1,7 @@
 /**
  *   (c) 2018-2020  ILS Automation. All rights reserved.
  */
-package com.ils.logging.common;
+package com.ils.common.log;
 
 /**
  * This is an MDC argument that can be added directly to a log message.

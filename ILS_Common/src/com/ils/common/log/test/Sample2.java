@@ -1,20 +1,26 @@
-package com.ils.logging.common.test;
+package com.ils.common.log.test;
 
-import com.ils.logging.common.LogMaker;
+import org.apache.log4j.MDC;
+
+import com.ils.common.log.LogMaker;
 
 import ch.qos.logback.classic.Logger;
 
 /**
- * Example of a logging class that does knows its project at logger creation time.
+ * Example of a logging class that does not know its project at logger creation time.
  * @author chuckc
  *
  */
-public class Sample1 {
+public class Sample2 {
 	private final Logger log;
-	private static final String CLSS = "Sample1";
+	private static final String CLSS = "Sample2";
 	
-	public Sample1(String project) {
-		this.log = LogMaker.getLogger(this,project);
+	public Sample2() {
+		this.log = LogMaker.getLogger(this);
+	}
+	
+	public void setProject(String project) {
+		MDC.put(LogMaker.PROJECT_KEY, project);
 	}
 	
 	public void info(String msg) {
@@ -28,10 +34,9 @@ public class Sample1 {
 	public void trace(String msg) {
 		log.trace(String.format("%s.trace: Test trace message (%s)",CLSS,msg));
 	}
-	
 	public void work() {
-		info("tuba");
-		warn("sax");
-		trace("triangle");
+		info("bassoon");
+		warn("oboe");
+		trace("piccolo");
 	}
 }

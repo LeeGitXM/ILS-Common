@@ -9,8 +9,8 @@ import java.util.Map;
 
 import org.slf4j.LoggerFactory;
 
+import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
-import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.LoggingHookInterface;
 import com.ils.logging.common.filter.CrashFilter;
 import com.ils.logging.common.filter.PatternFilter;
@@ -104,7 +104,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		try {
 			int crashBufferSize = ClientScriptFunctions.getCrashAppenderBufferSize();
 			String threshold = ClientScriptFunctions.getCrashAppenderThreshold();
-			crashFilter.setLevel(threshold);
+			crashFilter.setThreshold(threshold);
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);

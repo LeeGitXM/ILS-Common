@@ -11,8 +11,8 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
+import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
-import com.ils.logging.common.LogMaker;
 import com.ils.logging.common.LoggingHookInterface;
 import com.ils.logging.common.filter.PatternFilter;
 import com.inductiveautomation.ignition.client.gateway_interface.GatewayConnectionManager;
@@ -53,7 +53,7 @@ public class ClientScriptFunctions  {
 		int size = -1;
 		try {
 			size = (int)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
-					CommonProperties.MODULE_ID, "getCrashBufferSize" );
+					CommonProperties.MODULE_ID, "getCrashAppenderBufferSize" );
 		}
 		catch(Exception ge) {
 			System.out.println(String.format("%s.getCrashAppenderBufferSize: GatewayException (%s)",CLSS,ge.getMessage()));
@@ -61,10 +61,10 @@ public class ClientScriptFunctions  {
 		return size;
 	}
 	/**
-	 * @return the buffer size for the crash appender in the current scope
+	 * @return the save threshold for the crash appender in the current scope
 	 */
 	public static String getCrashAppenderThreshold() {
-		return hook.getCrashFilter().getLevel();
+		return hook.getCrashFilter().getThreshold();
 	}
 	
 	/**
@@ -322,7 +322,7 @@ public class ClientScriptFunctions  {
 	 * Specify the threshold level for message retention by the gateway crash appender
 	 */
 	public static void setGatewayCrashAppenderThreshold(String level) {
-		hook.getCrashFilter().setLevel(level);
+		hook.getCrashFilter().setThreshold(level);
 	}
 	/**
 	 * Set the level of a logger in Gateway scope. The level is changed for everyone and persists until changed again.
