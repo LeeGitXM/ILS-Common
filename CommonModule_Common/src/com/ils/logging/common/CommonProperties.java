@@ -26,6 +26,4 @@ public interface CommonProperties   {
 	
 	// Context-sensitive help configuration
 	public static String HELP_CONFIGURATION = "HELP CONFIGURATION";   // 
-	public static String HELP_CONFIGURATION_RECORD_CLASS = "ILS_HELP_PROPERTIES";   // Table name for context sensitive help meta
-	public final static String DEFAULT_WINDOWS_BROWSER_PATH  = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";       // Common location for Chrome browser on a Windows system
 }

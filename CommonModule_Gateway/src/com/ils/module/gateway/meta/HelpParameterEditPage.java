@@ -8,6 +8,7 @@ import org.apache.wicket.Application;
 import org.apache.wicket.model.Model;
 
 import com.ils.common.ILSProperties;
+import com.ils.common.help.HelpRecord;
 import com.ils.logging.common.CommonProperties;
 import com.ils.module.gateway.ILSGatewayHook;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;

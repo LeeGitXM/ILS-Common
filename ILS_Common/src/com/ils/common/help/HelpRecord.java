@@ -1,9 +1,9 @@
 /**
  *   (c) 2021  ILS Automation. All rights reserved. 
  */
-package com.ils.module.gateway.meta;
+package com.ils.common.help;
 
-import com.ils.logging.common.CommonProperties;
+import com.ils.common.ILSProperties;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.Category;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.IdentityField;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistentRecord;
@@ -19,7 +19,7 @@ import simpleorm.dataset.SFieldFlags;
 @SuppressWarnings("serial")
 public class HelpRecord extends PersistentRecord  {
 	public final static RecordMeta<HelpRecord> META = new RecordMeta<HelpRecord>(
-			HelpRecord.class, CommonProperties.HELP_CONFIGURATION_RECORD_CLASS);
+			HelpRecord.class, ILSProperties.HELP_CONFIGURATION_RECORD_CLASS);
 
 	public final static IdentityField Id = new IdentityField(META);
 	
@@ -27,7 +27,7 @@ public class HelpRecord extends PersistentRecord  {
 	// - path to the windows browser
 	
 	public final static StringField windowsBrowserPath = new StringField(META,
-			"WindowsBrowserPath", SFieldFlags.SMANDATORY).setDefault(CommonProperties.DEFAULT_WINDOWS_BROWSER_PATH);
+			"WindowsBrowserPath", SFieldFlags.SMANDATORY).setDefault(ILSProperties.DEFAULT_WINDOWS_BROWSER_PATH);
 
 	public final static Category browserCategory = new Category(
 			"ils.Categories.Browser_Path", 0).include(windowsBrowserPath);
