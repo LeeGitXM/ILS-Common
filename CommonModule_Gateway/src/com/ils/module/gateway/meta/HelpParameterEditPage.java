@@ -10,6 +10,7 @@ import org.apache.wicket.model.Model;
 import com.ils.common.ILSProperties;
 import com.ils.logging.common.CommonProperties;
 import com.ils.module.gateway.ILSGatewayHook;
+import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import com.inductiveautomation.ignition.gateway.web.components.RecordEditForm;
 import com.inductiveautomation.ignition.gateway.web.models.IConfigTab;
@@ -18,6 +19,13 @@ import com.inductiveautomation.ignition.gateway.web.models.IConfigTab;
  */
 public class HelpParameterEditPage extends RecordEditForm {
 	private static final long serialVersionUID = 9167269039342984188L;
+	public static final String BUNDLE_NAME = "ilsmodule";       // Properties file is ilsmodule.properties
+	public static final String BUNDLE_ROOT = "ilsmodule";       // Name of the bundle
+	
+	static {
+		// Access the resource bundle
+		BundleUtil.get().addBundle(BUNDLE_ROOT,ILSGatewayHook.class,BUNDLE_NAME);
+	}
 	
 	// This gets added as the panel for the help category
 	// The bundle name is "ils"
@@ -30,7 +38,7 @@ public class HelpParameterEditPage extends RecordEditForm {
 			.build();
 
 	public HelpParameterEditPage() {
-		super(null, null, Model.of("Browser Execution Path (Windows only)"),
+		super(null, null, Model.of("Context-sensitive Help Configuration"),
 				((GatewayContext) Application.get()).getPersistenceInterface()
 						.find(HelpRecord.META, 0L));
 	}
