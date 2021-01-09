@@ -212,6 +212,20 @@ public class ClientScriptFunctions  {
 		return type;
 	}
 	/**
+	 * @return the directory path to the Ignition installation directory holding jar files.
+	 */
+	public static String getWindowsBrowserPath()throws Exception{
+		String path = "";
+		try {
+			path = (String)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
+					CommonProperties.MODULE_ID, "getWindowsBrowserPath" );
+		}
+		catch(Exception ge) {
+			System.out.println(String.format("%s.getWindowsBrowserPath: GatewayException (%s)",CLSS,ge.getMessage()));
+		}
+		return path;
+	}
+	/**
 	 * @param threadName
 	 */
 	public static void passGatewayLogsOnThread(String threadName) {

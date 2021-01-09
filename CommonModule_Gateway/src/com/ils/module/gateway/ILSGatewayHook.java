@@ -42,6 +42,7 @@ import ch.qos.logback.classic.spi.TurboFilterList;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.joran.spi.JoranException;
+import simpleorm.dataset.SQuery;
 
 /**
  * This is root node for specialty code dealing with the gateway. On startup
@@ -156,9 +157,16 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	public Object getRPCHandler(ClientReqSession session, Long projectID) {
 		return dispatcher;
 	}
-	
+	/**
+	 * Retrieve the configured browser path from the ORM database HelpRecord
+	 * @return the configured browser path (for Windows)
+	 */
 	public String getWindowsBrowserPath() {
-		return "";
+		String path = null;
+		SQuery<HelpRecord> query = new SQuery<HelpRecord>(HelpRecord.META).eq(HelpRecord.Id,0L);
+		HelpRecord rec = this.context.getPersistenceInterface().queryOne(query);
+		if(rec!=null ) path = rec.getWindowsBrowserPath();
+		return path;
 	}
 	/**
 	 * Configure application logging for the database and crash appenders.

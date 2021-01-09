@@ -29,8 +29,8 @@ public class HelpRecord extends PersistentRecord  {
 	public final static StringField windowsBrowserPath = new StringField(META,
 			"WindowsBrowserPath", SFieldFlags.SMANDATORY).setDefault(CommonProperties.DEFAULT_WINDOWS_BROWSER_PATH);
 
-	public final static Category configurationCategory = new Category(
-			"ilsmodule.Categories.ILS_Configuration", 0).include(windowsBrowserPath);
+	public final static Category browserCategory = new Category(
+			"ils.Categories.Browser_Path", 0).include(windowsBrowserPath);
 	
 	
 	@Override
