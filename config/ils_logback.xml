@@ -60,7 +60,7 @@
     </discriminator>
     <sift>
       <appender name="FILE-${project}" class="ch.qos.logback.core.FileAppender">
-        <file>${IGNITION_HOME}/logs/aed-${project}.log</file>
+        <file>${IGNITION_HOME}/logs/${project}.log</file>
     	<prudent>true</prudent>
         <encoder>
           <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
@@ -78,7 +78,7 @@
     </discriminator>
     <sift>
       <appender name="FILE-${project}" class="ch.qos.logback.core.FileAppender">
-        <file>${IGNITION_HOME}/logs/aed-${project}.log</file>
+        <file>${IGNITION_HOME}/logs/${project}.log</file>
     	<prudent>true</prudent>
         <encoder>
           <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
@@ -90,7 +90,7 @@
       For this it will need to load the logger classes. Doing that ... you see where this is getting. Setting the log level to INFO
 	  supresses the debug log entry -> loop avoided.
    -->
-  <turboFilter class="com.ils.logging..common.filter.PassThruFilter">
+  <turboFilter class="com.ils.logging.common.filter.PassThruFilter">
   </turboFilter>
 
   <root name="ROOT" level="info">
