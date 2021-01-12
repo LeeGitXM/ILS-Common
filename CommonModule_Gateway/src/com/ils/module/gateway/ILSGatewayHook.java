@@ -114,12 +114,13 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			helpRec = context.getPersistenceInterface().createNew(HelpRecord.META);
 			helpRec.setLong(HelpRecord.Id, 0L);   
 			String currentPath = helpRec.getWindowsBrowserPath();
+			System.out.println(String.format("%s.startup: Browser path is: %s",CLSS,currentPath ));
 			if( currentPath==null || currentPath.isEmpty() ) currentPath = ILSProperties.DEFAULT_WINDOWS_BROWSER_PATH;
 			helpRec.setString(HelpRecord.windowsBrowserPath, currentPath);
 			context.getSchemaUpdater().ensureRecordExists(helpRec);
 		}
 		catch(Exception ex) {
-			System.out.println(String.format("%s.startup: Failed to create persistant record (%s)",CLSS, ex.getLocalizedMessage()));;
+			System.out.println(String.format("%s.startup: Failed to create persistent record (%s)",CLSS, ex.getLocalizedMessage()));;
 		}
 	}
 	@Override
@@ -203,7 +204,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 				crashFilter.setThreshold(threshold);
 			}
 			
-			String loggingDatasource = configurator.getInterpretationContext().getProperty(CommonProperties.LOGGING_DATASOURCE);
+			loggingDatasource = configurator.getInterpretationContext().getProperty(CommonProperties.LOGGING_DATASOURCE);
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
@@ -238,9 +239,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			System.out.println(String.format("%s: Failed to configure gateway logger (%s)",CLSS,je.getMessage()));
 		}
 
-
-		System.out.println(String.format("%s: Configured gateway logger",CLSS));
-		
+		System.out.println(String.format("%s: Configured gateway logger",CLSS));	
 	}
 	
 	private void installDatabaseAppender(Logger root,String connection) {

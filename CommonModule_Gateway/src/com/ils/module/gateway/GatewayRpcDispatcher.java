@@ -114,7 +114,9 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	 * @return the execution path for the browser used to display context-sensitive help.
 	 */
 	public String getWindowsBrowserPath() {
-		return hook.getWindowsBrowserPath();
+		String path = hook.getWindowsBrowserPath();
+		if( path==null ) path = "BROWSER_PATH_MUST_BE_CONFIGURED_VIA_CommonModule";
+		return path;
 	}
 	/**
 	 */
