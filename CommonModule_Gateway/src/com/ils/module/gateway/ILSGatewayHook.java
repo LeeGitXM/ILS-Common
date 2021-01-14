@@ -16,14 +16,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 import com.ils.common.ILSProperties;
-import com.ils.common.help.HelpRecord;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.filter.CrashFilter;
 import com.ils.logging.common.filter.PatternFilter;
 import com.ils.module.gateway.appender.GatewayCrashAppender;
 import com.ils.module.gateway.appender.GatewaySingleTableDBAppender;
-import com.ils.module.gateway.meta.HelpParameterEditPage;
+import com.ils.module.gateway.help.HelpParameterEditPage;
+import com.ils.module.gateway.help.HelpRecord;
 import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.common.expressions.ExpressionFunctionManager;
 import com.inductiveautomation.ignition.common.licensing.LicenseState;
