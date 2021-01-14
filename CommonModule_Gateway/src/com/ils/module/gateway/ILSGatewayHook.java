@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
 import com.ils.common.ILSProperties;
+import com.ils.common.help.HelpRecordProxy;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.filter.CrashFilter;
@@ -165,8 +166,8 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	 */
 	public String getWindowsBrowserPath() {
 		String path = null;
-		SQuery<HelpRecord> query = new SQuery<HelpRecord>(HelpRecord.META).eq(HelpRecord.Id,0L);
-		HelpRecord rec = this.context.getPersistenceInterface().queryOne(query);
+		SQuery<HelpRecordProxy> query = new SQuery<HelpRecordProxy>(HelpRecordProxy.META).eq(HelpRecordProxy.Id,0L);
+		HelpRecordProxy rec = this.context.getPersistenceInterface().queryOne(query);
 		if(rec!=null ) path = rec.getWindowsBrowserPath();
 		return path;
 	}
