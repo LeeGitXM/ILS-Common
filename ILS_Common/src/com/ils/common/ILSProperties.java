@@ -19,4 +19,8 @@ public interface ILSProperties   {
 	public static String HELP_CONFIGURATION = "ILS";   // Name of menu node for help configuration
 	public static String HELP_CONFIGURATION_RECORD_CLASS = "ILS_HELP_PROPERTIES";   // Table name for context sensitive help meta
 	public final static String DEFAULT_WINDOWS_BROWSER_PATH  = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe";       // Common location for Chrome browser on a Windows system
+	
+	// These are preferences keys for sharing between applications
+	public final static String ILS_PREFERENCES_DOMAIN = "ILS_Preferences";
+	public final static String PREFERENCES_PROJECT_EXIM_DIRECTORY = "ProjectExImDirectory";  
 }
