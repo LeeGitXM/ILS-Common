@@ -23,4 +23,6 @@ public interface CommonProperties   {
 	public final static Level DEFAULT_CRASH_APPENDER_THRESHOLD = Level.DEBUG;
 	public final static int DEFAULT_CRASH_BUFFER_SIZE = 500;
 	public final static String LOOP_PREVENTION_MARKER_NAME  = "no-loop";        // Used to prevent circular processing during logging
+	
+	public final static String DEFAULT_APPENDER_PATTERN = "%d{HH:mm:ss.SSS} %level %logger{35} %msg%n";
 }

@@ -30,10 +30,12 @@ import com.inductiveautomation.ignition.designer.model.DesignerContext;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.TurboFilterList;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.OutputStreamAppender;
 
 public class ILSDesignerHook extends AbstractDesignerModuleHook implements LoggingHookInterface  {
 	private static final String CLSS = "LoggingDesignerHook";
@@ -113,12 +115,20 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
+				
 				installDatabaseAppender(root,loggingDatasource);
 				installCrashAppender(root,loggingDatasource,crashBufferSize);
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
+				PatternLayoutEncoder pattern = new PatternLayoutEncoder();
+				pattern.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
 				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
 				while(iterator.hasNext()) {
-					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,iterator.next().getName() ));
+					
+					Appender app = iterator.next();
+					if( app instanceof OutputStreamAppender ) {
+						((OutputStreamAppender)app).setEncoder(pattern);
+					}
+					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,app.getName() ));
 				}
 			}
 		}

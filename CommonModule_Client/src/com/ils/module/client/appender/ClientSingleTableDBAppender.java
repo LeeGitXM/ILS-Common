@@ -19,9 +19,11 @@ import java.util.Map;
 
 import com.ils.common.db.ClientDBUtility;
 import com.ils.common.log.LogMaker;
+import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.appender.AbstractSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 
+import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.LoggingEvent;
 
 /**
@@ -34,6 +36,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 	private final String db;               // Database connection 
 	private final String insertString;
 	private String scope;
+	private final PatternLayout layout;
 
 	/**
 	 * 
@@ -46,6 +49,8 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 		this.dbUtil = new ClientDBUtility(ctx);
 		this.insertString = getInsertString();
 		this.scope = s;
+		this.layout = new PatternLayout();
+		layout.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
 	}
 	
 
@@ -62,8 +67,14 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 		catch(Exception ex) {
 			System.out.println(String.format("%s.start: Exception creating prepared statement (%s)",CLSS,ex.getLocalizedMessage()));
 		}
-
+		layout.start();
 		super.start();
+	}
+	
+	@Override
+	public void stop() {
+		super.stop();
+		layout.stop();
 	}
 	
 	/**
@@ -74,7 +85,8 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 		if( e instanceof LoggingEvent) {
 			LoggingEvent event = (LoggingEvent)e;
 			if( event.getLoggerName().equalsIgnoreCase("OutputConsole")) return;
-			System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
+			String output = layout.doLayout(event);
+			System.out.println(output);
 			Object[] args = new Object[16];
 			try {
 				Map<String, String> map = event.getMDCPropertyMap();

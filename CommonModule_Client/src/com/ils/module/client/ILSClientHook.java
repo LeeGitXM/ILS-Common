@@ -27,10 +27,12 @@ import com.inductiveautomation.vision.api.client.ClientModuleHook;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.TurboFilterList;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.OutputStreamAppender;
 
 public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	private static final String CLSS = "LoggingClientHook";
@@ -112,9 +114,15 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 				installDatabaseAppender(root,loggingDatasource);
 				installCrashAppender(root,loggingDatasource,crashBufferSize);
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
+				PatternLayoutEncoder pattern = new PatternLayoutEncoder();
+				pattern.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
 				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
 				while(iterator.hasNext()) {
-					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,iterator.next().getName() ));
+					Appender<ILoggingEvent> app = iterator.next();
+					if( app instanceof OutputStreamAppender ) {
+						((OutputStreamAppender<ILoggingEvent>)app).setEncoder(pattern);
+					}
+					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,app.getName() ));
 				}
 			}
 			// Find the pattern filter
