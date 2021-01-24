@@ -116,14 +116,13 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
 				
-				installDatabaseAppender(root,loggingDatasource);
-				installCrashAppender(root,loggingDatasource,crashBufferSize);
+				installDatabaseAppender(root,loggingDatasource,logContext);
+				installCrashAppender(root,loggingDatasource,logContext,crashBufferSize);
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
 				PatternLayoutEncoder pattern = new PatternLayoutEncoder();
 				pattern.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
 				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
 				while(iterator.hasNext()) {
-					
 					Appender app = iterator.next();
 					if( app instanceof OutputStreamAppender ) {
 						((OutputStreamAppender)app).setEncoder(pattern);
@@ -133,7 +132,8 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 			}
 		}
 		catch(Exception ex) {
-			System.out.println(String.format("%s: Failed to create logging appenders (%s)",CLSS,ex.getMessage()));
+			System.out.println(String.format("%s: Failed to create logging appenders (%s)\n",CLSS,ex.getMessage()));
+			ex.printStackTrace();
 		}
 		// Find the pattern filter
 		TurboFilterList list = logContext.getTurboFilterList();
@@ -148,18 +148,18 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 		
 	}
-	private void installDatabaseAppender(Logger root,String connection) {
+	private void installDatabaseAppender(Logger root,String connection,LoggerContext ctx) {
 		AbstractClientContext acc = (AbstractClientContext)context;
-		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,"designer");
+		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,ctx,"designer");
 		appender.setContext(root.getLoggerContext());
 		appender.setName(CommonProperties.DB_APPENDER_NAME);
 		appender.start();
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed databse appender ...",CLSS));
 	}
-	private void installCrashAppender(Logger root,String connection,int bufferSize) {
+	private void installCrashAppender(Logger root,String connection,LoggerContext ctx,int bufferSize) {
 		AbstractClientContext acc = (AbstractClientContext)context;
-		crashAppender = new ClientCrashAppender(connection,acc,"designer",bufferSize);
+		crashAppender = new ClientCrashAppender(connection,acc,ctx,"designer",bufferSize);
 		crashAppender.setContext(root.getLoggerContext());
 		crashAppender.setName(CommonProperties.CRASH_APPENDER_NAME);
 		crashAppender.addFilter(crashFilter);

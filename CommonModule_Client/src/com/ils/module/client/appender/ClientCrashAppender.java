@@ -20,6 +20,7 @@ import com.ils.logging.common.CircularLoggingEventBuffer;
 import com.ils.logging.common.CommonProperties;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 
+import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.LoggingEvent;
 
@@ -38,8 +39,8 @@ public class ClientCrashAppender extends ClientSingleTableDBAppender<ILoggingEve
 	 * @param ctx
 	 * @param s scope (client of designer)
 	 */
-	public ClientCrashAppender(String connect,AbstractClientContext ctx,String s,int bufferSize) {
-		super(connect,ctx,s);
+	public ClientCrashAppender(String connect,AbstractClientContext ctx,LoggerContext logContext,String s,int bufferSize) {
+		super(connect,ctx,logContext,s);
 		this.buffer = new CircularLoggingEventBuffer(bufferSize);
 		this.logMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
 	}

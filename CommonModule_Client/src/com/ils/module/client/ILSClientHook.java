@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.jfree.util.LogContext;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.LogMaker;
@@ -111,8 +112,8 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 			if( loggingDatasource!=null ) {
 				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
-				installDatabaseAppender(root,loggingDatasource);
-				installCrashAppender(root,loggingDatasource,crashBufferSize);
+				installDatabaseAppender(root,loggingDatasource,logContext);
+				installCrashAppender(root,loggingDatasource,logContext,crashBufferSize);
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
 				PatternLayoutEncoder pattern = new PatternLayoutEncoder();
 				pattern.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
@@ -142,18 +143,18 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 
 	}
-	private void installDatabaseAppender(Logger root,String connection) {
+	private void installDatabaseAppender(Logger root,String connection, LoggerContext ctx) {
 		AbstractClientContext acc = (AbstractClientContext)context;
-		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,"client");
+		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,ctx,"client");
 		appender.setContext(root.getLoggerContext());
 		appender.setName(CommonProperties.DB_APPENDER_NAME);
 		appender.start();
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed databse appender ...",CLSS));
 	}
-	private void installCrashAppender(Logger root,String connection,int bufferSize) {
+	private void installCrashAppender(Logger root,String connection,LoggerContext ctx,int bufferSize) {
 		AbstractClientContext acc = (AbstractClientContext)context;
-		crashAppender = new ClientCrashAppender(connection,acc,"client",bufferSize);
+		crashAppender = new ClientCrashAppender(connection,acc,ctx,"client",bufferSize);
 		crashAppender.setContext(root.getLoggerContext());
 		crashAppender.setName(CommonProperties.CRASH_APPENDER_NAME);
 		crashAppender.addFilter(crashFilter);

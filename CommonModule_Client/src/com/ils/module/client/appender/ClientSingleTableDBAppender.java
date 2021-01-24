@@ -17,12 +17,15 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
 
+import org.slf4j.LoggerFactory;
+
 import com.ils.common.db.ClientDBUtility;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.appender.AbstractSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 
+import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.PatternLayout;
 import ch.qos.logback.classic.spi.LoggingEvent;
 
@@ -44,13 +47,14 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 	 * @param ctx
 	 * @param s scope (client or designer)
 	 */
-	public ClientSingleTableDBAppender(String connect,AbstractClientContext ctx,String s) {
+	public ClientSingleTableDBAppender(String connect,AbstractClientContext ctx,LoggerContext logContext,String s) {
 		this.db = connect;  // Datasource
 		this.dbUtil = new ClientDBUtility(ctx);
 		this.insertString = getInsertString();
 		this.scope = s;
 		this.layout = new PatternLayout();
 		layout.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
+		layout.setContext(logContext);
 	}
 	
 
