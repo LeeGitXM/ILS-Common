@@ -87,6 +87,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 			if( event.getLoggerName().equalsIgnoreCase("OutputConsole")) return;
 			String output = layout.doLayout(event);
 			System.out.println(output);
+			System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
 			Object[] args = new Object[16];
 			try {
 				Map<String, String> map = event.getMDCPropertyMap();
