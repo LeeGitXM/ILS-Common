@@ -9,6 +9,7 @@ package com.ils.module.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.MDC;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.LogMaker;
@@ -16,6 +17,7 @@ import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.LoggingHookInterface;
 import com.ils.logging.common.filter.PatternFilter;
 import com.inductiveautomation.ignition.client.gateway_interface.GatewayConnectionManager;
+import com.inductiveautomation.ignition.client.model.ClientContext;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -32,19 +34,26 @@ import ch.qos.logback.classic.turbo.TurboFilter;
 public class ClientScriptFunctions  {
 	private static String CLSS = "ClientScriptFunctions: ";
 	private static LoggingHookInterface hook = null;
+	private static ClientContext context = null;
 	private static List<String> verboten = new ArrayList<>();
 	
 	static {
 		verboten.add("OutputConsole");
 	}
 	
+	public static void setContext(ClientContext c )     { context = c; }
 	public static void setHook(LoggingHookInterface h ) { hook = h; }
 	
 	/**
 	 * @return the named logger
 	 */
 	public static Logger getLogger(String name) {
-		return LogMaker.getLogger(name);
+		Logger logger = LogMaker.getLogger(name);
+		if( context!=null) {
+			//  MDC.put(LogMaker.CLIENT_KEY, "??");
+			MDC.put(LogMaker.PROJECT_KEY, context.getProject().getName());
+		}
+		return logger;
 	}
 	/**
 	 * @return the buffer size for the crash logging appender.

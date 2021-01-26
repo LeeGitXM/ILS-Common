@@ -1,5 +1,5 @@
 /**
- *   (c) 2020  ILS Automation. All rights reserved. 
+ *   (c) 2020-2021  ILS Automation. All rights reserved. 
  */
 package com.ils.module.client;
 
@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.jfree.util.LogContext;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.LogMaker;
@@ -45,6 +44,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	public ILSClientHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
 		crashFilter = new CrashFilter();
+		
 	}
 	
 	public CrashFilter getCrashFilter() { return this.crashFilter; }
@@ -88,6 +88,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	public void startup(ClientContext ctx, LicenseState arg1) throws Exception {
 		this.context = ctx;
 		ClientScriptFunctions.setHook(this);
+		ClientScriptFunctions.setContext(context);
 		configureLogging();
 	}
 

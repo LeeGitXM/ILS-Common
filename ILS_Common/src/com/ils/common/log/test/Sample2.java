@@ -27,6 +27,11 @@ public class Sample2 {
 		log.info(String.format("%s.info: Test info message (%s)",CLSS,msg));
 	}
 	
+	public void infof(String format,String arg1,String arg2) {
+		log.info(format,arg1,arg2);
+		log.info("{} {} {}",1,2,3);
+	}
+	
 	public void warn(String msg) {
 		log.info(String.format("%s.warn: Test warning message (%s)",CLSS,msg));
 	}
@@ -36,6 +41,7 @@ public class Sample2 {
 	}
 	public void work() {
 		info("bassoon");
+		infof("wood{} {}","win","quartet");
 		warn("oboe");
 		trace("piccolo");
 	}

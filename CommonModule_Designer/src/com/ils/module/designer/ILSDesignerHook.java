@@ -155,7 +155,7 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 		appender.setName(CommonProperties.DB_APPENDER_NAME);
 		appender.start();
 		root.addAppender(appender);
-		System.out.println(String.format("%s: Installed databse appender ...",CLSS));
+		System.out.println(String.format("%s: Installed database appender ...",CLSS));
 	}
 	private void installCrashAppender(Logger root,String connection,LoggerContext ctx,int bufferSize) {
 		AbstractClientContext acc = (AbstractClientContext)context;

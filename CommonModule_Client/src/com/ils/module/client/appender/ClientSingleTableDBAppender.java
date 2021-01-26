@@ -71,27 +71,26 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 		catch(Exception ex) {
 			System.out.println(String.format("%s.start: Exception creating prepared statement (%s)",CLSS,ex.getLocalizedMessage()));
 		}
-		layout.start();
 		super.start();
+		layout.start();
 	}
 	
 	@Override
 	public void stop() {
-		super.stop();
 		layout.stop();
+		super.stop();
 	}
-	
 	/**
-	 * This is where the work gets done 
+	 * This is where the work gets done. The layout formats the message,
+	 * then we send it to the console. 
 	 */
 	@Override
 	protected synchronized void append(E e) {
 		if( e instanceof LoggingEvent) {
 			LoggingEvent event = (LoggingEvent)e;
 			if( event.getLoggerName().equalsIgnoreCase("OutputConsole")) return;
-			String output = layout.doLayout(event);
-			System.out.println(output);
-			System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
+			String text = layout.doLayout(event);
+			System.out.print(text);
 			Object[] args = new Object[16];
 			try {
 				Map<String, String> map = event.getMDCPropertyMap();

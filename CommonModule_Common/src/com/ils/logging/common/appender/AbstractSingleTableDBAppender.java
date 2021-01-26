@@ -34,8 +34,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 	protected Connection cxn = null;       // Database connection 
 	protected PreparedStatement ps  = null;
 	protected final StackTraceElement EMPTY_CALLER_DATA = CallerData.naInstance();
-
-
+	
 	/** 
 	 * Create the table if it doesn't exist. We simply ignore any error
 	 */
@@ -71,10 +70,6 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 		return sb.toString();
 	}
 	
-	@Override
-	public void start() {
-		super.start();
-	}
 
 	@Override
 	public void stop() {
@@ -127,15 +122,17 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 		}
 		return caller;
 	}
-
+	
 	/**
-	 * This is where the work gets done to 
+	 * This is where the work gets done.
+	 * By default, do not send to the console. We let the ConsoleAppender
+	 * do that. It gives the user more control.
 	 */
 	@Override
 	protected synchronized void append(E e) {
 		if( e instanceof LoggingEvent) {
 			LoggingEvent event = (LoggingEvent)e;
-			//System.out.println(String.format("%s.append: %s",CLSS,event.getFormattedMessage()));
+			//System.out.println(event.getFormattedMessage());
 
 			try {
 				Map<String, String> map = event.getMDCPropertyMap();
