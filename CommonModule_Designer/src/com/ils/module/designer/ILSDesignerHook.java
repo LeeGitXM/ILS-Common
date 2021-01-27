@@ -90,6 +90,7 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 	public void startup(DesignerContext ctx, LicenseState arg1) throws Exception {
 		this.context = ctx;
 		ClientScriptFunctions.setHook(this);
+		ClientScriptFunctions.setContext(context);
 		configureLogging();
 	}
 	

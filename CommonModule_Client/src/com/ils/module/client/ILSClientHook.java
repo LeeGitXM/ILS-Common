@@ -44,7 +44,6 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	public ILSClientHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
 		crashFilter = new CrashFilter();
-		
 	}
 	
 	public CrashFilter getCrashFilter() { return this.crashFilter; }
