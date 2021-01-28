@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
 
-import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import com.ils.common.db.ClientDBUtility;
 import com.ils.common.log.LogMaker;
@@ -100,8 +100,9 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				args[0] = 0;   										  // pid
 				args[1] = Thread.currentThread().getId();   		  // thread
 				args[2] = truncate(map.get(LogMaker.PROJECT_KEY),25); // project
-				args[3] = scope;   								      // scope
-				args[4] = truncate(map.get(LogMaker.CLIENT_KEY),25);  // client
+				args[3] = scope; 									// scope
+				String clientId = MDC.get(LogMaker.CLIENT_KEY);
+				args[4] = truncate(clientId,25); 					// client
 				args[5] = truncate(event.getThreadName(),50);   	// thread name
 				args[6] = truncate(caller.getClassName(),50);   	// module
 				args[7] = truncate(event.getLoggerName(),50);   	// logger

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.io.Files;
 import com.ils.common.ILSProperties;
 import com.ils.common.help.HelpRecordProxy;
+import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.filter.CrashFilter;
@@ -207,7 +208,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			
 			loggingDatasource = configurator.getInterpretationContext().getProperty(CommonProperties.LOGGING_DATASOURCE);
 			if( loggingDatasource!=null ) {
-				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
 				installDatabaseAppender(root,loggingDatasource);
 				installCrashAppender(root,loggingDatasource,crashBufferSize);
@@ -243,7 +244,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		System.out.println(String.format("%s: Configured gateway logger",CLSS));	
 	}
 	
-	private void installDatabaseAppender(Logger root,String connection) {
+	private void installDatabaseAppender(ILSLogger root,String connection) {
 		Appender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
 		appender.setContext(root.getLoggerContext());
 		appender.setName(CommonProperties.DB_APPENDER_NAME);
@@ -251,7 +252,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		appender.start();
 		System.out.println(String.format("%s: Installed database appender ..",CLSS));
 	}
-	private void installCrashAppender(Logger root,String connection,int bufferSize) {
+	private void installCrashAppender(ILSLogger root,String connection,int bufferSize) {
 		crashAppender = new GatewayCrashAppender(connection,context,bufferSize);
 		crashAppender.setContext(root.getLoggerContext());
 		crashAppender.setName(CommonProperties.CRASH_APPENDER_NAME);
@@ -266,7 +267,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	 * They have all been appended to the root logger.
 	 */
 	private void shutdownLogging() {
-		Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+		ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 		root.detachAppender(CommonProperties.CRASH_APPENDER_NAME);
 		root.detachAppender(CommonProperties.DB_APPENDER_NAME);
 	}

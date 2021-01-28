@@ -1,8 +1,7 @@
 package com.ils.common.log.test;
 
+import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
-
-import ch.qos.logback.classic.Logger;
 
 /**
  * Example of a logging class that does knows its project at logger creation time.
@@ -10,7 +9,7 @@ import ch.qos.logback.classic.Logger;
  *
  */
 public class Sample1 {
-	private final Logger log;
+	private final ILSLogger log;
 	private static final String CLSS = "Sample1";
 	
 	public Sample1(String project) {
@@ -22,7 +21,7 @@ public class Sample1 {
 	}
 	
 	public void infof(String format,String arg) {
-		log.info(format,arg);
+		log.infof(format,arg);
 	}
 	
 	public void warn(String msg) {
@@ -35,7 +34,7 @@ public class Sample1 {
 	
 	public void work() {
 		info("tuba");
-		infof("sousa{}","phone");
+		infof("sousa%s","phone");
 		warn("sax");
 		trace("triangle");
 	}

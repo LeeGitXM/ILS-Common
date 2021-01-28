@@ -1,10 +1,10 @@
 /**
- *   (c) 2020  ILS Automation. All rights reserved.
+ *   (c) 2020-2021  ILS Automation. All rights reserved.
  */
 package com.ils.common.log;
 
-import org.apache.log4j.MDC;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
@@ -13,24 +13,33 @@ import ch.qos.logback.classic.LoggerContext;
  * LogMaker is a thin wrapper around LoggerFactory basically providing
  * the convenience of adding a project marker to the log.
  *
+ * MDC = Mapped Diagnostic Contexts 
  */
 public class LogMaker {
 	public static final String CLIENT_KEY = "client";     // client id
 	public static final String PROJECT_KEY = "project";   // Project name
 	private static final LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 	
-	public static Logger getLogger(Object source) {	
+	public static ILSLogger getLogger(Object source) {	
+		Logger lgr;
 		if( source instanceof String) {
-			return logContext.getLogger((String)source);
+			lgr =  logContext.getLogger((String)source);
 		}
-		return logContext.getLogger(source.getClass());
+		else {
+			lgr =  logContext.getLogger(source.getClass());
+		}
+		return new ILSLogger(lgr);
 	}
 	
-	public static Logger getLogger(Object source,String project) {	
+	public static ILSLogger getLogger(Object source,String project) {	
 		MDC.put(PROJECT_KEY, project);
+		Logger lgr;
 		if( source instanceof String) {
-			return logContext.getLogger((String)source);
+			lgr =  logContext.getLogger((String)source);
 		}
-		return logContext.getLogger(source.getClass());
+		else {
+			lgr =  logContext.getLogger(source.getClass());
+		}
+		return new ILSLogger(lgr);
 	}
 }

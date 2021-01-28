@@ -9,9 +9,10 @@ package com.ils.module.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.MDC;
+import org.slf4j.MDC;
 import org.slf4j.LoggerFactory;
 
+import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.LoggingHookInterface;
@@ -47,11 +48,13 @@ public class ClientScriptFunctions  {
 	/**
 	 * @return the named logger
 	 */
-	public static Logger getLogger(String name) {
-		Logger logger = LogMaker.getLogger(name);
+	public static ILSLogger getLogger(String name) {
+		ILSLogger logger = LogMaker.getLogger(name);
 		if( context!=null) {
-			//  MDC.put(LogMaker.CLIENT_KEY, "??");
 			MDC.put(LogMaker.PROJECT_KEY, context.getProject().getName());
+		}
+		if( hook!=null) {
+			MDC.put(LogMaker.CLIENT_KEY, hook.getClientId());
 		}
 		return logger;
 	}
@@ -170,7 +173,7 @@ public class ClientScriptFunctions  {
 	 */
 	public static String getLoggingLevel(String loggerName) {
 		String result = "";
-		Logger lgr =  LogMaker.getLogger(loggerName);
+		ILSLogger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
 			Level level = lgr.getLevel();
 			if( level!=null ) result = level.toString();
@@ -373,7 +376,7 @@ public class ClientScriptFunctions  {
 			System.out.println(String.format("%s.setLoggingLevel: Setting the level of %s is prohibited",CLSS,loggerName));
 			return;
 		}
-		Logger lgr =  LogMaker.getLogger(loggerName);
+		ILSLogger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
 			Level lvl = Level.toLevel(level.toUpperCase());
 			lgr.setLevel(lvl);

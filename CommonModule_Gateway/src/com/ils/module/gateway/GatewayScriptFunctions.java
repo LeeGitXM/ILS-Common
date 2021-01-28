@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
+import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
@@ -34,7 +35,7 @@ public class GatewayScriptFunctions  {
 	/**
 	 * @return the named logger
 	 */
-	public static Logger getLogger(String name) {
+	public static ILSLogger getLogger(String name) {
 		return LogMaker.getLogger(name);
 	}
 	/**
@@ -79,7 +80,7 @@ public class GatewayScriptFunctions  {
 	 */
 	public static String getGatewayLoggingLevel(String loggerName) {
 		String level = "";
-		Logger lgr =  LogMaker.getLogger(loggerName);
+		ILSLogger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
 			level = lgr.getLevel().toString();
 		}
@@ -212,7 +213,7 @@ public class GatewayScriptFunctions  {
 			System.out.println(String.format("%s.setLoggingLevel Setting the level of %s is prohibited",CLSS,loggerName));
 			return;
 		}
-		Logger lgr =  LogMaker.getLogger(loggerName);
+		ILSLogger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
 			Level lvl = Level.toLevel(level.toUpperCase());
 			lgr.setLevel(lvl);

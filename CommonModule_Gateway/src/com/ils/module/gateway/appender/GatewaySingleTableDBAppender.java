@@ -19,8 +19,6 @@ import com.ils.common.db.DBUtility;
 import com.ils.logging.common.appender.AbstractSingleTableDBAppender;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
-import ch.qos.logback.classic.LoggerContext;
-
 /**
  * This DBAppender inserts logging events into a single database table\
  * in gateway scope

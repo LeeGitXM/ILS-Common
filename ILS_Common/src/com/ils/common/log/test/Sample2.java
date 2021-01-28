@@ -1,10 +1,9 @@
 package com.ils.common.log.test;
 
-import org.apache.log4j.MDC;
-
+import org.slf4j.MDC;
+import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 
-import ch.qos.logback.classic.Logger;
 
 /**
  * Example of a logging class that does not know its project at logger creation time.
@@ -12,7 +11,7 @@ import ch.qos.logback.classic.Logger;
  *
  */
 public class Sample2 {
-	private final Logger log;
+	private final ILSLogger log;
 	private static final String CLSS = "Sample2";
 	
 	public Sample2() {
@@ -28,12 +27,11 @@ public class Sample2 {
 	}
 	
 	public void infof(String format,String arg1,String arg2) {
-		log.info(format,arg1,arg2);
-		log.info("{} {} {}",1,2,3);
+		log.infof(format,arg1,arg2);
 	}
 	
-	public void warn(String msg) {
-		log.info(String.format("%s.warn: Test warning message (%s)",CLSS,msg));
+	public void warn(String msg,String arg) {
+		log.info(msg,arg);
 	}
 	
 	public void trace(String msg) {
@@ -41,8 +39,8 @@ public class Sample2 {
 	}
 	public void work() {
 		info("bassoon");
-		infof("wood{} {}","win","quartet");
-		warn("oboe");
+		infof("wood%s %s","win","quartet");
+		warn("oboe {}","trio");
 		trace("piccolo");
 	}
 }

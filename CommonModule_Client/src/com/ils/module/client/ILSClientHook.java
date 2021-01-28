@@ -8,12 +8,15 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
+import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.LoggingHookInterface;
 import com.ils.logging.common.filter.CrashFilter;
 import com.ils.logging.common.filter.PatternFilter;
+import com.ils.logging.common.python.PythonExec;
 import com.ils.module.client.appender.ClientCrashAppender;
 import com.ils.module.client.appender.ClientSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
@@ -36,6 +39,7 @@ import ch.qos.logback.core.OutputStreamAppender;
 
 public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	private static final String CLSS = "LoggingClientHook";
+	private String clientId = null;
 	private ClientContext context = null;
 	private ClientCrashAppender crashAppender = null;
 	private final CrashFilter crashFilter;
@@ -68,6 +72,9 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	} 
 
 	@Override
+	public String getClientId() { return this.clientId; }
+	
+	@Override
 	public void notifyActivationStateChanged(LicenseState arg0) {	
 	}
 
@@ -88,6 +95,18 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		this.context = ctx;
 		ClientScriptFunctions.setHook(this);
 		ClientScriptFunctions.setContext(context);
+		PythonExec.setContext(context);
+		// Set client ID from script (we can't figure out how else)
+		try {
+			String code = "system.util.getClientId";
+			PythonExec pexec = new PythonExec(code,String.class);  // Specify the return class
+			clientId = (String)pexec.exec();
+			MDC.put(LogMaker.CLIENT_KEY,clientId);
+			System.out.println(String.format("%s.configureLogging: clientId = %s",CLSS,clientId));
+		}
+		catch(Exception ex) {
+			System.out.println(String.format("%s: Exception running script ... (%s)",CLSS,ex.getLocalizedMessage()));
+		}
 		configureLogging();
 	}
 
@@ -110,7 +129,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 			crashFilter.setThreshold(threshold);
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
-				Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
 				installDatabaseAppender(root,loggingDatasource,logContext);
 				installCrashAppender(root,loggingDatasource,logContext,crashBufferSize);
@@ -143,7 +162,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 
 	}
-	private void installDatabaseAppender(Logger root,String connection, LoggerContext ctx) {
+	private void installDatabaseAppender(ILSLogger root,String connection, LoggerContext ctx) {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,ctx,"client");
 		appender.setContext(root.getLoggerContext());
@@ -152,7 +171,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed databse appender ...",CLSS));
 	}
-	private void installCrashAppender(Logger root,String connection,LoggerContext ctx,int bufferSize) {
+	private void installCrashAppender(ILSLogger root,String connection,LoggerContext ctx,int bufferSize) {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		crashAppender = new ClientCrashAppender(connection,acc,ctx,"client",bufferSize);
 		crashAppender.setContext(root.getLoggerContext());
@@ -168,7 +187,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	 * They have all been appended to the root logger.
 	 */
 	private void shutdownLogging() {
-		Logger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+		ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 		root.detachAppender(CommonProperties.CRASH_APPENDER_NAME);
 		root.detachAppender(CommonProperties.DB_APPENDER_NAME);
 	}

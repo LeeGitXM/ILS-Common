@@ -92,6 +92,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 			for(StackTraceElement e:callerDataArray) {
 				String method = e.getClassName();
 				if( method.contains("SingleTableDBAppender")||
+						method.contains("ILSLogger") 		||
 						method.contains("qos.logback.") 			||
 						method.contains("util.Logger.") 			||
 						method.contains("Thread") ) continue;
@@ -111,6 +112,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 			for(StackTraceElement e:callerDataArray) {
 				String method = e.getClassName();
 				if( method.contains("SingleTableDBAppender")||
+						method.contains("ILSLogger") 		||
 						method.contains("qos.logback.") 	||
 						method.contains("util.Logger") 		||  // Includes LoggerEx
 						method.contains("Thread") ) continue;
@@ -143,7 +145,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				ps.setLong(2, Thread.currentThread().getId() );   			// thread
 				ps.setString(3, truncate(map.get(LogMaker.PROJECT_KEY),25)); // project
 				ps.setString(4, "gateway");   								// scope
-				ps.setInt(5, -1 );   										// client
+				ps.setString(5, "" );   									// client
 				ps.setString(6, truncate(event.getThreadName(),50));   		// thread name
 				ps.setString(7, truncate(caller.getClassName(),50) );   	// module
 				ps.setString(8, truncate(event.getLoggerName(),50) );   	// logger

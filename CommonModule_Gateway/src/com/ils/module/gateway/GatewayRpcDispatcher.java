@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.slf4j.LoggerFactory;
 
+import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.ModulePropertiesInterface;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
@@ -65,7 +66,7 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	@Override
 	public String getGatewayLoggingLevel(String loggerName) {
 		String result = "";
-		Logger lgr =  LogMaker.getLogger(loggerName);
+		ILSLogger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
 			Level level = lgr.getLevel();
 			if( level!=null ) result = level.levelStr;
@@ -170,7 +171,7 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	}
 	@Override
 	public void setGatewayLoggingLevel(String loggerName, String level) {
-		Logger lgr =  LogMaker.getLogger(loggerName);
+		ILSLogger lgr =  LogMaker.getLogger(loggerName);
 		if( lgr!=null ) {
 			Level lvl = Level.toLevel(level.toUpperCase());
 			lgr.setLevel(lvl);
