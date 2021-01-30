@@ -19,6 +19,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
 
+import org.slf4j.MDC;
+
 import com.ils.common.log.LogMaker;
 
 import ch.qos.logback.classic.spi.CallerData;
@@ -93,6 +95,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				String method = e.getClassName();
 				if( method.contains("SingleTableDBAppender")||
 						method.contains("ILSLogger") 		||
+						method.contains("LoggerEx") 		||
 						method.contains("qos.logback.") 			||
 						method.contains("util.Logger.") 			||
 						method.contains("Thread") ) continue;
@@ -113,6 +116,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				String method = e.getClassName();
 				if( method.contains("SingleTableDBAppender")||
 						method.contains("ILSLogger") 		||
+						method.contains("LoggerEx") 		||
 						method.contains("qos.logback.") 	||
 						method.contains("util.Logger") 		||  // Includes LoggerEx
 						method.contains("Thread") ) continue;
@@ -143,19 +147,19 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				else caller = extractFirstCaller();
 				ps.setInt(1, 0 );   											// pid
 				ps.setLong(2, Thread.currentThread().getId() );   			// thread
-				ps.setString(3, truncate(map.get(LogMaker.PROJECT_KEY),25)); // project
+				ps.setString(3, truncate(findProject(map),25)); 			// project
 				ps.setString(4, "gateway");   								// scope
 				ps.setString(5, "" );   									// client
 				ps.setString(6, truncate(event.getThreadName(),50));   		// thread name
-				ps.setString(7, truncate(caller.getClassName(),50) );   	// module
+				ps.setString(7, truncate(findModule(caller),50) );   		// module
 				ps.setString(8, truncate(event.getLoggerName(),50) );   	// logger
 				ps.setTimestamp(9, new Timestamp(event.getTimeStamp()));   	// timestamp
 				ps.setInt(10,event.getLevel().levelInt);   					// level
 				ps.setString(11, event.getLevel().levelStr );   				// level name
 				ps.setString(12, truncate(event.getFormattedMessage(),4000) );   // log message
-				ps.setString(13, truncate(caller.getMethodName(),25));   	// function name
-				ps.setString(14, truncate(caller.getFileName(),25));   		// filename
-				ps.setInt(15, caller.getLineNumber() );   					// line number
+				ps.setString(13, truncate(findMethod(caller),25));   	// function name
+				ps.setString(14, truncate(findFile(caller),25));   			// filename
+				ps.setString(15, truncate(findLine(caller),10 ));   		// line number
 				ps.setTimestamp(16, computeRetentionTIme(event));   		// retain until
 				ps.execute();
 			}
@@ -168,6 +172,42 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				}
 			}
 		}
+	}
+	// Retrieve the clientId name from either the event-specific MDC or the global.
+	protected String findClient(Map<String, String> map ) {
+		String result = map.get(LogMaker.CLIENT_KEY);
+		if( result==null ) result = MDC.get(LogMaker.CLIENT_KEY);
+		return result;
+	}
+	// Retrieve the method (java) or the function (python) from either the map or call stack element
+	protected String findFile(StackTraceElement caller ) {
+		String result = MDC.get(LogMaker.FILE_KEY);
+		if( result==null) result = caller.getFileName();
+		return result;
+	}
+	// Retrieve the method (java) or the function (python) from either the map or call stack element
+	protected String findLine(StackTraceElement caller ) {
+		String result = MDC.get(LogMaker.LINE_KEY);
+		if( result==null) result = String.valueOf(caller.getLineNumber());
+		return result;
+	}
+	// Retrieve the method (java) or the function (python) from either the map or call stack element
+	protected String findMethod(StackTraceElement caller ) {
+		String result = MDC.get(LogMaker.FUNCTION_KEY);
+		if( result==null) result = caller.getMethodName();
+		return result;
+	}
+	// Retrieve the method (java) or the function (python) from either the map or call stack element
+	protected String findModule(StackTraceElement caller ) {
+		String result = MDC.get(LogMaker.MODULE_KEY);
+		if( result==null) result = caller.getClassName();
+		return result;
+	}
+	// Retrieve the project name from either the event-specific MDC or the global.
+	protected String findProject(Map<String, String> map ) {
+		String result = map.get(LogMaker.PROJECT_KEY);
+		if( result==null ) result = MDC.get(LogMaker.PROJECT_KEY);
+		return result;
 	}
 	
 	/**

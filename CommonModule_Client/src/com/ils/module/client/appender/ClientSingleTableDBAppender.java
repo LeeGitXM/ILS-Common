@@ -99,20 +99,19 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				else caller = extractFirstCaller();
 				args[0] = 0;   										  // pid
 				args[1] = Thread.currentThread().getId();   		  // thread
-				args[2] = truncate(map.get(LogMaker.PROJECT_KEY),25); // project
+				args[2] = truncate(findProject(map),25); 			// project
 				args[3] = scope; 									// scope
-				String clientId = MDC.get(LogMaker.CLIENT_KEY);
-				args[4] = truncate(clientId,25); 					// client
+				args[4] = truncate(findClient(map),25); 					// client
 				args[5] = truncate(event.getThreadName(),50);   	// thread name
-				args[6] = truncate(caller.getClassName(),50);   	// module
+				args[6] = truncate(findModule(caller),50);   		// module
 				args[7] = truncate(event.getLoggerName(),50);   	// logger
 				args[8] =  new Timestamp(event.getTimeStamp());   	// timestamp
 				args[9] = event.getLevel().levelInt;   				// level
 				args[10]= event.getLevel().levelStr;   				// level name
 				args[11]= truncate(event.getFormattedMessage(),4000);  // log message
-				args[12]= truncate(caller.getMethodName(),25);   	// function name
-				args[13]= truncate(caller.getFileName(),25);   		// filename
-				args[14]= caller.getLineNumber();   				// line number
+				args[12]= truncate(findMethod(caller),25);   		// function name
+				args[13]= truncate(findFile(caller),25);   			// filename
+				args[14]= truncate(findLine(caller),10);   			// line number
 				args[15]= computeRetentionTIme(event);   			// retain until
 				dbUtil.executePreparedStatement(insertString, db, args);
 			}

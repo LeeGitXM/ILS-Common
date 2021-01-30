@@ -17,7 +17,11 @@ import ch.qos.logback.classic.LoggerContext;
  */
 public class LogMaker {
 	public static final String CLIENT_KEY = "client";     // client id
-	public static final String PROJECT_KEY = "project";   // Project name
+	public static final String FILE_KEY = "file";         // name of source file
+	public static final String FUNCTION_KEY = "function";   // python function or java method
+	public static final String LINE_KEY = "linenumber";     // line number in code
+	public static final String MODULE_KEY = "module";       // python module or java package
+	public static final String PROJECT_KEY = "project";     // project name
 	private static final LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 	
 	public static ILSLogger getLogger(Object source) {	

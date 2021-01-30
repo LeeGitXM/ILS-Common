@@ -11,6 +11,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.spi.AppenderAttachable;
 
@@ -23,7 +24,10 @@ import ch.qos.logback.core.spi.AppenderAttachable;
 public class ILSLogger implements org.slf4j.Logger,AppenderAttachable<ILoggingEvent> {
 	private final Logger logger;
 	
-	public ILSLogger(Logger lgr) { this.logger = lgr; }
+	public ILSLogger(Logger lgr) {
+		this.logger = lgr;
+		setLevel(Level.INFO);
+	}
 	
 
 	@Override
@@ -399,4 +403,7 @@ public class ILSLogger implements org.slf4j.Logger,AppenderAttachable<ILoggingEv
 		return logger.iteratorForAppenders();
 	}
 	
+	public void callAppenders(LoggingEvent event) {
+		logger.callAppenders(event);
+	}
 }
