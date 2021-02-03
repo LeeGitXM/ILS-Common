@@ -91,7 +91,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 			if( event.getLoggerName().equalsIgnoreCase("OutputConsole")) return;
 			String text = layout.doLayout(event);
 			System.out.print(text);
-			Object[] args = new Object[16];
+			Object[] args = new Object[15];
 			try {
 				Map<String, String> map = event.getMDCPropertyMap();
 				StackTraceElement caller = null;
@@ -103,16 +103,15 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				args[3] = scope; 									// scope
 				args[4] = truncate(findClient(map),25); 					// client
 				args[5] = truncate(event.getThreadName(),50);   	// thread name
-				args[6] = truncate(findModule(caller),50);   		// module
-				args[7] = truncate(event.getLoggerName(),50);   	// logger
+				args[6] = truncate(findModule(caller),100);   		// module
+				args[7] = truncate(event.getLoggerName(),100);   	// logger
 				args[8] =  new Timestamp(event.getTimeStamp());   	// timestamp
 				args[9] = event.getLevel().levelInt;   				// level
 				args[10]= event.getLevel().levelStr;   				// level name
-				args[11]= truncate(event.getFormattedMessage(),4000);  // log message
-				args[12]= truncate(findMethod(caller),25);   		// function name
-				args[13]= truncate(findFile(caller),25);   			// filename
-				args[14]= truncate(findLine(caller),10);   			// line number
-				args[15]= computeRetentionTIme(event);   			// retain until
+				args[11]= truncate(event.getFormattedMessage(),8000);  // log message
+				args[12]= truncate(findMethod(caller),100);   		// function name
+				args[13]= truncate(findLine(caller),10);   			// line number
+				args[14]= computeRetentionTIme(event);   			// retain until
 				dbUtil.executePreparedStatement(insertString, db, args);
 			}
 			catch( Exception sqle ) {

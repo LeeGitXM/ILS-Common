@@ -49,14 +49,13 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				"scope char(10) NULL,"+
 				"client_id char(12) NULL,"+
 				"thread_name char(50) NULL,"+
-				"module char(50) NULL,"+
-				"logger_name char(50) NOT NULL,"+
+				"module char(250) NULL,"+
+				"logger_name char(100) NOT NULL,"+
 				"timestamp datetime NOT NULL,"+
 				"log_level int NULL,"+
 				"log_level_name char(10) NULL,"+
-				"log_message varchar(4000) NOT NULL,"+
-				"function_name varchar(25) NULL,"+
-				"filename varchar(25) NULL,"+
+				"log_message varchar(8000) NOT NULL,"+
+				"function_name varchar(100) NULL,"+
 				"line_number int NULL,"+
 				"retain_until datetime NOT NULL" +
 				")";
@@ -67,8 +66,8 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 		StringBuilder sb = new StringBuilder();
 		sb.append("INSERT INTO log ");
 		sb.append("(process_id,thread,project,scope,client_id,thread_name,module,logger_name,timestamp, ");
-		sb.append("log_level,log_level_name,log_message,function_name,filename,line_number,retain_until) ");
-		sb.append("VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+		sb.append("log_level,log_level_name,log_message,function_name,line_number,retain_until) ");
+		sb.append("VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 		return sb.toString();
 	}
 	
@@ -151,16 +150,15 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				ps.setString(4, "gateway");   								// scope
 				ps.setString(5, "" );   									// client
 				ps.setString(6, truncate(event.getThreadName(),50));   		// thread name
-				ps.setString(7, truncate(findModule(caller),50) );   		// module
-				ps.setString(8, truncate(event.getLoggerName(),50) );   	// logger
+				ps.setString(7, truncate(findModule(caller),250) );   		// module
+				ps.setString(8, truncate(event.getLoggerName(),100) );   	// logger
 				ps.setTimestamp(9, new Timestamp(event.getTimeStamp()));   	// timestamp
 				ps.setInt(10,event.getLevel().levelInt);   					// level
 				ps.setString(11, event.getLevel().levelStr );   				// level name
-				ps.setString(12, truncate(event.getFormattedMessage(),4000) );   // log message
-				ps.setString(13, truncate(findMethod(caller),25));   	// function name
-				ps.setString(14, truncate(findFile(caller),25));   			// filename
-				ps.setString(15, truncate(findLine(caller),10 ));   		// line number
-				ps.setTimestamp(16, computeRetentionTIme(event));   		// retain until
+				ps.setString(12, truncate(event.getFormattedMessage(),8000) );   // log message
+				ps.setString(13, truncate(findMethod(caller),100));   		// function name
+				ps.setString(14, truncate(findLine(caller),10 ));   		// line number
+				ps.setTimestamp(15, computeRetentionTIme(event));   		// retain until
 				ps.execute();
 			}
 			catch( SQLException sqle ) {
@@ -179,12 +177,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 		if( result==null ) result = MDC.get(LogMaker.CLIENT_KEY);
 		return result;
 	}
-	// Retrieve the method (java) or the function (python) from either the map or call stack element
-	protected String findFile(StackTraceElement caller ) {
-		String result = MDC.get(LogMaker.FILE_KEY);
-		if( result==null) result = caller.getFileName();
-		return result;
-	}
+
 	// Retrieve the method (java) or the function (python) from either the map or call stack element
 	protected String findLine(StackTraceElement caller ) {
 		String result = MDC.get(LogMaker.LINE_KEY);
