@@ -51,10 +51,10 @@ public class ClientScriptFunctions  {
 	public static ILSLogger getLogger(String name) {
 		ILSLogger logger = LogMaker.getLogger(name);
 		if( context!=null) {
-			MDC.put(LogMaker.PROJECT_KEY, context.getProject().getName());
+			logger.setProject(context.getProject().getName());
 		}
 		if( hook!=null) {
-			MDC.put(LogMaker.CLIENT_KEY, hook.getClientId());
+			logger.setClientId(hook.getClientId());
 		}
 		return logger;
 	}

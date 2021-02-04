@@ -4,14 +4,15 @@
 package com.ils.common.log;
 
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 
 /**
  * LogMaker is a thin wrapper around LoggerFactory basically providing
- * the convenience of adding a project marker to the log.
+ * the convenience of adding a project marker to the log. Care must be taken 
+ * if there are multiple projects, so that the MDC values of project/client
+ * are updated just before logging.
  *
  * MDC = Mapped Diagnostic Contexts 
  */
@@ -35,7 +36,6 @@ public class LogMaker {
 	}
 	
 	public static ILSLogger getLogger(Object source,String project) {	
-		MDC.put(PROJECT_KEY, project);
 		Logger lgr;
 		if( source instanceof String) {
 			lgr =  logContext.getLogger((String)source);
@@ -43,6 +43,8 @@ public class LogMaker {
 		else {
 			lgr =  logContext.getLogger(source.getClass());
 		}
-		return new ILSLogger(lgr);
+		ILSLogger ilogger = new ILSLogger(lgr);
+		ilogger.setProject(project);
+		return ilogger;
 	}
 }
