@@ -22,17 +22,9 @@ public interface ModulePropertiesInterface   {
 	 */
 	public int getCrashAppenderBufferSize();
 	/**
-	 * @return the buffer size for the crash appender in the current scope
-	 */
-	public String getCrashAppenderThreshold();
-	/**
 	 * @return the buffer size for the gateway crash appender
 	 */
 	public int getGatewayCrashAppenderBufferSize();
-	/**
-	 * @return the buffer size for the crash appender for the gateway
-	 */
-	public String getGatewayCrashAppenderThreshold();
 	/**
 	 * @return a list of names of loggers known to the Gateway scope
 	 */
@@ -113,17 +105,9 @@ public interface ModulePropertiesInterface   {
 	 */
 	public void setCrashAppenderBufferSize(int size);
 	/**
-	 * Set the max logging level to be passed by the local crash appender.
-	 */
-	public void setCrashAppenderThreshold(String threshold);
-	/**
 	 * Set the size of the Gateway crash filter circular buffer.
 	 */
 	public void setGatewayCrashAppenderBufferSize(int size);
-	/**
-	 * Set the max logging level to be passed by the gateway crash appender.
-	 */
-	public void setGatewayCrashAppenderThreshold(String threshold);
 	/**
 	 * Set the level of a logger in Gateway scope. The level is changed for everyone and persists until changed again.
 	 * @param loggerName

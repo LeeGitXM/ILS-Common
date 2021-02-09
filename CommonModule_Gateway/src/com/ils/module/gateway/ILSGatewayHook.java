@@ -20,7 +20,7 @@ import com.ils.common.help.HelpRecordProxy;
 import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
-import com.ils.logging.common.filter.CrashFilter;
+import com.ils.logging.common.filter.SuppressByMarkerFilter;
 import com.ils.logging.common.filter.PatternFilter;
 import com.ils.module.gateway.appender.GatewayCrashAppender;
 import com.ils.module.gateway.appender.GatewaySingleTableDBAppender;
@@ -66,7 +66,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private GatewayRpcDispatcher dispatcher = null;
 	private GatewayCrashAppender crashAppender = null;
 	private String loggingDatasource = "";
-	private final CrashFilter crashFilter;
+	private final SuppressByMarkerFilter crashFilter;
 	private PatternFilter patternFilter = null;
 	
 	static {
@@ -76,10 +76,10 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 
 	public ILSGatewayHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
-		crashFilter = new CrashFilter();
+		crashFilter = new SuppressByMarkerFilter();
 	}
 	
-	public CrashFilter getCrashFilter() { return this.crashFilter; }
+	public SuppressByMarkerFilter getCrashFilter() { return this.crashFilter; }
 	public PatternFilter getPatternFilter() { return this.patternFilter; }
 	
 	// NOTE: During this period, the module status is LOADED, not RUNNING
@@ -200,10 +200,17 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 					System.out.println(String.format("%s: %s is not a number in ils_logback.xml (%s)",CLSS,CommonProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
 				}
 			}
-			String threshold = configurator.getInterpretationContext().getProperty(CommonProperties.CRASH_APPENDER_THRESHOLD);
-			if( threshold==null) threshold = "debug";
-			if( threshold!=null ) {
-				crashFilter.setThreshold(threshold);
+			
+			// Find the pattern filter
+			TurboFilterList list = logContext.getTurboFilterList();
+			resetTurboFilterList(list);
+			Iterator<TurboFilter> iter  = list.iterator();
+			while( iter.hasNext()) {
+				TurboFilter filter = iter.next();
+				if( filter instanceof PatternFilter ) {
+					patternFilter = (PatternFilter)filter;
+					break;
+				}
 			}
 			
 			loggingDatasource = configurator.getInterpretationContext().getProperty(CommonProperties.LOGGING_DATASOURCE);
@@ -221,18 +228,10 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			else {
 				System.out.println(String.format("%s: WARNING: ils_logback.xml must contain a %s property in order to create a DB appender",CLSS,CommonProperties.LOGGING_DATASOURCE));
 			}
-			// Find the pattern filter
-			TurboFilterList list = logContext.getTurboFilterList();
-			Iterator<TurboFilter> iter  = list.iterator();
-			while( iter.hasNext()) {
-				TurboFilter filter = iter.next();
-				if( filter instanceof PatternFilter ) {
-					patternFilter = (PatternFilter)filter;
-					break;
-				}
-			}
-			System.out.println(String.format("%s.configureLogging: Reconfigured gateway logger from %s, threshold %s for %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),
-					threshold,sizeString,loggingDatasource));
+
+			
+			System.out.println(String.format("%s.configureLogging: Reconfigured gateway logger from %s,for %s, cxn=%s",CLSS,configPath.toFile().getAbsolutePath(),
+					sizeString,loggingDatasource));
 		}
 		catch(IOException ioe) {
 			System.out.println(String.format("%s: Failed to read gateway logger configuration (%s)",CLSS,ioe.getMessage()));
@@ -270,5 +269,16 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 		root.detachAppender(CommonProperties.CRASH_APPENDER_NAME);
 		root.detachAppender(CommonProperties.DB_APPENDER_NAME);
+	}
+	
+	/**
+	 * First processPriorToRemoval all registered turbo filters and then clear the registration
+	 * list.
+	 */
+	public void resetTurboFilterList(TurboFilterList list) {
+	  for (TurboFilter tf : list) {
+	    tf.stop();
+	  }
+	  list.clear();
 	}
 }

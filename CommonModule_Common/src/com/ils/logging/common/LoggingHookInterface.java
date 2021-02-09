@@ -3,7 +3,7 @@
  */
 package com.ils.logging.common;
 
-import com.ils.logging.common.filter.CrashFilter;
+import com.ils.logging.common.filter.SuppressByMarkerFilter;
 import com.ils.logging.common.filter.PatternFilter;
 
 /**
@@ -12,7 +12,7 @@ import com.ils.logging.common.filter.PatternFilter;
  */
 public interface LoggingHookInterface   {
 	public String getClientId();
-	public CrashFilter getCrashFilter() ;
+	public SuppressByMarkerFilter getCrashFilter() ;
 	public PatternFilter getPatternFilter();
 	public void setCrashBufferSize(int size);
 }

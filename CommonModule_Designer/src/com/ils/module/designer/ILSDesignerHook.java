@@ -15,7 +15,7 @@ import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.LoggingHookInterface;
-import com.ils.logging.common.filter.CrashFilter;
+import com.ils.logging.common.filter.SuppressByMarkerFilter;
 import com.ils.logging.common.filter.PatternFilter;
 import com.ils.logging.common.python.PythonExec;
 import com.ils.module.client.ClientScriptFunctions;
@@ -45,15 +45,15 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 	private String clientId = null;
 	private ClientContext context = null;
 	private ClientCrashAppender crashAppender = null;
-	private final CrashFilter crashFilter;
+	private final SuppressByMarkerFilter crashFilter;
 	private PatternFilter patternFilter = null;
 
 	public ILSDesignerHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
-		crashFilter = new CrashFilter();
+		crashFilter = new SuppressByMarkerFilter();
 	}
 	
-	public CrashFilter getCrashFilter() { return this.crashFilter; }
+	public SuppressByMarkerFilter getCrashFilter() { return this.crashFilter; }
 	public PatternFilter getPatternFilter() { return this.patternFilter; }
 	public void setCrashBufferSize(int size) { crashAppender.setBufferSize(size); }
 	
@@ -129,12 +129,20 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 		logContext.reset();
 		try {
 			int crashBufferSize = ClientScriptFunctions.getCrashAppenderBufferSize();
-			String threshold = ClientScriptFunctions.getCrashAppenderThreshold();
-			crashFilter.setThreshold(threshold);
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
+				
+				TurboFilterList list = logContext.getTurboFilterList();
+				Iterator<TurboFilter> iter  = list.iterator();
+				while( iter.hasNext()) {
+					TurboFilter filter = iter.next();
+					if( filter instanceof PatternFilter ) {
+						patternFilter = (PatternFilter)filter;
+						break;
+					}
+				}
 				
 				installDatabaseAppender(root,loggingDatasource,logContext);
 				installCrashAppender(root,loggingDatasource,logContext,crashBufferSize);
@@ -155,16 +163,6 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 			System.out.println(String.format("%s: Failed to create logging appenders (%s)\n",CLSS,ex.getMessage()));
 			ex.printStackTrace();
 		}
-		// Find the pattern filter
-		TurboFilterList list = logContext.getTurboFilterList();
-		Iterator<TurboFilter> iter  = list.iterator();
-		while( iter.hasNext()) {
-			TurboFilter filter = iter.next();
-			if( filter instanceof PatternFilter ) {
-				patternFilter = (PatternFilter)filter;
-				break;
-			}
-		}	
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 		
 	}

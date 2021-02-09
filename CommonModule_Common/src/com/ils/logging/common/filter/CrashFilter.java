@@ -20,45 +20,32 @@ import org.slf4j.MarkerFactory;
 import com.ils.logging.common.CommonProperties;
 
 import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.filter.Filter;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 
 /**
- * The crash filter is a specialized filter designer for use with the crash appender.
- * It acts as a threshold filter to reduce the message levels regurgitated after a crash.
- * It also stops re-propagation of messages created during debugging from, for example,
- * the pattern appender, or the crash appender itself.
+ * This filter marks low priority pre-events with a marker that all appenders
+ * except for the crash appender filter out.
  */
-public class CrashFilter extends Filter<ILoggingEvent> {
+public class CrashFilter extends TurboFilter {
 	private final static String CLSS = "CrashFilter";
-	private final Marker logMarker;
-	private Level threshold;
+	private final Marker crashMarker;
 	
-
 	public CrashFilter() {
-		this.logMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
-		this.threshold = CommonProperties.DEFAULT_CRASH_APPENDER_THRESHOLD;
+		this.crashMarker = MarkerFactory.getMarker(CommonProperties.CRASH_MARKER_NAME);
 	}
-	public String getThreshold() { return this.threshold.levelStr; }
-	public void setThreshold(String thresh) { this.threshold = Level.toLevel(thresh.toLowerCase()); }
+	
 	/**
-	 *  If the event has the configured level or more, pass it
-	 *  irrespective of the logger configuration.
+	 *  If the level is lower priority than the logger level, then mark it for crash appender only.
 	 */
 	@Override
-	public FilterReply decide(ILoggingEvent event) {
-		FilterReply result = FilterReply.NEUTRAL;
-		// First check level
-		if( !event.getLevel().isGreaterOrEqual(threshold) ) {
-			result = FilterReply.DENY;
+	public FilterReply decide(Marker marker, Logger logger, Level level,String format, Object[] params, Throwable t) {
+		if( marker!=null ) {
+			if(marker.contains(crashMarker)) return FilterReply.DENY;  // We've seen this already
+			marker.add(crashMarker);
 		}
-		else  {
-			Marker eventMarkers = event.getMarker();
-			if( eventMarkers!=null && eventMarkers.contains(logMarker)) {
-				result = FilterReply.DENY;
-			}
-		}
-		return result;
+
+		return FilterReply.ACCEPT;  // Normal comparison applies.
 	}
 }

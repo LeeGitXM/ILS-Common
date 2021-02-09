@@ -45,22 +45,10 @@ public class GatewayScriptFunctions  {
 		return hook.getCrashAppender().getBufferSize();
 	}
 	/**
-	 * @return the buffer size for the crash appender in the current scope
-	 */
-	public static String getCrashAppenderThreshold() {
-		return hook.getCrashFilter().getThreshold();
-	}
-	/**
 	 * @return the buffer size for the crash logging appender.
 	 */
 	public static int getGatewayCrashAppenderBufferSize()throws Exception{
 		return hook.getCrashAppender().getBufferSize();
-	}
-	/**
-	 * @return the buffer size for the crash appender in the current scope
-	 */
-	public static String getGatewayCrashAppenderThreshold() {
-		return hook.getCrashFilter().getThreshold();
 	}
 	/**
 	 * @return a list of names of loggers known to the Gateway scope.
@@ -182,18 +170,6 @@ public class GatewayScriptFunctions  {
 	 */
 	public static void setGatewayCrashAppenderBufferSize(int size) {
 		hook.getCrashAppender().setBufferSize(size);
-	}
-	/**
-	 * Specify the threshold level for message retention by the local crash appender
-	 */
-	public static void setCrashAppenderThreshold(String level) {
-		hook.getCrashFilter().setThreshold(level);
-	}
-	/**
-	 * Specify the threshold level for message retention by the gateway crash appender
-	 */
-	public static void setGatewayCrashAppenderThreshold(String level) {
-		hook.getCrashFilter().setThreshold(level);
 	}
 	/**
 	 * Set a level: ERROR, WARN, INFO, DEBUG, TRACE in your current scope on the named logger.

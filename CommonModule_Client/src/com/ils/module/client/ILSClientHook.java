@@ -14,7 +14,7 @@ import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.LoggingHookInterface;
-import com.ils.logging.common.filter.CrashFilter;
+import com.ils.logging.common.filter.SuppressByMarkerFilter;
 import com.ils.logging.common.filter.PatternFilter;
 import com.ils.logging.common.python.PythonExec;
 import com.ils.module.client.appender.ClientCrashAppender;
@@ -42,15 +42,15 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	private String clientId = null;
 	private ClientContext context = null;
 	private ClientCrashAppender crashAppender = null;
-	private final CrashFilter crashFilter;
+	private final SuppressByMarkerFilter crashFilter;
 	private PatternFilter patternFilter= null;
 	
 	public ILSClientHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
-		crashFilter = new CrashFilter();
+		crashFilter = new SuppressByMarkerFilter();
 	}
 	
-	public CrashFilter getCrashFilter() { return this.crashFilter; }
+	public SuppressByMarkerFilter getCrashFilter() { return this.crashFilter; }
 	public PatternFilter getPatternFilter() { return this.patternFilter; }
 	public void setCrashBufferSize(int size) { crashAppender.setBufferSize(size); }
 
@@ -125,8 +125,6 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		logContext.reset();
 		try {
 			int crashBufferSize = ClientScriptFunctions.getCrashAppenderBufferSize();
-			String threshold = ClientScriptFunctions.getCrashAppenderThreshold();
-			crashFilter.setThreshold(threshold);
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);

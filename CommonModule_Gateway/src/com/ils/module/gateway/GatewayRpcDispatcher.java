@@ -44,25 +44,11 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	public int getCrashAppenderBufferSize() {
 		return hook.getCrashAppender().getBufferSize();
 	}
-	/**
-	 * @return the buffer size for the crash appender in the current scope
-	 */
-	@Override
-	public String getCrashAppenderThreshold() {
-		return hook.getCrashFilter().getThreshold();
-	}
 	@Override
 	public int getGatewayCrashAppenderBufferSize() {
 		return hook.getCrashAppender().getBufferSize();
 	}
-	/**
-	 * @return the buffer size for the crash appender in the current scope
-	 *         (which is the gateway).
-	 */
-	@Override
-	public String getGatewayCrashAppenderThreshold() {
-		return hook.getCrashFilter().getThreshold();
-	}
+
 	@Override
 	public String getGatewayLoggingLevel(String loggerName) {
 		String result = "";
@@ -157,17 +143,9 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 		hook.getCrashAppender().setBufferSize(size);
 	}
 	@Override
-	public void setCrashAppenderThreshold(String threshold) {
-		hook.getCrashFilter().setThreshold(threshold);
-	}
-	@Override
 	public void setGatewayCrashAppenderBufferSize(int size) {
 		hook.getCrashAppender().setBufferSize(size);
 		
-	}
-	@Override
-	public void setGatewayCrashAppenderThreshold(String threshold) {
-		hook.getCrashFilter().setThreshold(threshold);	
 	}
 	@Override
 	public void setGatewayLoggingLevel(String loggerName, String level) {
