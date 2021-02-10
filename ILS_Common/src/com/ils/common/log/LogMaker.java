@@ -22,6 +22,10 @@ public class LogMaker {
 	public static final String LINE_KEY = "linenumber";     // line number in code
 	public static final String MODULE_KEY = "module";       // python module or java package
 	public static final String PROJECT_KEY = "project";     // project name
+	// Marker names used by the filters
+	public final static String CRASH_MARKER_NAME            = "crash";        // Marks an event destined for the crash logger only.
+	public final static String LOOP_PREVENTION_MARKER_NAME  = "no-loop";      // Used to prevent circular processing during logging
+	
 	private static final LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 	
 	public static ILSLogger getLogger(Object source) {	

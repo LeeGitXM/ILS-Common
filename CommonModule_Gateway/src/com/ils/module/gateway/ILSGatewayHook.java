@@ -19,9 +19,9 @@ import com.ils.common.ILSProperties;
 import com.ils.common.help.HelpRecordProxy;
 import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
+import com.ils.common.log.filter.CrashFilter;
+import com.ils.common.log.filter.PatternFilter;
 import com.ils.logging.common.CommonProperties;
-import com.ils.logging.common.filter.SuppressByMarkerFilter;
-import com.ils.logging.common.filter.PatternFilter;
 import com.ils.module.gateway.appender.GatewayCrashAppender;
 import com.ils.module.gateway.appender.GatewaySingleTableDBAppender;
 import com.ils.module.gateway.help.HelpParameterEditPage;
@@ -65,9 +65,9 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
 	private GatewayCrashAppender crashAppender = null;
+	private final CrashFilter crashFilter;
+	private final PatternFilter patternFilter;
 	private String loggingDatasource = "";
-	private final SuppressByMarkerFilter crashFilter;
-	private PatternFilter patternFilter = null;
 	
 	static {
 		// Access the resource bundle
@@ -76,10 +76,11 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 
 	public ILSGatewayHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
-		crashFilter = new SuppressByMarkerFilter();
+		patternFilter = new PatternFilter();
+		crashFilter = new CrashFilter();
 	}
 	
-	public SuppressByMarkerFilter getCrashFilter() { return this.crashFilter; }
+	public CrashFilter getCrashFilter() { return this.crashFilter; }
 	public PatternFilter getPatternFilter() { return this.patternFilter; }
 	
 	// NOTE: During this period, the module status is LOADED, not RUNNING
@@ -201,18 +202,25 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 				}
 			}
 			
-			// Find the pattern filter
+			// Add pattern, then crash filters
+			resetTurboFilterList(logContext.getTurboFilterList());
+			
+			
+
+			/*
+			 * We ghave not been able to get the turbofilters to work. We get a ClassCircularityException
+			 * whenever the following are executed ...
+			logContext.addTurboFilter(patternFilter);
+			logContext.addTurboFilter(crashFilter);
+			
+			
 			TurboFilterList list = logContext.getTurboFilterList();
-			resetTurboFilterList(list);
 			Iterator<TurboFilter> iter  = list.iterator();
 			while( iter.hasNext()) {
 				TurboFilter filter = iter.next();
-				if( filter instanceof PatternFilter ) {
-					patternFilter = (PatternFilter)filter;
-					break;
-				}
+				System.out.println(String.format("%s: TurboFilter (%s)",CLSS,filter.getClass().getCanonicalName()));
 			}
-			
+			*/
 			loggingDatasource = configurator.getInterpretationContext().getProperty(CommonProperties.LOGGING_DATASOURCE);
 			if( loggingDatasource!=null ) {
 				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -255,7 +263,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		crashAppender = new GatewayCrashAppender(connection,context,bufferSize);
 		crashAppender.setContext(root.getLoggerContext());
 		crashAppender.setName(CommonProperties.CRASH_APPENDER_NAME);
-		crashAppender.addFilter(crashFilter);
+		//crashAppender.addFilter(crashFilter);
 		crashAppender.start();
 		root.addAppender(crashAppender);
 		System.out.println(String.format("%s: Installed crash appender ..",CLSS));
@@ -272,12 +280,14 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	}
 	
 	/**
-	 * First processPriorToRemoval all registered turbo filters and then clear the registration
-	 * list.
+	 * Remove all registered turbo filters and then clear the registration list.
+	 * NOTE: There never seem to be any found even though configured in ils_logback.xml.
 	 */
 	public void resetTurboFilterList(TurboFilterList list) {
-	  for (TurboFilter tf : list) {
+		System.out.println("Turbo filters ..");
+	  for (TurboFilter tf : list) { 
 	    tf.stop();
+	    System.out.println(String.format("%s: TURBO (%s)",CLSS,tf.getClass().getCanonicalName()));
 	  }
 	  list.clear();
 	}

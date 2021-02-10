@@ -16,8 +16,8 @@ package com.ils.module.gateway.appender;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CircularLoggingEventBuffer;
-import com.ils.logging.common.CommonProperties;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -37,7 +37,7 @@ public class GatewayCrashAppender extends GatewaySingleTableDBAppender<ILoggingE
 	public GatewayCrashAppender(String connect,GatewayContext ctx,int bufferSize) {
 		super(connect,ctx);
 		this.buffer = new CircularLoggingEventBuffer(bufferSize);
-		this.logMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
+		this.logMarker = MarkerFactory.getMarker(LogMaker.LOOP_PREVENTION_MARKER_NAME);
 	}
 	
 	/**

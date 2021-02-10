@@ -1,18 +1,16 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<!-- For assistance related to logback-translator or configuration  -->
-<!-- files in general, please contact the logback user mailing list -->
-<!-- at http://www.qos.ch/mailman/listinfo/logback-user             -->
-<!--                                                                -->
-<!-- For professional support please see                            -->
-<!--    http://www.qos.ch/shop/products/professionalSupport         -->
-<!--                                                                -->
-<configuration debug="true">
-  <appender name="SysoutAppender" class="ch.qos.logback.core.ConsoleAppender">
+<configuration scan="true" scanPeriod="60 seconds">
+  <!--  See  https://logback.qos.ch/manual/configuration.html for hints on the makeup of this file
+        NOTE: Any com.ils.common.log classes must be inserted into catapult.jar as logging is
+		      initialized on early startup.
+  -->
+  <!-- This ends up in the wrapper.log -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%.-1p [%-30c{1}] [%d{HH:mm:ss,SSS}]: %m %X%n</pattern>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
+
+  <!-- This ends up in the SQLite database and is displayed in the Gateway -->
   <appender name="DB" class="com.inductiveautomation.logging.SQLiteAppender">
     <dir>logs</dir>
     <!--
@@ -29,14 +27,78 @@
     <vacuumFrequency>3</vacuumFrequency>
     -->
   </appender>
-  <appender name="SysoutAsync" class="ch.qos.logback.classic.AsyncAppender" queueSize="1000" discardingThreshold="0">
-    <appender-ref ref="SysoutAppender" />
+
+  <!--
+  <property name="IGNITION_HOME" value="C:\ignition" />
+  -->
+  <property name="IGNITION_HOME" value="/usr/local/ignition-7.9.14" />
+  <property name="CRASH_BUFFER_SIZE" value="500" />
+  <property name="LOGGING_DATASOURCE" value="Logs" />
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${IGNITION_HOME}/logs/aed.log</file>
+  	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+  		<!-- daily rollover. Path must match the one in the file element or else
+             the rollover logs are placed in the working directory. -->
+        <fileNamePattern>${IGNITION_HOME}_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>5MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+	</rollingPolicy>
+    <encoder>
+          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+    </encoder>
   </appender>
-  <appender name="DBAsync" class="ch.qos.logback.classic.AsyncAppender" queueSize="100000" discardingThreshold="0">
+
+  <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+    <discriminator>
+      	<defaultValue>unknown</defaultValue>
+	<key>project</key>
+    </discriminator>
+    <sift>
+      <appender name="FILE-${project}" class="ch.qos.logback.core.FileAppender">
+        <file>${IGNITION_HOME}/logs/${project}.log</file>
+    	<prudent>true</prudent>
+        <encoder>
+          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+         </encoder>
+	<filter class="com.ils.common.log.filter.SuppressByMarkerFilter"> 
+            <marker>crash</marker>
+        </filter>
+      </appender>
+     </sift>
+   </appender>
+   <appender name="INNER" class="ch.qos.logback.classic.sift.SiftingAppender">
+    <discriminator>
+      	<defaultValue>unknown</defaultValue>
+	<key>project</key>
+    </discriminator>
+    <sift>
+      <appender name="FILE-${project}" class="ch.qos.logback.core.FileAppender">
+        <file>${IGNITION_HOME}/logs/${project}.log</file>
+    	<prudent>true</prudent>
+        <encoder>
+          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+         </encoder>
+      </appender>
+     </sift>
+   </appender>
+
+  <root name="ROOT" level="info">
+    <appender-ref ref="STDOUT" />
     <appender-ref ref="DB" />
-  </appender>
-  <root level="INFO">
-    <appender-ref ref="SysoutAsync"/>
-    <appender-ref ref="DBAsync"/>
+    <appender-ref ref="SIFT" />
+    <appender-ref ref="INNER" />
+    <appender-ref ref="FILE" />
   </root>
+
+  <logger name="org.apache" level="INFO"></logger>
+  <logger name="com" level="INFO" >
+    <appender-ref ref="FILE" />
+  </logger>
+  <logger name="com" level="INFO" >
+    <appender-ref ref="SIFT" />
+  </logger>
 </configuration>

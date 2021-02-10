@@ -3,12 +3,21 @@
         NOTE: Any com.ils.common.log classes must be inserted into catapult.jar as logging is
 		      initialized on early startup.
   -->
+
   <!-- This ends up in the wrapper.log -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
+
+  <!-- A  Circularity Error occurs when the class loader loads the logger classes. Doing that, it outputs
+       a debug message to the log. For this it will need to load the logger classes. Doing that ... 
+       you see where this is getting. Setting the log level to INFO supresses the debug log entry -> loop avoided.
+       The entries below are only to make sure classes are loaded while debug level is INFO.
+   -->
+  <turboFilter class="com.ils.common.log.filter.CrashFilter"> </turboFilter>
+  <turboFilter class="com.ils.common.log.filter.PatternFilter"> </turboFilter>
 
   <!-- This ends up in the SQLite database and is displayed in the Gateway -->
   <appender name="DB" class="com.inductiveautomation.logging.SQLiteAppender">
@@ -64,7 +73,7 @@
         <encoder>
           <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
          </encoder>
-	     <filter class="com.ils.logging.common..filter.SuppressByMarkerFilter"> 
+	     <filter class="com.ils.common.log.filter.SuppressByMarkerFilter"> 
             <marker>crash</marker>
         </filter>
       </appender>
@@ -85,13 +94,6 @@
       </appender>
      </sift>
    </appender>
-  <!-- A  Circularity Error occurs when the class loader loads the logger classes. Doing that, it outputs
-       a debug message to the log. For this it will need to load the logger classes. Doing that ... 
-       you see where this is getting. Setting the log level to INFO supresses the debug log entry -> loop avoided.
-       The entries below are only to make sure classes are loaded while debug level is INFO.
-   -->
-  <turboFilter class="com.ils.logging.common.filter.CrashFilter"> </turboFilter>
-  <turboFilter class="com.ils.logging.common.filter.PatternFilter"> </turboFilter>
 
   <root name="ROOT" level="info">
     <appender-ref ref="STDOUT" />

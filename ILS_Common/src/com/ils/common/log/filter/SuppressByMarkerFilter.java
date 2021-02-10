@@ -11,15 +11,14 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package com.ils.logging.common.filter;
+package com.ils.common.log.filter;
 
 
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import com.ils.logging.common.CommonProperties;
+import com.ils.common.log.LogMaker;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
@@ -34,7 +33,7 @@ public class SuppressByMarkerFilter extends Filter<ILoggingEvent> {
 	
 
 	public SuppressByMarkerFilter() {
-		this.crashMarker = MarkerFactory.getMarker(CommonProperties.CRASH_MARKER_NAME);
+		this.crashMarker = MarkerFactory.getMarker(LogMaker.CRASH_MARKER_NAME);
 	}
 	public String getMarker() { return this.crashMarker.getName(); }
 	public void setMarker(String name) { this.crashMarker = MarkerFactory.getMarker(name); }

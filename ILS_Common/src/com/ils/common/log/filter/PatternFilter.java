@@ -11,7 +11,7 @@
  * under the terms of the GNU Lesser General Public License version 2.1
  * as published by the Free Software Foundation.
  */
-package com.ils.logging.common.filter;
+package com.ils.common.log.filter;
 
 
 import java.util.ArrayList;
@@ -20,12 +20,13 @@ import java.util.List;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
-import com.ils.logging.common.CommonProperties;
+import com.ils.common.log.LogMaker;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
+
 
 /**
  * This filter provides a way of passing messages regardless of level provided 
@@ -48,7 +49,7 @@ public class PatternFilter extends TurboFilter {
 	public PatternFilter() {
 		this.patterns = new ArrayList<>();
 		this.threadNames = new ArrayList<>();
-		this.loggingMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
+		this.loggingMarker = MarkerFactory.getMarker(LogMaker.LOOP_PREVENTION_MARKER_NAME);
 	}
 	
 	public void addPattern(String pattern) {
@@ -79,13 +80,12 @@ public class PatternFilter extends TurboFilter {
 				patternInName(logger) ){
 			return FilterReply.ACCEPT;
 		}
-		
+
 		//System.out.println(String.format("PatternFilter.decide: %s= %s (%s)",logger.getName(),format,(t==null?"NULL":t.getCause().getMessage())));
 		if( format==null || logger==null || logger.getName().isEmpty() ) {
 			return FilterReply.NEUTRAL;
 		}
-
-		return FilterReply.NEUTRAL;  // Normal comparison applies.
+		return FilterReply.NEUTRAL;
 	}
 
 	private boolean patternInName(Logger lgr) {

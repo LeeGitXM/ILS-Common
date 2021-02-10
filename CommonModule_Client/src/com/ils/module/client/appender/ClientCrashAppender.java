@@ -16,8 +16,8 @@ package com.ils.module.client.appender;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CircularLoggingEventBuffer;
-import com.ils.logging.common.CommonProperties;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 
 import ch.qos.logback.classic.LoggerContext;
@@ -42,7 +42,7 @@ public class ClientCrashAppender extends ClientSingleTableDBAppender<ILoggingEve
 	public ClientCrashAppender(String connect,AbstractClientContext ctx,LoggerContext logContext,String s,int bufferSize) {
 		super(connect,ctx,logContext,s);
 		this.buffer = new CircularLoggingEventBuffer(bufferSize);
-		this.logMarker = MarkerFactory.getMarker(CommonProperties.LOOP_PREVENTION_MARKER_NAME);
+		this.logMarker = MarkerFactory.getMarker(LogMaker.LOOP_PREVENTION_MARKER_NAME);
 	}
 	
 	/**

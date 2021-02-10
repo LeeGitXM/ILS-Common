@@ -3,8 +3,8 @@
  */
 package com.ils.logging.common;
 
-import com.ils.logging.common.filter.SuppressByMarkerFilter;
-import com.ils.logging.common.filter.PatternFilter;
+import com.ils.common.log.filter.PatternFilter;
+import com.ils.common.log.filter.SuppressByMarkerFilter;
 
 /**
  *  Define the methods shared by the client and designer hook classes and used by the
