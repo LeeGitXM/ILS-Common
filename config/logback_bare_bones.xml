@@ -2,10 +2,9 @@
 
 <!-- 
 This is a bare bones logger configuration for when you don't want 
-project specific logging.  Also use this when the ils-common module 
-is not It is always used, even when the ils-common logging module 
-is installed at the beginning of gateway startup before the ils-common 
-is up and running.
+project specific logging and don't have the ils-common module installed.
+Even with the ils-common module, this configuration is in effect until
+the ils-common module is up and running.
 -->
 <!-- For assistance related to logback-translator or configuration  -->
 <!-- files in general, please contact the logback user mailing list -->

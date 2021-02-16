@@ -1,19 +1,29 @@
 <configuration scan="true" scanPeriod="60 seconds">
-  <!--
-    This version of the logging configuration is meant to be used when project-specific
-	log files are desired but the ils-common module is not installed, that is, there
-	is no desire for database logs or the crash reporter
+  <!--  
+		This configuration file is invoked only when the ils-common module is loaded into Ignition.
+		This module features log messages loaded into a database table for easy searching and sorting.
+		The version here also sifts messages into directories based on project name.
 
-    See  https://logback.qos.ch/manual/configuration.html for hints on the makeup of this file
+  		See  https://logback.qos.ch/manual/configuration.html for hints on the makeup of this file
         NOTE: Any com.ils.common.log classes must be inserted into catapult.jar as logging is
 		      initialized on early startup.
   -->
+
   <!-- This ends up in the wrapper.log -->
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
       <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
     </encoder>
   </appender>
+
+  <!-- A  Circularity Error occurs when the class loader loads the logger classes. Doing that, it outputs
+       a debug message to the log. For this it will need to load the logger classes. Doing that ... 
+       you see where this is getting. Setting the log level to INFO supresses the debug log entry -> loop avoided.
+       The entries below are only to make sure classes are loaded while debug level is INFO.
+	   These filters are necessary for the crash appender when it is ready.
+  <turboFilter class="com.ils.common.log.filter.CrashFilter"> </turboFilter>
+  <turboFilter class="com.ils.common.log.filter.PatternFilter"> </turboFilter>
+   -->
 
   <!-- This ends up in the SQLite database and is displayed in the Gateway -->
   <appender name="DB" class="com.inductiveautomation.logging.SQLiteAppender">
@@ -33,31 +43,31 @@
     -->
   </appender>
 
-  <!-- An appender for a common log file that wraps monthly
-       Daily rollover. Path must match the one in the file element or else
-       the rollover logs are placed in the working directory. -->
-       Each file keeps 30 days' worth of history
-   -->
+  <property name="CRASH_BUFFER_SIZE" value="500" />
+  <property name="LOGGING_DATASOURCE" value="Logs" />
+
+  <!-- Sample appender for daily rollover.  Path must match the one in the file element or else
+       the rollover logs are placed in the working directory. 
+  -->
   <!--
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>logs/ils.log</file>
+    <file>logs/aed.log</file>
   	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-        <fileNamePattern>log_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+        <fileNamePattern>aed-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>5MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
-            <maxHistory>30</maxHistory>
+            <maxHistory>1</maxHistory>
 	</rollingPolicy>
     <encoder>
           <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
     </encoder>
   </appender>
   -->
-
   <!-- An appender that sifts based on project. Individual projects roll over daily.
        Prudent mode allows several JVMs to write to the same files
-  	   Daily rollover. Path must match the one in the file element or else
-       the rollover logs are placed in the working directory. 
+       Daily rollover. Path must match the one in the file element or else
+       the rollover logs are placed in the working directory.
   -->
   <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
     <discriminator>
@@ -67,14 +77,14 @@
     <sift>
       <appender name="FILE-${project}" class="ch.qos.logback.core.FileAppender">
         <file>logs/${project}.log</file>
-  	    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>log_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
                 <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                     <maxFileSize>5MB</maxFileSize>
                 </timeBasedFileNamingAndTriggeringPolicy>
                 <maxHistory>3</maxHistory>
-		</rollingPolicy>
-    	<prudent>true</prudent>
+        </rollingPolicy>
+        <prudent>true</prudent>
         <encoder>
           <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
          </encoder>
@@ -90,6 +100,6 @@
 
   <logger name="org.apache" level="INFO"></logger>
   <logger name="com" level="INFO" additivity="false">
-    <appender-ref ref="SIFT" />
+    <appender-ref ref="SIFT"/>
   </logger>
 </configuration>

@@ -16,10 +16,11 @@ public class Sample2 {
 	
 	public Sample2() {
 		this.log = LogMaker.getLogger(this);
+		
 	}
 	
 	public void setProject(String project) {
-		MDC.put(LogMaker.PROJECT_KEY, project);
+		this.log.setProject(project);
 	}
 	
 	public void info(String msg) {
@@ -27,6 +28,7 @@ public class Sample2 {
 	}
 	
 	public void infof(String format,String arg1,String arg2) {
+		
 		log.infof(format,arg1,arg2);
 	}
 	
