@@ -22,6 +22,8 @@ import java.util.Map;
 import org.slf4j.MDC;
 
 import com.ils.common.log.LogMaker;
+import com.ils.logging.common.CommonProperties;
+import com.inductiveautomation.ignition.common.logging.Level;
 
 import ch.qos.logback.classic.spi.CallerData;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -36,7 +38,15 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 	protected Connection cxn = null;       // Database connection 
 	protected PreparedStatement ps  = null;
 	protected final StackTraceElement EMPTY_CALLER_DATA = CallerData.naInstance();
+	protected double[] retentionTimes = new double[5];
 	
+	public AbstractSingleTableDBAppender() {
+		this.retentionTimes[0]= CommonProperties.ERROR_DEFAULT_RETENTION;
+		this.retentionTimes[1]=CommonProperties.WARNING_DEFAULT_RETENTION;
+		this.retentionTimes[2]=CommonProperties.INFO_DEFAULT_RETENTION;
+		this.retentionTimes[3]=CommonProperties.DEBUG_DEFAULT_RETENTION;
+		this.retentionTimes[4]=CommonProperties.TRACE_DEFAULT_RETENTION;
+	}
 	/** 
 	 * Create the table if it doesn't exist. We simply ignore any error
 	 */
@@ -71,6 +81,8 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 		return sb.toString();
 	}
 	
+	public double[] getRetentionTimes() { return retentionTimes; }
+	public void setRetentionTimes(double[] times)   { retentionTimes = times; }
 
 	@Override
 	public void stop() {
@@ -158,7 +170,7 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 				ps.setString(12, truncate(event.getFormattedMessage(),8000) );   // log message
 				ps.setString(13, truncate(findMethod(caller),100));   		// function name
 				ps.setString(14, truncate(findLine(caller),10 ));   		// line number
-				ps.setTimestamp(15, computeRetentionTIme(event));   		// retain until
+				ps.setTimestamp(15, computeRetentionTime(event));   		// retain until
 				ps.execute();
 			}
 			catch( SQLException sqle ) {
@@ -204,10 +216,16 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 	}
 	
 	/**
-	 * Compute a retention date dependent on the severity of the message
+	 * Compute a retention date dependent on the severity of the message.
+	 * The retention time array has units of days. Need to convert to msecs
 	 */
-	protected Timestamp computeRetentionTIme(ILoggingEvent event) {
+	protected Timestamp computeRetentionTime(ILoggingEvent event) {
 		long time = event.getTimeStamp();
+		if(      event.getLevel().equals(Level.ERROR) ) { time = time + (long)(retentionTimes[0]*24*3600*1000); }
+		else if( event.getLevel().equals(Level.WARN) )  { time = time + (long)(retentionTimes[1]*24*3600*1000); }
+		else if( event.getLevel().equals(Level.INFO) )  { time = time + (long)(retentionTimes[2]*24*3600*1000); }
+		else if( event.getLevel().equals(Level.DEBUG) ) { time = time + (long)(retentionTimes[3]*24*3600*1000); }
+		else if( event.getLevel().equals(Level.TRACE) ) { time = time + (long)(retentionTimes[4]*24*3600*1000); }
 		return new Timestamp(time);
 	}
 	/**

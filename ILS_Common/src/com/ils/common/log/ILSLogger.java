@@ -244,12 +244,12 @@ public class ILSLogger implements org.slf4j.Logger,AppenderAttachable<ILoggingEv
 
 	@Override
 	public boolean isDebugEnabled() {
-		return isDebugEnabled();
+		return logger.isDebugEnabled();
 	}
 
 	@Override
 	public boolean isDebugEnabled(Marker marker) {
-		return isDebugEnabled(marker);
+		return logger.isDebugEnabled(marker);
 	}
 
 	@Override
@@ -259,7 +259,7 @@ public class ILSLogger implements org.slf4j.Logger,AppenderAttachable<ILoggingEv
 
 	@Override
 	public boolean isErrorEnabled(Marker marker) {
-		return isErrorEnabled(marker);
+		return logger.isErrorEnabled(marker);
 	}
 
 	@Override

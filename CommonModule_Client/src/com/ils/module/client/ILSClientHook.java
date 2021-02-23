@@ -125,11 +125,12 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		logContext.reset();
 		try {
 			int crashBufferSize = ClientScriptFunctions.getCrashAppenderBufferSize();
+			double[] times = ClientScriptFunctions.getRetentionTimes();
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
-				installDatabaseAppender(root,loggingDatasource,logContext);
+				installDatabaseAppender(root,loggingDatasource,logContext,times);
 				installCrashAppender(root,loggingDatasource,logContext,crashBufferSize);
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
 				PatternLayoutEncoder pattern = new PatternLayoutEncoder();
@@ -160,11 +161,12 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 
 	}
-	private void installDatabaseAppender(ILSLogger root,String connection, LoggerContext ctx) {
+	private void installDatabaseAppender(ILSLogger root,String connection, LoggerContext ctx,double[] times) {
 		AbstractClientContext acc = (AbstractClientContext)context;
-		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,ctx,"client");
+		ClientSingleTableDBAppender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,ctx,"client");
 		appender.setContext(root.getLoggerContext());
 		appender.setName(CommonProperties.DB_APPENDER_NAME);
+		appender.setRetentionTimes(times);
 		appender.start();
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed databse appender ...",CLSS));

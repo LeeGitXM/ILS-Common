@@ -18,11 +18,21 @@ public interface CommonProperties   {
 	public final static String CRASH_APPENDER_THRESHOLD = "CRASH_APPENDER_THRESHOLD"; // Key for threshold string
 	public final static String CRASH_BUFFER_SIZE   = "CRASH_BUFFER_SIZE";
 	public final static String LOGGING_DATASOURCE  = "LOGGING_DATASOURCE";
+	public final static String RETENTION_TIME_DEBUG  = "DEBUG_RETENTION_DAYS";
+	public final static String RETENTION_TIME_ERROR  = "ERROR_RETENTION_DAYS";
+	public final static String RETENTION_TIME_INFO   = "INFO_RETENTION_DAYS";
+	public final static String RETENTION_TIME_TRACE  = "TRACE_RETENTION_DAYS";
+	public final static String RETENTION_TIME_WARNING = "WARNING_RETENTION_DAYS";
 	public final static String CRASH_APPENDER_NAME = "CrashAppender";
 	public final static String DB_APPENDER_NAME    = "DBAppender";
 	public final static Level DEFAULT_CRASH_APPENDER_THRESHOLD = Level.DEBUG;
 	public final static int DEFAULT_CRASH_BUFFER_SIZE = 500;
 	
+	public static final double ERROR_DEFAULT_RETENTION = 30.;   // Days
+	public static final double WARNING_DEFAULT_RETENTION = 30.;  
+	public static final double INFO_DEFAULT_RETENTION = 14.;   
+	public static final double DEBUG_DEFAULT_RETENTION = 1.;   
+	public static final double TRACE_DEFAULT_RETENTION = 1.;
 	
 	public final static String DEFAULT_APPENDER_PATTERN = "%d{HH:mm:ss.SSS} %level %logger{35} %msg%n";
 }

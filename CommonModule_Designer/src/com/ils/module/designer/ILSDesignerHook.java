@@ -129,6 +129,7 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 		logContext.reset();
 		try {
 			int crashBufferSize = ClientScriptFunctions.getCrashAppenderBufferSize();
+			double[] times = ClientScriptFunctions.getRetentionTimes();
 			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
 			if( loggingDatasource!=null ) {
 				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -144,16 +145,16 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 					}
 				}
 				
-				installDatabaseAppender(root,loggingDatasource,logContext);
+				installDatabaseAppender(root,loggingDatasource,logContext,times);
 				installCrashAppender(root,loggingDatasource,logContext,crashBufferSize);
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
 				PatternLayoutEncoder pattern = new PatternLayoutEncoder();
 				pattern.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
 				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName()));
 				while(iterator.hasNext()) {
-					Appender app = iterator.next();
+					Appender<ILoggingEvent> app = iterator.next();
 					if( app instanceof OutputStreamAppender ) {
-						((OutputStreamAppender)app).setEncoder(pattern);
+						((OutputStreamAppender<ILoggingEvent>)app).setEncoder(pattern);
 					}
 					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,app.getName() ));
 				}
@@ -166,11 +167,12 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 		
 	}
-	private void installDatabaseAppender(ILSLogger root,String connection,LoggerContext ctx) {
+	private void installDatabaseAppender(ILSLogger root,String connection,LoggerContext ctx,double[] times) {
 		AbstractClientContext acc = (AbstractClientContext)context;
-		Appender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,ctx,"designer");
+		ClientSingleTableDBAppender appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,ctx,"designer");
 		appender.setContext(root.getLoggerContext());
 		appender.setName(CommonProperties.DB_APPENDER_NAME);
+		appender.setRetentionTimes(times);
 		appender.start();
 		root.addAppender(appender);
 		System.out.println(String.format("%s: Installed database appender ...",CLSS));

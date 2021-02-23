@@ -67,7 +67,9 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private GatewayCrashAppender crashAppender = null;
 	private final CrashFilter crashFilter;
 	private final PatternFilter patternFilter;
+	private final double[] times;
 	private String loggingDatasource = "";
+	
 	
 	static {
 		// Access the resource bundle
@@ -78,10 +80,12 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		System.out.println(String.format("%s: Initializing...",CLSS));
 		patternFilter = new PatternFilter();
 		crashFilter = new CrashFilter();
+		times = new double[5]; 
 	}
 	
 	public CrashFilter getCrashFilter() { return this.crashFilter; }
 	public PatternFilter getPatternFilter() { return this.patternFilter; }
+	public double[] getRetentionTimes() { return this.times; }
 	
 	// NOTE: During this period, the module status is LOADED, not RUNNING
 	// Database facilities are not available yet.
@@ -201,6 +205,38 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 					System.out.println(String.format("%s: %s is not a number in ils_logback.xml (%s)",CLSS,CommonProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
 				}
 			}
+			// The retention times by severity are separate properties.
+			String property = "";
+			try {
+				property = CommonProperties.RETENTION_TIME_ERROR;
+				times[0] = CommonProperties.ERROR_DEFAULT_RETENTION;
+				sizeString = configurator.getInterpretationContext().getProperty(property);
+				if( sizeString!=null ) { times[0] = Double.parseDouble(sizeString); }
+				
+				property = CommonProperties.RETENTION_TIME_WARNING;
+				times[1] = CommonProperties.WARNING_DEFAULT_RETENTION;
+				sizeString = configurator.getInterpretationContext().getProperty(property);
+				if( sizeString!=null ) { times[1] = Double.parseDouble(sizeString); }
+
+				property = CommonProperties.RETENTION_TIME_INFO;
+				times[2] = CommonProperties.INFO_DEFAULT_RETENTION;
+				sizeString = configurator.getInterpretationContext().getProperty(property);
+				if( sizeString!=null ) { times[2] = Double.parseDouble(sizeString); }
+
+				property = CommonProperties.RETENTION_TIME_DEBUG;
+				times[3] = CommonProperties.DEBUG_DEFAULT_RETENTION;
+				sizeString = configurator.getInterpretationContext().getProperty(property);
+				if( sizeString!=null ) { times[3] = Double.parseDouble(sizeString); }
+
+				property = CommonProperties.RETENTION_TIME_TRACE;
+				times[4] = CommonProperties.TRACE_DEFAULT_RETENTION;
+				sizeString = configurator.getInterpretationContext().getProperty(property);
+				if( sizeString!=null ) { times[4] = Double.parseDouble(sizeString); }
+
+			}
+			catch(NumberFormatException nfe) {
+				System.out.println(String.format("%s: %s is not a number in ils_logback.xml (%s)",CLSS,property,nfe.getLocalizedMessage()));
+			}
 			
 			// Add pattern, then crash filters
 			resetTurboFilterList(logContext.getTurboFilterList());
@@ -208,7 +244,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			
 
 			/*
-			 * We ghave not been able to get the turbofilters to work. We get a ClassCircularityException
+			 * We have not been able to get the turbofilters to work. We get a ClassCircularityException
 			 * whenever the following are executed ...
 			logContext.addTurboFilter(patternFilter);
 			logContext.addTurboFilter(crashFilter);
@@ -225,7 +261,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			if( loggingDatasource!=null ) {
 				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
-				installDatabaseAppender(root,loggingDatasource);
+				installDatabaseAppender(root,loggingDatasource,times);
 				installCrashAppender(root,loggingDatasource,crashBufferSize);
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
 				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
@@ -251,10 +287,11 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		System.out.println(String.format("%s: Configured gateway logger",CLSS));	
 	}
 	
-	private void installDatabaseAppender(ILSLogger root,String connection) {
-		Appender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
+	private void installDatabaseAppender(ILSLogger root,String connection,double[] times) {
+		GatewaySingleTableDBAppender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
 		appender.setContext(root.getLoggerContext());
 		appender.setName(CommonProperties.DB_APPENDER_NAME);
+		appender.setRetentionTimes(times);
 		root.addAppender(appender);
 		appender.start();
 		System.out.println(String.format("%s: Installed database appender ..",CLSS));

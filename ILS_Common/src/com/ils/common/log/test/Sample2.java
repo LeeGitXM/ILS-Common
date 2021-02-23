@@ -1,6 +1,5 @@
 package com.ils.common.log.test;
 
-import org.slf4j.MDC;
 import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 

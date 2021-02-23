@@ -51,6 +51,11 @@ public interface ModulePropertiesInterface   {
 	 */
 	public String getLogsDir();
 	/**
+	 * @return retention times for database messages by severity: ERROR,WARNING,INFO,DEBUG and TRACE.
+	 *         
+	 */
+	public double[] getRetentionTimes();
+	/**
 	 * The browser path is used for Windows systems only. Mac and Linux systems used the default browser
 	 * and require no configuration.
 	 * 

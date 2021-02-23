@@ -45,6 +45,11 @@
 
   <property name="CRASH_BUFFER_SIZE" value="500" />
   <property name="LOGGING_DATASOURCE" value="Logs" />
+  <property name="RETENTION_TIME_ERROR" value="30." />
+  <property name="RETENTION_TIME_WARNING" value="30." />
+  <property name="RETENTION_TIME_INFO" value="14." />
+  <property name="RETENTION_TIME_DEBUG" value="1." />
+  <property name="RETENTION_TIME_TRACE" value="1." />
 
   <!-- Sample appender for daily rollover.  Path must match the one in the file element or else
        the rollover logs are placed in the working directory. 

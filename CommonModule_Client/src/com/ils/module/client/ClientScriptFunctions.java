@@ -190,6 +190,21 @@ public class ClientScriptFunctions  {
 		return type;
 	}
 	/**
+	 * @return an array of message retention times in the database by message severity level.
+	 */
+	public static double[] getRetentionTimes() {
+		double[] times = new double[5];
+		try {
+			times = (double[])GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
+					CommonProperties.MODULE_ID, "getRetentionTimes" );
+		}
+		catch(Exception ge) {
+			System.out.println(String.format("%s.getRetentionTimes: GatewayException (%s)",CLSS,ge.getMessage()));
+		}
+		return times;
+		
+	}
+	/**
 	 * @return the directory path to the Ignition installation directory holding jar files.
 	 */
 	public static String getUserLibDir()throws Exception{

@@ -111,7 +111,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				args[11]= truncate(event.getFormattedMessage(),8000);  // log message
 				args[12]= truncate(findMethod(caller),100);   		// function name
 				args[13]= truncate(findLine(caller),10);   			// line number
-				args[14]= computeRetentionTIme(event);   			// retain until
+				args[14]= computeRetentionTime(event);   			// retain until
 				dbUtil.executePreparedStatement(insertString, db, args);
 			}
 			catch( Exception sqle ) {

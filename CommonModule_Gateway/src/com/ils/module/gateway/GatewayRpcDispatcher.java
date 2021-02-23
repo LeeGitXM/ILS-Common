@@ -97,6 +97,11 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	 */
 	@Override
 	public String getLogsDir() { return context.getLogsDir().getAbsolutePath(); } 
+	
+	@Override 
+	public double[] getRetentionTimes() {
+		return hook.getRetentionTimes();
+	}
 	/**
 	 * @return the execution path for the browser used to display context-sensitive help.
 	 */
