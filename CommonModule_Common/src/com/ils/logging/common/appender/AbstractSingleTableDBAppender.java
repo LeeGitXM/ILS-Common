@@ -221,11 +221,11 @@ public abstract class AbstractSingleTableDBAppender<E> extends UnsynchronizedApp
 	 */
 	protected Timestamp computeRetentionTime(ILoggingEvent event) {
 		long time = event.getTimeStamp();
-		if(      event.getLevel().equals(Level.ERROR) ) { time = time + (long)(retentionTimes[0]*24*3600*1000); }
-		else if( event.getLevel().equals(Level.WARN) )  { time = time + (long)(retentionTimes[1]*24*3600*1000); }
-		else if( event.getLevel().equals(Level.INFO) )  { time = time + (long)(retentionTimes[2]*24*3600*1000); }
-		else if( event.getLevel().equals(Level.DEBUG) ) { time = time + (long)(retentionTimes[3]*24*3600*1000); }
-		else if( event.getLevel().equals(Level.TRACE) ) { time = time + (long)(retentionTimes[4]*24*3600*1000); }
+		if(      event.getLevel().levelStr.equalsIgnoreCase("ERROR") ) { time = time + (long)(retentionTimes[0]*24*3600*1000); }
+		else if( event.getLevel().levelStr.equalsIgnoreCase("WARN") )  { time = time + (long)(retentionTimes[1]*24*3600*1000); }
+		else if( event.getLevel().levelStr.equalsIgnoreCase("INFO") )  { time = time + (long)(retentionTimes[2]*24*3600*1000); }
+		else if( event.getLevel().levelStr.equalsIgnoreCase("DEBUG") ) { time = time + (long)(retentionTimes[3]*24*3600*1000); }
+		else if( event.getLevel().levelStr.equalsIgnoreCase("TRACE") ) { time = time + (long)(retentionTimes[4]*24*3600*1000); }
 		return new Timestamp(time);
 	}
 	/**
