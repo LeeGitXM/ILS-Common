@@ -10,7 +10,7 @@
 	<!-- Change version.beta value to "" for release builds -->
 	<property name="version.beta" value="-development" />		
 	<property name="CommonModule.version" value="1.1.0.${version.build}" />
-	<property name="CommonModule.name" value="Common" />
+	<property name="CommonModule.name" value="CommonModule" />
 	<property name="CommonModule.release" value="0.5" />
 	<property name="CommonModule.description" value="ILS Common Module" />
 	<property name="root.dir" value="${basedir}/.." />
