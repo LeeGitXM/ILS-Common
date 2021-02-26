@@ -4,7 +4,6 @@
 package com.ils.module.gateway.help;
 
 import com.ils.common.ILSProperties;
-import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.Category;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.IdentityField;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistentRecord;
@@ -24,13 +23,14 @@ public class HelpRecord extends PersistentRecord  {
 	public final static IdentityField Id = new IdentityField(META);
 	
 	// On the configuration page, we configure:
-	// - path to the windows browser
-	
+	// - path to the windows browse
+	// Resource is in HelpRecord.properties
 	public final static StringField windowsBrowserPath = new StringField(META,
 			"WindowsBrowserPath", SFieldFlags.SMANDATORY).setDefault(ILSProperties.DEFAULT_WINDOWS_BROWSER_PATH);
-
+	
+	
 	public final static Category browserCategory = new Category(
-			"ils.Categories.Browser_Path", 0).include(windowsBrowserPath);
+			"ilscommon.Categories.Browser_Path", 0).include(windowsBrowserPath);
 	
 
 	

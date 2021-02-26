@@ -24,7 +24,7 @@ public class HelpParameterEditPage extends RecordEditForm {
 	public static IConfigTab MENU_ENTRY = com.inductiveautomation.ignition.gateway.web.models.DefaultConfigTab.builder()
 			.category(ILSGatewayHook.helpCategory)
 			.name("settings")
-			.i18n("ils.help.settings")
+			.i18n("ilscommon.help.settings")
 			.page(HelpParameterEditPage.class)
 			.terms(new String[] {"path"})
 			.build();

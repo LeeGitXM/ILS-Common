@@ -57,10 +57,8 @@ import simpleorm.dataset.SQuery;
  */
 public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private static final String CLSS = "LoggingGatewayHook";
-	public static final String BUNDLE_NAME = "ilsmodule";       // Properties file is ilsmodule.properties
-	public static final String BUNDLE_ROOT = "ils";             // Name of the bundle
 	private static final String CATEGORY_NAME = "ILSParameters";
-	public static final ConfigCategory helpCategory = new ConfigCategory(CATEGORY_NAME,BUNDLE_ROOT+".menu.category");
+	public static final ConfigCategory helpCategory = new ConfigCategory(CATEGORY_NAME,ILSProperties.COMMON_BUNDLE_ROOT+".menu.category");
 	private static HelpRecord helpRec = null;
 	private GatewayContext context = null;
 	private GatewayRpcDispatcher dispatcher = null;
@@ -69,13 +67,11 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private final PatternFilter patternFilter;
 	private final double[] times;
 	private String loggingDatasource = "";
-	
-	
 	static {
 		// Access the resource bundle
-		BundleUtil.get().addBundle(BUNDLE_ROOT,ILSGatewayHook.class,BUNDLE_NAME);
+		BundleUtil.get().addBundle(ILSProperties.COMMON_BUNDLE_ROOT,ILSGatewayHook.class,ILSProperties.COMMON_BUNDLE_NAME);
 	}
-
+	
 	public ILSGatewayHook() {
 		System.out.println(String.format("%s: Initializing...",CLSS));
 		patternFilter = new PatternFilter();
