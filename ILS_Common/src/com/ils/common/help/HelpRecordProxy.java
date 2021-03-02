@@ -4,7 +4,6 @@
 package com.ils.common.help;
 
 import com.ils.common.ILSProperties;
-import com.inductiveautomation.ignition.common.BundleUtil;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.Category;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.IdentityField;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistentRecord;
@@ -31,7 +30,7 @@ public class HelpRecordProxy extends PersistentRecord  {
 			"WindowsBrowserPath", SFieldFlags.SMANDATORY).setDefault(ILSProperties.DEFAULT_WINDOWS_BROWSER_PATH);
 
 	public final static Category browserCategory = new Category(
-			"ils.Categories.Browser_Path", 0).include(windowsBrowserPath);
+			ILSProperties.COMMON_BUNDLE_ROOT+".Categories.Browser_Path", 0).include(windowsBrowserPath);
 	
 
 	
