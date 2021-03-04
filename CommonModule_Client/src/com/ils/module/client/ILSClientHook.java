@@ -39,7 +39,6 @@ import ch.qos.logback.core.OutputStreamAppender;
 
 public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	private static final String CLSS = "LoggingClientHook";
-	private String clientId = null;
 	private ClientContext context = null;
 	private ClientCrashAppender crashAppender = null;
 	private final SuppressByMarkerFilter crashFilter;
@@ -72,7 +71,22 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	} 
 
 	@Override
-	public String getClientId() { return this.clientId; }
+	public String getClientId() { 
+		PythonExec.setContext(context);
+		String clientId = "";
+		// Set client ID from script (we can't figure out how else)
+		try {
+			String code = "system.util.getClientId";
+			PythonExec pexec = new PythonExec(code,String.class);  // Specify the return class
+			clientId = (String)pexec.exec();
+			MDC.put(LogMaker.CLIENT_KEY,clientId);
+			System.out.println(String.format("%s.configureLogging: clientId = %s",CLSS,clientId));
+		}
+		catch(Exception ex) {
+			System.out.println(String.format("%s: Exception getting clientId ... (%s)",CLSS,ex.getLocalizedMessage()));
+		}
+		return clientId;
+	}
 	
 	@Override
 	public void notifyActivationStateChanged(LicenseState arg0) {	
@@ -95,18 +109,6 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		this.context = ctx;
 		ClientScriptFunctions.setHook(this);
 		ClientScriptFunctions.setContext(context);
-		PythonExec.setContext(context);
-		// Set client ID from script (we can't figure out how else)
-		try {
-			String code = "system.util.getClientId";
-			PythonExec pexec = new PythonExec(code,String.class);  // Specify the return class
-			clientId = (String)pexec.exec();
-			MDC.put(LogMaker.CLIENT_KEY,clientId);
-			System.out.println(String.format("%s.configureLogging: clientId = %s",CLSS,clientId));
-		}
-		catch(Exception ex) {
-			System.out.println(String.format("%s: Exception running script ... (%s)",CLSS,ex.getLocalizedMessage()));
-		}
 		configureLogging();
 	}
 
@@ -161,6 +163,7 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
 
 	}
+	
 	private void installDatabaseAppender(ILSLogger root,String connection, LoggerContext ctx,double[] times) {
 		AbstractClientContext acc = (AbstractClientContext)context;
 		ClientSingleTableDBAppender<ILoggingEvent> appender = new ClientSingleTableDBAppender<ILoggingEvent>(connection,acc,ctx,"client");

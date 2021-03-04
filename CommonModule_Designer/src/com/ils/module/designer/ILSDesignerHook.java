@@ -108,7 +108,7 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 			System.out.println(String.format("%s.configureLogging: clientId = %s",CLSS,clientId));
 		}
 		catch(Exception ex) {
-			System.out.println(String.format("%s: Exception running script ... (%s)",CLSS,ex.getLocalizedMessage()));
+			System.out.println(String.format("%s: Exception getting client ID ... (%s)",CLSS,ex.getLocalizedMessage()));
 		}
 		configureLogging();
 	}
