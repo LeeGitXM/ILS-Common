@@ -13,6 +13,7 @@ public interface ToolkitProperties   {
 	// These are the common names of toolkit properties that are to be stored in SQLite
 	// Note: Duplicates are intentional. The same strings are referenced in several places differently.
 	public static final String TOOLKIT_PROPERTY_DATABASE            = "Database";           // Production database
+	public static final String TOOLKIT_PROPERTY_LOGGING_DATABASE    = "LoggingDatabase";           // Production database
 	public static final String TOOLKIT_PROPERTY_BE_DATABASE         = "BatchExpertDatabase"; //Database for BatchExpert
 	public static final String TOOLKIT_PROPERTY_PYSFC_DATABASE      = "PySfcDatabase";       //Database for PySfc
 	public static final String TOOLKIT_PROPERTY_BE_DBMS             = "BatchExpertDBMS";     //Database for BatchExpert
