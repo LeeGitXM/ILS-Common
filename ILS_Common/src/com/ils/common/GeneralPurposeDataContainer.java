@@ -4,6 +4,7 @@
 package com.ils.common;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  * in the order shown above.
  * This structure is designed to be easily serializable.
  */
-public class GeneralPurposeDataContainer implements Serializable {
+public class GeneralPurposeDataContainer implements Serializable, Cloneable {
 	private static final long serialVersionUID = 5499297358912286066L;
 	private static LoggerEx log = LogUtil.getLogger(GeneralPurposeDataContainer.class.getPackage().getName());
 	private Map<String,String> properties;
@@ -75,5 +76,28 @@ public class GeneralPurposeDataContainer implements Serializable {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public GeneralPurposeDataContainer clone() {
+		GeneralPurposeDataContainer dup = new GeneralPurposeDataContainer();
+		dup.properties.putAll(this.properties);
+		for(String key:lists.keySet()) {
+			List<String> list = lists.get(key);
+			List<String> duplist = new ArrayList<>();
+			duplist.addAll(list);
+			dup.lists.put(key, duplist);
+		}
+		for(String key:maplists.keySet()) {
+			List<Map<String,String>> maplist = maplists.get(key);
+			List<Map<String,String>> dupmaplist = new ArrayList<>();
+			for(Map<String,String> map:maplist) {
+				Map<String,String>dupmap = new HashMap<>();
+				dupmap.putAll(map);
+				dupmaplist.add(dupmap);
+			}
+			dup.maplists.put(key, dupmaplist);
+		}
+		return dup;
 	}
 }

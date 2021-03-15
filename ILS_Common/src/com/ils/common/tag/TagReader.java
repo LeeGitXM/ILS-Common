@@ -4,15 +4,16 @@
 package com.ils.common.tag;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.inductiveautomation.ignition.common.model.BaseContext;
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
-import com.inductiveautomation.ignition.common.sqltags.model.Tag;
 import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
+import com.inductiveautomation.ignition.common.sqltags.model.TagSubscriptionManager;
 import com.inductiveautomation.ignition.common.sqltags.parser.TagPathParser;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
-import com.inductiveautomation.ignition.gateway.model.GatewayContext;
-import com.inductiveautomation.ignition.gateway.sqltags.TagProvider;
 
 /**
  *  A Tag reader obtains the current value of a tag without
@@ -21,12 +22,12 @@ import com.inductiveautomation.ignition.gateway.sqltags.TagProvider;
 public class TagReader  {
 	private static final String TAG = "TagReader";
 	private final LoggerEx log;
-	private final GatewayContext context;
+	private final BaseContext context;
 	
 	/**
 	 * Constructor.
 	 */
-	public TagReader(GatewayContext ctx) {
+	public TagReader(BaseContext ctx) {
 		log = LogUtil.getLogger(getClass().getPackage().getName());
 		this.context = ctx;
 	}
@@ -41,16 +42,15 @@ public class TagReader  {
 		
 		if( context==null) return null;                   // Not initialized yet.
 		if(path==null || path.isEmpty() ) return null;    // Path not set
-		QualifiedValue result = null;
+		QualifiedValue value = null;
 		try {
 			TagPath tp = TagPathParser.parse(path);
-			String providerName = tp.getSource();
-			TagProvider provider = context.getTagManager().getTagProvider(providerName);
-			if( provider!=null) {
-				Tag tag = provider.getTag(tp);
-				if( tag!=null ) result = tag.getValue();
-			} 
-			if( log.isDebugEnabled() && !tp.getSource().equalsIgnoreCase("system")  )log.infof("%s.readTag: %s = %s",TAG,path,result.toString());
+			TagSubscriptionManager tsm = context.getTagManager();
+			List<TagPath> paths = new ArrayList<>();
+			paths.add(tp);
+			List<QualifiedValue> values = tsm.read(paths);
+			if( values!=null && !values.isEmpty()) value = values.get(0);
+			if( log.isDebugEnabled() && !tp.getSource().equalsIgnoreCase("system")  )log.infof("%s.readTag: %s = %s",TAG,path,value.toString());
 		}
 		catch(IOException ioe) {
 			log.warnf("%s.readTag: Exception parsing path %s",TAG,path);
@@ -58,7 +58,7 @@ public class TagReader  {
 		catch(NullPointerException npe) {
 			log.warnf("%s.readTag: Null value for path %s",TAG,path);
 		}
-		return result;
+		return value;
 	}
 	
 }
