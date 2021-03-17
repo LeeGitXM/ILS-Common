@@ -283,11 +283,11 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		System.out.println(String.format("%s: Configured gateway logger",CLSS));	
 	}
 	
-	private void installDatabaseAppender(ILSLogger root,String connection,double[] times) {
+	private void installDatabaseAppender(ILSLogger root,String connection,double[] tms) {
 		GatewaySingleTableDBAppender<ILoggingEvent> appender = new GatewaySingleTableDBAppender<ILoggingEvent>(connection,context);
 		appender.setContext(root.getLoggerContext());
 		appender.setName(CommonProperties.DB_APPENDER_NAME);
-		appender.setRetentionTimes(times);
+		appender.setRetentionTimes(tms);
 		root.addAppender(appender);
 		appender.start();
 		System.out.println(String.format("%s: Installed database appender ..",CLSS));

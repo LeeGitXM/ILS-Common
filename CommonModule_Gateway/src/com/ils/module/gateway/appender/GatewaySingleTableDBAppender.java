@@ -25,14 +25,14 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  */
 public class GatewaySingleTableDBAppender<E> extends AbstractSingleTableDBAppender<E> {
 	private final static String CLSS = "GatewaySingleTableDBAppender";
+	private final GatewayContext ctx;
 	private final DBUtility dbUtil;
-	private final GatewayContext context;
 	private final String db;               // Database connection 
 
 	public GatewaySingleTableDBAppender(String connect,GatewayContext ctx) {
-		this.context = ctx;
+		this.ctx = ctx;
 		this.db = connect;
-		this.dbUtil = new DBUtility(context);
+		this.dbUtil = new DBUtility(ctx);
 	}
 
 	@Override
