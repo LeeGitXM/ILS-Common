@@ -20,7 +20,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  *  creating a subscription.
  */
 public class TagReader  {
-	private static final String TAG = "TagReader";
+	private static final String CLSS = "TagReader";
 	private final LoggerEx log;
 	private final BaseContext context;
 	
@@ -50,13 +50,13 @@ public class TagReader  {
 			paths.add(tp);
 			List<QualifiedValue> values = tsm.read(paths);
 			if( values!=null && !values.isEmpty()) value = values.get(0);
-			if( log.isDebugEnabled() && !tp.getSource().equalsIgnoreCase("system")  )log.infof("%s.readTag: %s = %s",TAG,path,value.toString());
+			if( log.isDebugEnabled() && !tp.getSource().equalsIgnoreCase("system")  )log.infof("%s.readTag: %s = %s",CLSS,path,value.toString());
 		}
 		catch(IOException ioe) {
-			log.warnf("%s.readTag: Exception parsing path %s",TAG,path);
+			log.warnf("%s.readTag: Exception parsing path %s (%s)",CLSS,path,ioe.getCause().getMessage());
 		}
 		catch(NullPointerException npe) {
-			log.warnf("%s.readTag: Null value for path %s",TAG,path);
+			log.warnf("%s.readTag: Null value for path %s",CLSS,path);
 		}
 		return value;
 	}

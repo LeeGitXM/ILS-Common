@@ -21,6 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 
+import com.ils.common.SortedListModel;
+
 public class DualListBox extends JPanel{
 
 	private static final long serialVersionUID = 7655516252196772688L;
@@ -90,8 +92,9 @@ public class DualListBox extends JPanel{
 	}
 	public List<String> getDestinations(){
 		List<String> list = new ArrayList<>();
-		for( String val:destListModel.model) {
-			list.add(val);
+		Iterator<String> iter = destListModel.iterator();
+		while(iter.hasNext()) {
+			list.add(iter.next());
 		}
 		return list;
 	}
