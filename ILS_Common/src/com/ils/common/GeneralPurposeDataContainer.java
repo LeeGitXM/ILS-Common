@@ -45,9 +45,9 @@ public class GeneralPurposeDataContainer implements Serializable, Cloneable {
 	 */
 	public boolean containsData() {
 		boolean result = false;
-		if( properties.isEmpty() &&
-			lists.isEmpty()      &&
-			maplists.isEmpty()      ) result = true;
+		if( !properties.isEmpty() ||
+			!lists.isEmpty()      ||
+			!maplists.isEmpty()      ) result = true;
 		return result;
 	}
 	public Map<String,String> getProperties() {return properties;}
