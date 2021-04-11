@@ -103,7 +103,7 @@ public class GeneralPurposeDataContainer implements Serializable, Cloneable {
 	
 	@Override
 	public String toString() {
-		return String.format("GPData: list: %d maplist %dproperties %d",
+		return String.format("GPData: list: %d maplist %d properties %d",
 				(lists==null?-2:lists.size()),(maplists==null?-2:maplists.size()),(properties==null?-2:properties.size()) );
 	}
 }
