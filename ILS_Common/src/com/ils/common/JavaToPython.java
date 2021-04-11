@@ -159,7 +159,6 @@ public class JavaToPython {
 				 }
 			}
 			result.add(maplists);
-
 		}
 		return result;
 	}
