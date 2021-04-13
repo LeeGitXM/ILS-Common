@@ -125,4 +125,8 @@ public interface ModulePropertiesInterface   {
 	 * @param level name
 	 */
 	public void setLoggingLevel(String loggerName, String level);
+	/**
+	 * @return true to indicate desire to use the database logging and crash reported features.
+	 */
+	public boolean useDatabaseAppender();
 }

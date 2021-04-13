@@ -164,16 +164,9 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	public void setLoggingLevel(String loggerName, String level) {
 		setGatewayLoggingLevel(loggerName,level);
 	}
-
-
-
-
-
-
-
-
-
-
-
+	@Override 
+	public boolean useDatabaseAppender() {
+		return hook.useDatabaseAppender();
+	}
 
 }

@@ -202,7 +202,6 @@ public class ClientScriptFunctions  {
 			System.out.println(String.format("%s.getRetentionTimes: GatewayException (%s)",CLSS,ge.getMessage()));
 		}
 		return times;
-		
 	}
 	/**
 	 * @return the directory path to the Ignition installation directory holding jar files.
@@ -358,5 +357,18 @@ public class ClientScriptFunctions  {
 			lgr.setLevel(lvl);
 		}
 	}
-
+	/**
+	 * @return an array of message retention times in the database by message severity level.
+	 */
+	public static boolean useDatabaseAppender() {
+		boolean use = false;
+		try {
+			use = (boolean)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
+					CommonProperties.MODULE_ID, "useDatabaseAppender" );
+		}
+		catch(Exception ge) {
+			System.out.println(String.format("%s.useDatabaseAppender: GatewayException (%s)",CLSS,ge.getMessage()));
+		}
+		return use;
+	}
 }

@@ -50,6 +50,7 @@
   <property name="RETENTION_TIME_INFO" value="14." />
   <property name="RETENTION_TIME_DEBUG" value="1." />
   <property name="RETENTION_TIME_TRACE" value="1." />
+  <property name="USE_DATABASE_APPENDER" value="TRUE" />
 
   <!-- Sample appender for daily rollover.  Path must match the one in the file element or else
        the rollover logs are placed in the working directory. 

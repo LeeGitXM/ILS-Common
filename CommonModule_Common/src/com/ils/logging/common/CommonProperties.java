@@ -15,6 +15,7 @@ public interface CommonProperties   {
 	public final static String PROPERTIES_SCRIPT_PACKAGE = "system.ils.log.properties";
 	
 	// Logging
+	// These are property keys from ils_logback.xml 
 	public final static String CRASH_APPENDER_THRESHOLD = "CRASH_APPENDER_THRESHOLD"; // Key for threshold string
 	public final static String CRASH_BUFFER_SIZE   = "CRASH_BUFFER_SIZE";
 	public final static String LOGGING_DATASOURCE  = "LOGGING_DATASOURCE";
@@ -23,6 +24,8 @@ public interface CommonProperties   {
 	public final static String RETENTION_TIME_INFO   = "INFO_RETENTION_DAYS";
 	public final static String RETENTION_TIME_TRACE  = "TRACE_RETENTION_DAYS";
 	public final static String RETENTION_TIME_WARNING = "WARNING_RETENTION_DAYS";
+	public final static String USE_DATABASE_APPENDER = "USE_DATABASE_APPENDER";
+	
 	public final static String CRASH_APPENDER_NAME = "CrashAppender";
 	public final static String DB_APPENDER_NAME    = "DBAppender";
 	public final static Level DEFAULT_CRASH_APPENDER_THRESHOLD = Level.DEBUG;
