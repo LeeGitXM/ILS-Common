@@ -67,6 +67,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private final PatternFilter patternFilter;
 	private final double[] times;
 	private String loggingDatasource = "";
+	private boolean useDatabaseAppender = false;
 	static {
 		// Access the resource bundle
 		BundleUtil.get().addBundle(ILSProperties.COMMON_BUNDLE_ROOT,ILSGatewayHook.class,ILSProperties.COMMON_BUNDLE_NAME);
@@ -201,6 +202,10 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 					System.out.println(String.format("%s: %s is not a number in ils_logback.xml (%s)",CLSS,CommonProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
 				}
 			}
+			String useDatabaseString = configurator.getInterpretationContext().getProperty(CommonProperties.USE_DATABASE_APPENDER);
+			if( useDatabaseString!=null ) {
+				useDatabaseAppender = useDatabaseString.equalsIgnoreCase("TRUE");
+			}
 			// The retention times by severity are separate properties.
 			String property = "";
 			try {
@@ -257,8 +262,10 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			if( loggingDatasource!=null ) {
 				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
-				installDatabaseAppender(root,loggingDatasource,times);
-				installCrashAppender(root,loggingDatasource,crashBufferSize);
+				if( useDatabaseAppender ) {
+					installDatabaseAppender(root,loggingDatasource,times);
+					installCrashAppender(root,loggingDatasource,crashBufferSize);
+				}
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
 				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
 				while(iterator.hasNext()) {
@@ -324,4 +331,6 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	  }
 	  list.clear();
 	}
+	
+	public boolean usDatabaseAppender() { return useDatabaseAppender; }
 }
