@@ -332,5 +332,5 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	  list.clear();
 	}
 	
-	public boolean usDatabaseAppender() { return useDatabaseAppender; }
+	public boolean useDatabaseAppender() { return useDatabaseAppender; }
 }
