@@ -1,5 +1,5 @@
 /**
- *   (c) 2013  ILS Automation. All rights reserved.
+ *   (c) 2013-2021  ILS Automation. All rights reserved.
  */
 package com.ils.common;
 
@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 
 /**
  *  Create a list of classes in the jar of a specified class. Filter out to
@@ -25,10 +25,10 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  */
 public class ClassList {
 	private static final String TAG = "ClassList";
-	private final LoggerEx log; 
+	private final ILSLogger log; 
 	
 	public ClassList() {
-		log = LogUtil.getLogger(getClass().getPackage().getName());
+		log = LogMaker.getLogger(getClass().getPackage().getName());
 	}
 	
 	/** 

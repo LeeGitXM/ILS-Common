@@ -1,23 +1,24 @@
 package com.ils.common.db;
 
+
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;
 import com.inductiveautomation.ignition.client.script.ClientDBUtilities;
 import com.inductiveautomation.ignition.common.BasicDataset;
 import com.inductiveautomation.ignition.common.Dataset;
 import com.inductiveautomation.ignition.common.script.builtin.AbstractDBUtilities;
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  * A convenience class for executing queries from Client/Designer scope.
  */
 public class ClientDBUtility extends ClientDBUtilities {
 	private static long TXN_TIMEOUT = 60000;
-	private final LoggerEx log;
+	private final ILSLogger log;
 	
 	public ClientDBUtility(AbstractClientContext context)  {
 		super(context);
-		this.log = LogUtil.getLogger(getClass().getPackage().getName());
+		this.log = LogMaker.getLogger(getClass().getPackage().getName());
 	}
 	
 	public Dataset runQuery(String sql,String datasource) {

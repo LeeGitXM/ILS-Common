@@ -1,7 +1,7 @@
 /**
- *   (c) 2013-2015  ILS Automation. All rights reserved.
+ *   (c) 2013-2021  ILS Automation. All rights reserved.
  */
-package com.ils.common;
+ package com.ils.common;
 
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -17,8 +17,8 @@ import org.python.core.PyList;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 
 /**
  *  JavaToPython is a class with methods for converting
@@ -28,7 +28,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  */
 public class JavaToPython {
 	private static final String TAG = "JavaToPython";
-	private static LoggerEx log = LogUtil.getLogger(JavaToPython.class.getPackage().getName());
+	private static ILSLogger log = LogMaker.getLogger(JavaToPython.class.getPackage().getName());
 	
 	@SuppressWarnings("unchecked")
 	public PyObject objectToPy(Object obj) {

@@ -1,5 +1,5 @@
 /**
- *   (c) 2016-2018  ILS Automation. All rights reserved.
+ *   (c) 2016-2021  ILS Automation. All rights reserved.
  *   @See: sql-bridge-common-api.jar, sql-bridge-designer-api.jar
  */
 
@@ -13,6 +13,8 @@ import java.util.Optional;
 
 import org.python.core.PyList;
 
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 import com.inductiveautomation.factorysql.common.config.CommonGroupProperties;
 import com.inductiveautomation.factorysql.common.config.CommonItemProperties;
 import com.inductiveautomation.factorysql.common.config.GroupConfig;
@@ -21,8 +23,6 @@ import com.inductiveautomation.ignition.common.metaproperties.MetaProperty;
 import com.inductiveautomation.ignition.common.project.Project;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResource;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceId;
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.common.xmlserialization.SerializationException;
 import com.inductiveautomation.ignition.common.xmlserialization.deserialization.DeserializationContext;
 import com.inductiveautomation.ignition.common.xmlserialization.deserialization.XMLDeserializer;
@@ -60,7 +60,7 @@ public abstract class BaseTransactionGroupUtility {
 	// Defaults
 	protected final static String DEFAULT_TSTAMP= "tstamp";
 	
-	protected LoggerEx log;
+	protected ILSLogger log;
 	protected final Map<String, TransactionGroup> groupsByPath;              // Lookup by path name
 	protected final Map<ProjectResourceId, TransactionGroup> groupsById;     // Lookup by resource Id
 	protected Project project = null;
@@ -72,7 +72,7 @@ public abstract class BaseTransactionGroupUtility {
 	public BaseTransactionGroupUtility() {
 		this.groupsByPath = new HashMap<>();
 		this.groupsById = new HashMap<>();
-		this.log = LogUtil.getLogger(getClass().getPackage().getName());
+		this.log = LogMaker.getLogger(getClass().getPackage().getName());
 	}
 
 	protected abstract void addResource(String path,GroupConfig group);

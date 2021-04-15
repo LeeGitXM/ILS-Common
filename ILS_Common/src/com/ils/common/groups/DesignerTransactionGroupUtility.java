@@ -4,7 +4,6 @@ import com.inductiveautomation.factorypmi.application.FPMIApp;
 import com.inductiveautomation.factorysql.common.config.GroupConfig;
 import com.inductiveautomation.factorysql.designer.FSQLDesignerModuleHook;
 import com.inductiveautomation.ignition.client.model.ClientContext;
-import com.inductiveautomation.ignition.common.modules.ModuleInfo;
 import com.inductiveautomation.ignition.common.project.resource.ProjectResourceId;
 import com.inductiveautomation.ignition.common.xmlserialization.deserialization.XMLDeserializer;
 

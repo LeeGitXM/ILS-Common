@@ -12,8 +12,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 
 /**
  *  JsonToJava is a class with  methods for converting a Json
@@ -25,7 +25,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  */
 public class JsonToJava {
 	private static final String TAG = "JsonToJava";
-	private static LoggerEx log = LogUtil.getLogger(JsonToJava.class.getPackage().getName());
+	private static ILSLogger log = LogMaker.getLogger(JsonToJava.class.getPackage().getName());
 	private static ObjectMapper mapper = new ObjectMapper();
 	
 	/**

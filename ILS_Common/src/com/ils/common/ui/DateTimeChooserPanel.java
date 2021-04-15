@@ -15,8 +15,8 @@ import javax.swing.JPanel;
 
 import org.jfree.ui.DateChooserPanel;
 
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 
 /**
  * This is a simple panel that allows entry of time-of-day 
@@ -25,7 +25,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
 public class DateTimeChooserPanel extends JPanel{
 	private static final long serialVersionUID = 1653393576145239228L;
 	private final static String TAG = "DateTimeChooserPanel";
-	private final LoggerEx log;
+	private final ILSLogger log;
 	private static final Dimension COMBO_SIZE = new Dimension(20,24);
 	private final static String STANDARD_DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";
 	private JComboBox<String> hour, minute, second;
@@ -34,7 +34,7 @@ public class DateTimeChooserPanel extends JPanel{
 	private final SimpleDateFormat dateFormatter;
 
 	public DateTimeChooserPanel(){
-		this.log = LogUtil.getLogger(getClass().getPackage().getName());
+		this.log = LogMaker.getLogger(getClass().getPackage().getName());
 		this.dateFormatter= new SimpleDateFormat(STANDARD_DATE_FORMAT);
 		this.timeZone = dateFormatter.getTimeZone();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));

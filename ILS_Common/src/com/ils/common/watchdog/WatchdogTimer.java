@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 
 /**
  *  The watchdog timer manages a collection of "watchdogs". The dogs
@@ -26,7 +26,7 @@ public class WatchdogTimer implements Runnable   {
 	protected final static String TAG = "WatchdogTimer";
 	protected final static int IDLE_DELAY = 60000;    // One minute
 	protected static int THREAD_POOL_SIZE = 20;       // Evaluate threads
-	protected final LoggerEx log;
+	protected final ILSLogger log;
 	protected final LinkedList<Watchdog> dogs;
 	protected boolean stopped = true;
 	protected final ExecutorService threadPool;
@@ -52,7 +52,7 @@ public class WatchdogTimer implements Runnable   {
 	 *              sorted accordingly.
 	 */
 	public WatchdogTimer()  {
-		log = LogUtil.getLogger(getClass().getPackage().getName());
+		log = LogMaker.getLogger(getClass().getPackage().getName());
 		this.threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
 		this.idleDog = new Watchdog("IDLE",null);
 		idleDog.setDelay(IDLE_DELAY);

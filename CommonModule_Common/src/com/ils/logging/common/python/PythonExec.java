@@ -1,5 +1,5 @@
 /**
- * Copyright 2016 ILS Automation. All rights reserved.
+ * Copyright 2021 ILS Automation. All rights reserved.
  */
 package com.ils.logging.common.python;
 
@@ -10,7 +10,7 @@ import org.python.core.PyCode;
 import org.python.core.PyObject;
 import org.python.core.PyStringMap;
 
-import com.inductiveautomation.ignition.common.model.BaseContext;
+import com.inductiveautomation.ignition.common.model.CommonContext;
 import com.inductiveautomation.ignition.common.script.JythonExecException;
 import com.inductiveautomation.ignition.common.script.ScriptManager;
 
@@ -26,7 +26,7 @@ public class PythonExec {
 	private PyCode compiledCode;	// cached compiled code
 	private boolean valid = true;
 
-	private static BaseContext context = null;
+	private static CommonContext context = null;
 	
 	public PythonExec(String methodName, Class<?> returnType, String...args) {
 		this.methodName = methodName;
@@ -102,7 +102,7 @@ public class PythonExec {
 		compiledCode = Py.compile_flags(script, "ils", CompileMode.exec, CompilerFlags.getCompilerFlags());		
 	}
 
-	public static void setContext(BaseContext ctx) {
+	public static void setContext(CommonContext ctx) {
 		context = ctx;
 	}
 

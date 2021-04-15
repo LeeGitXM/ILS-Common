@@ -10,9 +10,9 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.common.datasource.DatasourceStatus;
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.datasource.Datasource;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
@@ -31,12 +31,12 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 public class DBUtility {
 	private final static String TAG = "DBUtility";
 	private final int BATCH_SIZE = 100;
-	private final LoggerEx log;
+	private final ILSLogger log;
 	private final GatewayContext context;
 	
 	public DBUtility(GatewayContext ctx) {
 		this.context = ctx;
-		this.log = LogUtil.getLogger(getClass().getPackage().getName());
+		this.log = LogMaker.getLogger(getClass().getPackage().getName());
 	}
 	/** 
 	 * Any time a connection is "gotten", it should be closed.

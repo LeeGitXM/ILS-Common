@@ -4,8 +4,8 @@
  */
 package com.ils.common.persistence;
 
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 /**
@@ -15,14 +15,14 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  */
 public class ToolkitRecordHandler  {
 	private final static String TAG = "ToolkitRecordHandler";
-	private final LoggerEx log;
+	private final ILSLogger log;
 	private GatewayContext context = null;
     
 	/**
 	 * Initialize with instances of the classes to be controlled.
 	 */
 	public ToolkitRecordHandler(GatewayContext ctx) {
-		log = LogUtil.getLogger(getClass().getPackage().getName());
+		log = LogMaker.getLogger(getClass().getPackage().getName());
 		this.context = ctx;
 	}
 	

@@ -11,8 +11,8 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.MenuElement;
 
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.designer.IgnitionDesigner;
 import com.inductiveautomation.ignition.designer.WorkspaceManager;
 import com.inductiveautomation.ignition.designer.model.DesignerContext;
@@ -25,7 +25,7 @@ import com.inductiveautomation.ignition.designer.navtree.model.ProjectBrowserRoo
  *  by name (path). This works only in the Designer scope.
  */
 public class WorkspaceHandler {
-	private final LoggerEx log;
+	private final ILSLogger log;
 	private final DesignerContext context;
 	
 	// "well-known" workspace keys
@@ -40,7 +40,7 @@ public class WorkspaceHandler {
 	 * The handler
 	 */
 	public WorkspaceHandler(DesignerContext ctx) {
-		this.log = LogUtil.getLogger(getClass().getPackage().getName());
+		this.log = LogMaker.getLogger(getClass().getPackage().getName());
 		this.context = ctx;
 	}
 	/**

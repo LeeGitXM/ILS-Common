@@ -1,5 +1,5 @@
 /**
- *   (c) 2020  ILS Automation. All rights reserved.
+ *   (c) 2020-2021  ILS Automation. All rights reserved.
  *  
  *   Based on sample code in the IA-scripting-module
  *   by Travis Cox.
@@ -9,7 +9,6 @@ package com.ils.module.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.MDC;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.ILSLogger;

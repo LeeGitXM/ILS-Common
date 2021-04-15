@@ -13,13 +13,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.common.project.GlobalProps;
 import com.inductiveautomation.ignition.common.project.ProjectNotFoundException;
 import com.inductiveautomation.ignition.common.project.RuntimeProject;
 import com.inductiveautomation.ignition.common.user.AuthenticatedUser;
 import com.inductiveautomation.ignition.common.user.BasicAuthenticatedUser;
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.IgnitionGateway;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.PersistenceSession;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
@@ -32,14 +32,14 @@ import com.inductiveautomation.ignition.gateway.project.ProjectManager;
 public class InternalDatabaseHandler {
 	private final static String CLSS = "InternalDatabaseHandler";
 	
-	private final LoggerEx log;
+	private final ILSLogger log;
 	private GatewayContext context = null;
     
 	/**
 	 * Constructor:
 	 */
 	public InternalDatabaseHandler() { 
-		log = LogUtil.getLogger(getClass().getPackage().getName());
+		log = LogMaker.getLogger(getClass().getPackage().getName());
 		context = IgnitionGateway.get();
 	}
 	

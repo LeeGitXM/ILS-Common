@@ -25,8 +25,8 @@ import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.RectangleInsets;
 
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 
 /* ===========================================================
  * JFreeChart : a free chart library for the Java(tm) platform
@@ -74,7 +74,7 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	private JFreeChart chart = null;
 	private final ChartPanel chartPanel;
 	private final String yAxisLabel;
-	private final LoggerEx log;
+	private final ILSLogger log;
 
 	/**
 	 * Constructor:
@@ -83,7 +83,7 @@ public class TimeSeriesSparkChart implements NotificationListener, SeriesChangeL
 	 */
 	public TimeSeriesSparkChart(String title, String ylabel ) {  
 		this.yAxisLabel = ylabel; 
-		this.log = LogUtil.getLogger(getClass().getPackage().getName());
+		this.log = LogMaker.getLogger(getClass().getPackage().getName());
 		timeSeriesCollection = new TimeSeriesCollection();
 		
 		// Note: The class of the time-series time period is inferred

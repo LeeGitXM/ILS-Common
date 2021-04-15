@@ -1,5 +1,5 @@
 /**
- *   (c) 2012-2013  ILS Automation. All rights reserved.
+ *   (c) 2012-2021  ILS Automation. All rights reserved.
  */
 package com.ils.common;
 
@@ -10,8 +10,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import com.inductiveautomation.ignition.common.util.LogUtil;
-import com.inductiveautomation.ignition.common.util.LoggerEx;
+import com.ils.common.log.ILSLogger;
+import com.ils.common.log.LogMaker;
 
 /**
  *  The introspector is a debug tool that uses Java reflection
@@ -20,7 +20,7 @@ import com.inductiveautomation.ignition.common.util.LoggerEx;
  *  Taken from "Core Java: Vol 1", by Cay Horstmann, Gary Cornell
  */
 public class Introspector {
-	private static LoggerEx logger = LogUtil.getLogger(Introspector.class.getPackage().getName());
+	private static ILSLogger logger = LogMaker.getLogger(Introspector.class.getPackage().getName());
 	private final static String INDENT = "   "; // Indent for each level of a nested dump
 	private Object obj;
 	

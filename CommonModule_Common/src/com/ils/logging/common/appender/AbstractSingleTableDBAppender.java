@@ -23,7 +23,6 @@ import org.slf4j.MDC;
 
 import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
-import com.inductiveautomation.ignition.common.logging.Level;
 
 import ch.qos.logback.classic.spi.CallerData;
 import ch.qos.logback.classic.spi.ILoggingEvent;
