@@ -76,8 +76,8 @@ public class PythonToJava {
 				else if( obj instanceof PyInteger ) {
 					result.add(new Integer(((PyInteger)obj).getValue()));
 				}
-				else {
-					log.warnf("%s: pyListToArrayList: %s (unrecognized list element type)",TAG,obj.getClass().getName());
+				else { // unrecognized type, adding based on its toString value
+					log.debugf("%s: pyListToArrayList: %s (unrecognized list element type)",TAG,obj.getClass().getName());
 					result.add(obj.toString());
 				}
 			}
