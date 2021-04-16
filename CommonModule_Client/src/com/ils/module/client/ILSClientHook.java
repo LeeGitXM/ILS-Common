@@ -120,48 +120,50 @@ public class ILSClientHook implements ClientModuleHook,LoggingHookInterface {
 	 * Even if the configuration fails, we still have the default configuration.
 	 */
 	private void configureLogging() {
-		LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-		System.out.println(String.format("%s: LoggerContext is %s",CLSS,logContext.getClass().getCanonicalName()));
-		// Resetting the context clears all logger properties and closes existing appenders
-		// It also sets all loggers to DEBUG.
-		logContext.reset();
-		try {
-			int crashBufferSize = ClientScriptFunctions.getCrashAppenderBufferSize();
-			double[] times = ClientScriptFunctions.getRetentionTimes();
-			String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
-			if( loggingDatasource!=null ) {
-				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
-				root.setLevel(Level.INFO);
-				installDatabaseAppender(root,loggingDatasource,logContext,times);
-				installCrashAppender(root,loggingDatasource,logContext,crashBufferSize);
-				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
-				PatternLayoutEncoder pattern = new PatternLayoutEncoder();
-				pattern.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
-				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
-				while(iterator.hasNext()) {
-					Appender<ILoggingEvent> app = iterator.next();
-					if( app instanceof OutputStreamAppender ) {
-						((OutputStreamAppender<ILoggingEvent>)app).setEncoder(pattern);
+		boolean use = ClientScriptFunctions.useDatabaseAppender();
+		if( use ) {
+			LoggerContext logContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+			System.out.println(String.format("%s: LoggerContext is %s",CLSS,logContext.getClass().getCanonicalName()));
+			// Resetting the context clears all logger properties and closes existing appenders
+			// It also sets all loggers to DEBUG.
+			logContext.reset();
+			try {
+				int crashBufferSize = ClientScriptFunctions.getCrashAppenderBufferSize();
+				double[] times = ClientScriptFunctions.getRetentionTimes();
+				String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
+				if( loggingDatasource!=null ) {
+					ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
+					root.setLevel(Level.INFO);
+					installDatabaseAppender(root,loggingDatasource,logContext,times);
+					installCrashAppender(root,loggingDatasource,logContext,crashBufferSize);
+					Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
+					PatternLayoutEncoder pattern = new PatternLayoutEncoder();
+					pattern.setPattern(CommonProperties.DEFAULT_APPENDER_PATTERN);
+					System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
+					while(iterator.hasNext()) {
+						Appender<ILoggingEvent> app = iterator.next();
+						if( app instanceof OutputStreamAppender ) {
+							((OutputStreamAppender<ILoggingEvent>)app).setEncoder(pattern);
+						}
+						System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,app.getName() ));
 					}
-					System.out.println(String.format("%s.configureLogging: appender .................. (%s)",CLSS,app.getName() ));
+				}
+				// Find the pattern filter
+				TurboFilterList list = logContext.getTurboFilterList();
+				Iterator<TurboFilter> iter  = list.iterator();
+				while( iter.hasNext()) {
+					TurboFilter filter = iter.next();
+					if( filter instanceof PatternFilter ) {
+						patternFilter = (PatternFilter)filter;
+						break;
+					}
 				}
 			}
-			// Find the pattern filter
-			TurboFilterList list = logContext.getTurboFilterList();
-			Iterator<TurboFilter> iter  = list.iterator();
-			while( iter.hasNext()) {
-				TurboFilter filter = iter.next();
-				if( filter instanceof PatternFilter ) {
-					patternFilter = (PatternFilter)filter;
-					break;
-				}
+			catch(Exception ex) {
+				System.out.println(String.format("%s.configureLogging: Exception (%s)",CLSS,ex.getMessage()));
 			}
+			System.out.println(String.format("%s: Created Client logger ...",CLSS));
 		}
-		catch(Exception ex) {
-			System.out.println(String.format("%s.configureLogging: Exception (%s)",CLSS,ex.getMessage()));
-		}
-		System.out.println(String.format("%s: Created Designer logger ...",CLSS));
-
 	}
 	
 	private void installDatabaseAppender(ILSLogger root,String connection, LoggerContext ctx,double[] times) {

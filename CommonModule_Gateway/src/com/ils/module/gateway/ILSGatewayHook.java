@@ -67,6 +67,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	private final PatternFilter patternFilter;
 	private final double[] times;
 	private String loggingDatasource = "";
+	private boolean useDatabaseAppender = false;
 	static {
 		// Access the resource bundle
 		BundleUtil.get().addBundle(ILSProperties.COMMON_BUNDLE_ROOT,ILSGatewayHook.class,ILSProperties.COMMON_BUNDLE_NAME);
@@ -159,7 +160,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	}
 
 	@Override
-	public Object getRPCHandler(ClientReqSession session, Long projectID) {
+	public Object getRPCHandler(ClientReqSession session, String projectName) {
 		return dispatcher;
 	}
 	/**
@@ -186,7 +187,7 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 		// It also sets all loggers to DEBUG. We will reset here.
 		logContext.reset();
 		configurator.setContext(logContext);
-		Path configPath = Paths.get(context.getLibDir().getAbsolutePath(),"..","data","ils_logback.xml");
+		Path configPath = Paths.get(context.getSystemManager().getLibDir().getAbsolutePath(),"..","data","ils_logback.xml");
 		try {
 			byte[] bytes = Files.toByteArray(configPath.toFile());
 			configurator.doConfigure(new ByteArrayInputStream(bytes));
@@ -200,6 +201,10 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 				catch(NumberFormatException nfe) {
 					System.out.println(String.format("%s: %s is not a number in ils_logback.xml (%s)",CLSS,CommonProperties.CRASH_BUFFER_SIZE,nfe.getLocalizedMessage()));
 				}
+			}
+			String useDatabaseString = configurator.getInterpretationContext().getProperty(CommonProperties.USE_DATABASE_APPENDER);
+			if( useDatabaseString!=null ) {
+				useDatabaseAppender = useDatabaseString.equalsIgnoreCase("TRUE");
 			}
 			// The retention times by severity are separate properties.
 			String property = "";
@@ -257,8 +262,10 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 			if( loggingDatasource!=null ) {
 				ILSLogger root = LogMaker.getLogger(Logger.ROOT_LOGGER_NAME);
 				root.setLevel(Level.INFO);
-				installDatabaseAppender(root,loggingDatasource,times);
-				installCrashAppender(root,loggingDatasource,crashBufferSize);
+				if( useDatabaseAppender ) {
+					installDatabaseAppender(root,loggingDatasource,times);
+					installCrashAppender(root,loggingDatasource,crashBufferSize);
+				}
 				Iterator<Appender<ILoggingEvent>> iterator = root.iteratorForAppenders();
 				System.out.println(String.format("%s.configureLogging: Root (%s) has these appenders",CLSS,root.getName() ));
 				while(iterator.hasNext()) {
@@ -324,4 +331,6 @@ public class ILSGatewayHook extends AbstractGatewayModuleHook {
 	  }
 	  list.clear();
 	}
+	
+	public boolean useDatabaseAppender() { return useDatabaseAppender; }
 }

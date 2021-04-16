@@ -83,7 +83,7 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 		return buf.toString();
 	}
 	@Override
-	public String getLibDir() { return context.getLibDir().getAbsolutePath(); }
+	public String getLibDir() { return context.getSystemManager().getLibDir().getAbsolutePath(); }
 	
 	@Override
 	public List<String> getLoggerNames() {
@@ -96,7 +96,7 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	/**
 	 */
 	@Override
-	public String getLogsDir() { return context.getLogsDir().getAbsolutePath(); } 
+	public String getLogsDir() { return context.getSystemManager().getLogsDir().getAbsolutePath(); } 
 	
 	@Override 
 	public double[] getRetentionTimes() {
@@ -112,7 +112,7 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	}
 	/**
 	 */
-	public String getUserLibDir() { return context.getUserlibDir().getAbsolutePath(); }
+	public String getUserLibDir() { return context.getSystemManager().getUserLibDir().getAbsolutePath(); }
 
 	@Override
 	public void passGatewayLogsOnThread(String threadName) {
@@ -164,16 +164,9 @@ public class GatewayRpcDispatcher implements ModulePropertiesInterface {
 	public void setLoggingLevel(String loggerName, String level) {
 		setGatewayLoggingLevel(loggerName,level);
 	}
-
-
-
-
-
-
-
-
-
-
-
+	@Override 
+	public boolean useDatabaseAppender() {
+		return hook.useDatabaseAppender();
+	}
 
 }

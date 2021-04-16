@@ -1,0 +1,34 @@
+<configuration debug="true">
+  <!--  
+		This configuration file is designed for logging behavior that mimics that supplied with ignition
+		by default, even though the ILS Common module is installed. In other words database retention
+		is turned off.
+
+  		See  https://logback.qos.ch/manual/configuration.html for hints on the makeup of this file
+  -->
+
+  <!-- This ends up in the wrapper.log -->
+  <appender name="SysoutAppender" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- This ends up in the SQLite database and is displayed in the Gateway -->
+  <appender name="DB" class="com.inductiveautomation.logging.SQLiteAppender">
+    <dir>logs</dir>
+  </appender>
+
+  <property name="USE_DATABASE_APPENDER" value="FALSE" />
+
+  <appender name="SysoutAsync" class="ch.qos.logback.classic.AsyncAppender" queueSize="1000" discardingThreshold="0">
+    <appender-ref ref="SysoutAppender" />
+  </appender>
+  <appender name="DBAsync" class="ch.qos.logback.classic.AsyncAppender" queueSize="100000" discardingThreshold="0">
+    <appender-ref ref="DB" />
+  </appender>
+  <root name="ROOT" level="info">
+    <appender-ref ref="SysoutAsync" />
+    <appender-ref ref="DBAsync" />
+  </root>
+</configuration>

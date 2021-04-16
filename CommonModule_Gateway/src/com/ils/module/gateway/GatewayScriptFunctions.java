@@ -74,7 +74,7 @@ public class GatewayScriptFunctions  {
 		}
 		return level;
 	}
-	public static String getLibDir() { return context.getLibDir().getAbsolutePath(); }
+	public static String getLibDir() { return context.getSystemManager().getLibDir().getAbsolutePath(); }
 	/**
 	 * @return a list of names of loggers known in your current scope (simply defer to the Gateway method).
 	 */
@@ -94,13 +94,13 @@ public class GatewayScriptFunctions  {
 	public static String getLoggingDatasource() { return hook.getLoggingDatasource(); }
 	/**
 	 */
-	public static String getLogsDir() { return context.getLogsDir().getAbsolutePath(); }
+	public static String getLogsDir() { return context.getSystemManager().getLogsDir().getAbsolutePath(); }
 	/**
 	 */
 	public static String getWindowsBrowserPath() { return hook.getWindowsBrowserPath(); }
 	/**
 	 */
-	public static String getUserLibDir() { return context.getUserlibDir().getAbsolutePath(); }
+	public static String getUserLibDir() { return context.getSystemManager().getUserLibDir().getAbsolutePath(); }
 	/**
 	 */
 	public static void passGatewayLogsOnCurrentThread() {

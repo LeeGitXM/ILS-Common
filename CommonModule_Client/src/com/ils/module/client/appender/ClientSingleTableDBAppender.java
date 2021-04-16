@@ -63,10 +63,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 		//System.out.println(CLSS+ ".start ");
 		try {
 			String SQL = getTableCreateString();
-			dbUtil.executeUpdateQuery(SQL,db);
-		}
-		catch(SQLException sqle) {
-			System.out.println(String.format("%s.start: Error creating prepared statement (%s)",CLSS,sqle.getLocalizedMessage()));
+			dbUtil.runUpdateQuery(SQL,db,"",false,true);
 		}
 		catch(Exception ex) {
 			System.out.println(String.format("%s.start: Exception creating prepared statement (%s)",CLSS,ex.getLocalizedMessage()));
@@ -112,7 +109,7 @@ public class ClientSingleTableDBAppender<E> extends AbstractSingleTableDBAppende
 				args[12]= truncate(findMethod(caller),100);   		// function name
 				args[13]= truncate(findLine(caller),10);   			// line number
 				args[14]= computeRetentionTime(event);   			// retain until
-				dbUtil.executePreparedStatement(insertString, db, args);
+				dbUtil.runPreparedStatement(insertString, db,"",false,true,args);
 			}
 			catch( Exception sqle ) {
 				Object msg = sqle.getLocalizedMessage();

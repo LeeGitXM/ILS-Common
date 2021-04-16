@@ -13,7 +13,8 @@ import com.inductiveautomation.ignition.common.script.builtin.AbstractDBUtilitie
  * A convenience class for executing queries from Client/Designer scope.
  */
 public class ClientDBUtility extends ClientDBUtilities {
-	private static long TXN_TIMEOUT = 60000;
+	private final static String clss = "ClientDBUtility";
+	private final static long TXN_TIMEOUT = 60000;
 	private final ILSLogger log;
 	
 	public ClientDBUtility(AbstractClientContext context)  {
@@ -33,5 +34,24 @@ public class ClientDBUtility extends ClientDBUtilities {
 		}
 		return ds;
 	}
-	 
+	public Integer runUpdateQuery(String SQL,String db,String txid,boolean getIds,boolean skipAudit) {
+		Integer rowsAffected = 0;
+		try {
+			rowsAffected = _runUpdateQuery(SQL,db,txid,getIds,skipAudit);
+		}
+		catch(Exception ex) {
+			log.warn("ClientDBUtility.runUpdateQuery: Exception running update  ("+ex.getMessage()+")",ex);
+		}
+		return rowsAffected;
+	}
+	public Integer runPreparedStatement(String SQL,String db,String txid,boolean getIds,boolean skipAudit,Object[] args) {
+		Integer rowsAffected = 0;
+		try {
+			rowsAffected = _runPrepStmt(SQL,db,txid,getIds,skipAudit,args);
+		}
+		catch(Exception ex) {
+			log.warn("ClientDBUtility.runPreparedStatement: Exception running prepared statement ("+ex.getMessage()+")",ex);
+		}
+		return rowsAffected;
+	}
 }

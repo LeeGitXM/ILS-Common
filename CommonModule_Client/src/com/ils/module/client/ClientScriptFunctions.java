@@ -1,5 +1,5 @@
 /**
- *   (c) 2020-2021  ILS Automation. All rights reserved.
+ *   (c) 2020  ILS Automation. All rights reserved.
  *  
  *   Based on sample code in the IA-scripting-module
  *   by Travis Cox.
@@ -9,6 +9,7 @@ package com.ils.module.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.MDC;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.ILSLogger;
@@ -201,7 +202,6 @@ public class ClientScriptFunctions  {
 			System.out.println(String.format("%s.getRetentionTimes: GatewayException (%s)",CLSS,ge.getMessage()));
 		}
 		return times;
-		
 	}
 	/**
 	 * @return the directory path to the Ignition installation directory holding jar files.
@@ -357,5 +357,18 @@ public class ClientScriptFunctions  {
 			lgr.setLevel(lvl);
 		}
 	}
-
+	/**
+	 * @return an array of message retention times in the database by message severity level.
+	 */
+	public static boolean useDatabaseAppender() {
+		boolean use = false;
+		try {
+			use = (boolean)GatewayConnectionManager.getInstance().getGatewayInterface().moduleInvoke(
+					CommonProperties.MODULE_ID, "useDatabaseAppender" );
+		}
+		catch(Exception ge) {
+			System.out.println(String.format("%s.useDatabaseAppender: GatewayException (%s)",CLSS,ge.getMessage()));
+		}
+		return use;
+	}
 }

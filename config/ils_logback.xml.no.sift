@@ -1,0 +1,112 @@
+<configuration scan="true" scanPeriod="60 seconds">
+  <!--  
+		This configuration file is invoked only when the ils-common module is loaded into Ignition.
+		This module features log messages loaded into a database table for easy searching and sorting.
+		The version here does NOT separate logfiles by project.
+
+  		See  https://logback.qos.ch/manual/configuration.html for hints on the makeup of this file
+        NOTE: Any com.ils.common.log classes must be inserted into catapult.jar as logging is
+		      initialized on early startup.
+  -->
+
+  <!-- This ends up in the wrapper.log -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- A  Circularity Error occurs when the class loader loads the logger classes. Doing that, it outputs
+       a debug message to the log. For this it will need to load the logger classes. Doing that ... 
+       you see where this is getting. Setting the log level to INFO supresses the debug log entry -> loop avoided.
+       The entries below are only to make sure classes are loaded while debug level is INFO.
+	   These filters are necessary for the crash appender when it is ready.
+  <turboFilter class="com.ils.common.log.filter.CrashFilter"> </turboFilter>
+  <turboFilter class="com.ils.common.log.filter.PatternFilter"> </turboFilter>
+   -->
+
+  <!-- This ends up in the SQLite database and is displayed in the Gateway -->
+  <appender name="DB" class="com.inductiveautomation.logging.SQLiteAppender">
+    <dir>logs</dir>
+    <!--
+      Maintenance Settings
+      entryLimit: The maximum number of entries in the database. However, at any given time, there may be more than this number, due to how cleanup works.
+      maxEventsPerMaintenance: The number of event that can happen before a maintenance cycle occurs.
+      minTimeBetweenMaintenance: The minimum time (max frequency) between maintenance events. Takes precedent over max events.
+      vacuumFrequency: The number of maintenance cycles before a "vacuum" is performed, to recover disk space.
+
+      On disk, most log events are between 600-800 bytes.
+    <entryLimit>50000</entryLimit>
+    <maxEventsPerMaintenance>5000</maxEventsPerMaintenance>
+    <minTimeBetweenMaintenance>60000</minTimeBetweenMaintenance>
+    <vacuumFrequency>3</vacuumFrequency>
+    -->
+  </appender>
+
+  <property name="CRASH_BUFFER_SIZE" value="500" />
+  <property name="LOGGING_DATASOURCE" value="Logs" />
+  <property name="RETENTION_TIME_ERROR" value="30." />
+  <property name="RETENTION_TIME_WARNING" value="30." />
+  <property name="RETENTION_TIME_INFO" value="14." />
+  <property name="RETENTION_TIME_DEBUG" value="1." />
+  <property name="RETENTION_TIME_TRACE" value="1." />
+  <property name="USE_DATABASE_APPENDER" value="TRUE" />
+
+  <!-- Appender for daily rollover.  Path must match the one in the file element or else
+       the rollover logs are placed in the working directory. 
+  -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>logs/wrapper.log</file>
+  	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <fileNamePattern>wrapper-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>5</maxHistory>
+	</rollingPolicy>
+    <encoder>
+          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- An appender that sifts based on project. Individual projects roll over daily.
+       Prudent mode allows several JVMs to write to the same files
+       Daily rollover. Path must match the one in the file element or else
+       the rollover logs are placed in the working directory.
+  -->
+  <!--
+  <appender name="SIFT" class="ch.qos.logback.classic.sift.SiftingAppender">
+    <discriminator>
+      	<defaultValue>unknown</defaultValue>
+	<key>project</key>
+    </discriminator>
+    <sift>
+      <appender name="FILE-${project}" class="ch.qos.logback.core.FileAppender">
+        <file>logs/${project}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>log_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+                <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    <maxFileSize>5MB</maxFileSize>
+                </timeBasedFileNamingAndTriggeringPolicy>
+                <maxHistory>3</maxHistory>
+        </rollingPolicy>
+        <prudent>true</prudent>
+        <encoder>
+          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+         </encoder>
+      </appender>
+     </sift>
+   </appender>
+   -->
+
+  <root name="ROOT" level="info">
+    <appender-ref ref="STDOUT" />
+    <appender-ref ref="DB" />
+    <appender-ref ref="SIFT" />
+  </root>
+
+  <logger name="org.apache" level="INFO"></logger>
+  <logger name="com" level="INFO" additivity="false">
+    <appender-ref ref="SIFT"/>
+  </logger>
+</configuration>
