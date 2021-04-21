@@ -126,10 +126,13 @@ public class ILSDesignerHook extends AbstractDesignerModuleHook implements Loggi
 		System.out.println(String.format("%s: LoggerContext is %s",CLSS,logContext.getClass().getCanonicalName()));
 		// Resetting the context clears all logger properties and closes existing appenders
 		// It also sets all loggers to DEBUG.
-		logContext.reset();
+		//logContext.reset();  ** This is where Chuck had it, but if I turn off the module then everything in the Designer gets set to DEBUG mode,   **
 		try {
 			boolean use = ClientScriptFunctions.useDatabaseAppender();
 			if( use ) {
+				// Resetting the context clears all logger properties and closes existing appenders
+				// It also sets all loggers to DEBUG.
+				logContext.reset();
 				int crashBufferSize = ClientScriptFunctions.getCrashAppenderBufferSize();
 				double[] times = ClientScriptFunctions.getRetentionTimes();
 				String loggingDatasource = ClientScriptFunctions.getLoggingDatasource();
