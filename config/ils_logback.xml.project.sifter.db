@@ -1,8 +1,8 @@
 <configuration scan="true" scanPeriod="60 seconds">
   <!--  
 		This configuration file is invoked only when the ils-common module is loaded into Ignition.
-		This configuration file configures project sifters to sift messages to project specific log files.
-		It does NOT use the custom database logging feature.
+		This module features log messages loaded into a database table for easy searching and sorting.
+		The version here also sifts messages into directories based on project name.
 
   		See  https://logback.qos.ch/manual/configuration.html for hints on the makeup of this file
         NOTE: Any com.ils.common.log classes must be inserted into catapult.jar as logging is
@@ -50,7 +50,7 @@
   <property name="RETENTION_TIME_INFO" value="14." />
   <property name="RETENTION_TIME_DEBUG" value="1." />
   <property name="RETENTION_TIME_TRACE" value="1." />
-  <property name="USE_DATABASE_APPENDER" value="FALSE" />
+  <property name="USE_DATABASE_APPENDER" value="TRUE" />
 
   <!-- Sample appender for daily rollover.  Path must match the one in the file element or else
        the rollover logs are placed in the working directory. 
