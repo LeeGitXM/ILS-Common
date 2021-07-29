@@ -1,5 +1,5 @@
 /**
- *   (c) 2013-2015  ILS Automation. All rights reserved.
+ *   (c) 2013-2021  ILS Automation. All rights reserved.
  *  
  */
 package com.ils.common.watchdog;
@@ -7,6 +7,7 @@ package com.ils.common.watchdog;
 import java.util.Date;
 
 import com.inductiveautomation.ignition.common.model.values.BasicQualifiedValue;
+import com.inductiveautomation.ignition.common.model.values.QualityCode;
 
 
 /**
@@ -16,6 +17,17 @@ import com.inductiveautomation.ignition.common.model.values.BasicQualifiedValue;
 public class TestAwareQualifiedValue extends BasicQualifiedValue  {
 	private static final long serialVersionUID = 5170215720921103760L;
 
+	/**
+	 * Create a qualified value from a value and quality. If in a testing 
+	 * situation, set the time to the test time. The standard timer
+	 * simply returns the current time as the "test time". 
+	 * @param observer
+	 */
+	public TestAwareQualifiedValue(WatchdogTimer timer,Object value, QualityCode q) {
+		this(timer,value);
+		setQuality(q);
+	}
+	
 	/**
 	 * Create a qualified value from just a value. If in a testing 
 	 * situation, set the time to the test time. The standard timer

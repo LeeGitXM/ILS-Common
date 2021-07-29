@@ -5,7 +5,9 @@
 	<property name="jar.name" value="ils-common.jar" />
 	<property name="build.dir" value="bin" />
 	<property name="src.dir" value="src" />
-	<property name="p200props" value="${basedir}/pack200.properties" />
+	<property name="ant.build.javac.source" value="11"/>
+	<property name="ant.build.javac.target" value="11"/>
+	
 	<!-- CAREFUL: Pull out of official Inductive automation jars first.  -->
 	<path id="ils-classpath">
 		<fileset dir="${sdk.dir}">
@@ -36,7 +38,7 @@
 	<!-- Compile the library -->
 	<target name="build" description="Compile the source">
 		<mkdir dir="${build.dir}/images"/>
-		<javac destdir="${build.dir}"  source="11" target="11" debug="true" debuglevel="lines,vars,source">
+		<javac destdir="${build.dir}" debug="true" debuglevel="lines,vars,source">
 		     <src path="${src.dir}"/>
 		     <classpath refid="ils-classpath"/>
 		</javac>

@@ -10,7 +10,6 @@ import org.python.core.PyCode;
 import org.python.core.PyObject;
 import org.python.core.PyStringMap;
 
-import com.inductiveautomation.ignition.common.model.BaseContext;
 import com.inductiveautomation.ignition.common.model.CommonContext;
 import com.inductiveautomation.ignition.common.script.JythonExecException;
 import com.inductiveautomation.ignition.common.script.ScriptManager;
