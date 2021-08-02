@@ -49,7 +49,7 @@
             <maxHistory>30</maxHistory>
 	</rollingPolicy>
     <encoder>
-          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+          <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
     </encoder>
   </appender>
   -->
@@ -80,7 +80,7 @@
     	<prudent>true</prudent>
 		-->
         <encoder>
-          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+          <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
          </encoder>
       </appender>
 	  
