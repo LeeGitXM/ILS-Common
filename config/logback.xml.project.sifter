@@ -38,9 +38,8 @@
        the rollover logs are placed in the working directory. -->
        Each file keeps 30 days' worth of history
    -->
-  <!--
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>logs/ils.log</file>
+    <file>logs/wrapper.log</file>
   	<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
         <fileNamePattern>log_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -52,7 +51,6 @@
           <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
     </encoder>
   </appender>
-  -->
 
   <!-- An appender that sifts based on project. Individual projects roll over daily.
        Prudent mode allows several JVMs to write to the same files
