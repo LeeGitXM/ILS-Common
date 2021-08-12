@@ -14,11 +14,11 @@
       </EventScripts>
    </Tag>
    <Tag name="gateway_java" path="Sandbox/Logging" type="DB">
-      <Property name="Value">true</Property>
-      <Property name="DataType">6</Property>
+      <Property name="Value">0</Property>
+      <Property name="DataType">2</Property>
       <EventScripts>
-         <Event id="valueChanged" enabled="true">	import com.ils.common.log.Sample1 as Sample1
-	import com.ils.common.log.Sample2 as Sample2
+         <Event id="valueChanged" enabled="true">	import com.ils.common.log.test.Sample1 as Sample1
+	import com.ils.common.log.test.Sample2 as Sample2
 	
 	s1 = Sample1(&quot;project1&quot;)
 	s1.work()
@@ -30,14 +30,18 @@
       </EventScripts>
    </Tag>
    <Tag name="gateway_python" path="Sandbox/Logging" type="DB">
-      <Property name="Value">false</Property>
-      <Property name="DataType">6</Property>
+      <Property name="Value">1</Property>
+      <Property name="DataType">2</Property>
       <EventScripts>
          <Event id="valueChanged" enabled="true">	from ils.log.LogRecorder import LogRecorder
 	logger = LogRecorder(&quot;myLogger&quot;)
+
+
 	logger.info(&quot;This is an info message&quot;)
 	logger.infof(&quot;This is info message #%d&quot;,42)
-	logger.trace(&quot;and I can trace&quot;)</Event>
+	logger.trace(&quot;and I can trace&quot;)
+	logger.setLevel(&quot;TRACE&quot;)
+	logger.trace(&quot; and I can still trace&quot;)</Event>
       </EventScripts>
    </Tag>
    <Tag name="work1a_setInfo" path="Sandbox/Logging" type="DB">
@@ -49,7 +53,7 @@
       </EventScripts>
    </Tag>
    <Tag name="work1a_setTrace" path="Sandbox/Logging" type="DB">
-      <Property name="Value">true</Property>
+      <Property name="Value">false</Property>
       <Property name="DataType">6</Property>
       <EventScripts>
          <Event id="valueChanged" enabled="true">	from ils.logging.work1a import setTrace
@@ -65,7 +69,7 @@
       </EventScripts>
    </Tag>
    <Tag name="work1b_setInfo" path="Sandbox/Logging" type="DB">
-      <Property name="Value">false</Property>
+      <Property name="Value">true</Property>
       <Property name="DataType">6</Property>
       <EventScripts>
          <Event id="valueChanged" enabled="true">	from ils.logging.work1b import setInfo
