@@ -33,10 +33,9 @@
     -->
   </appender>
 
-  <!-- An appender for a common log file that wraps monthly
-       Daily rollover. Path must match the one in the file element or else
+  <!-- An appender for a common log file that wraps by size and time (daily).
+       Path must match the one in the file element or else
        the rollover logs are placed in the working directory. -->
-       Each file keeps 30 days' worth of history
    -->
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <file>logs/wrapper.log</file>
@@ -63,7 +62,6 @@
 	<key>project</key>
     </discriminator>
     <sift>
-	
 	  <appender name="FILE-${project}" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/${project}.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
@@ -85,14 +83,17 @@
     </sift>
   </appender>
 
-  <root name="ROOT" level="info">
+  <!-- Define appenders to be added to the root logger -->
+  <root level="info">
     <appender-ref ref="STDOUT" />
     <appender-ref ref="DB" />
+    <appender-ref ref="FILE" />
     <appender-ref ref="SIFT" />
   </root>
 
   <logger name="org.apache" level="INFO"></logger>
   <logger name="com" level="INFO" additivity="false">
     <appender-ref ref="SIFT" />
+    <appender-ref ref="FILE" />
   </logger>
 </configuration>

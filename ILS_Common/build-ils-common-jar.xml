@@ -25,7 +25,7 @@
 		<mkdir dir="${jar.dir}"/>
 		<mkdir dir="${build.dir}"/>
 		<delete file="${jar.dir}/${jar.name}" />
-        <delete>
+        <delete failonerror="false">
             <fileset dir="${build.dir}">
                 <include name="**/*.class"/>
             	<include name="**/*.png"/>
