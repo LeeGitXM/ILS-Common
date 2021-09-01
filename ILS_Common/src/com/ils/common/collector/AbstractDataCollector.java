@@ -98,7 +98,7 @@ public abstract class AbstractDataCollector  {
 		}
 		newPoints[prototype.dataPoints.length] = point;
 		startSubscription(point);
-		positionMap.put(point.tagPath, new Integer(point.index));
+		positionMap.put(point.tagPath,point.index);
 		prototype.dataPoints = newPoints;
 		log.tracef("%s: replaceDataPoint. extended point array to %d with %s",TAG,prototype.dataPoints.length,point.tagPath);
 	}
@@ -117,7 +117,7 @@ public abstract class AbstractDataCollector  {
 			DataPoint point = prototype.dataPoints[index];
 			if( point.tagPath!=null ) {
 				stopSubscription(point);
-				positionMap.remove(new Integer(point.index));
+				positionMap.remove(point.index);
 			}
 			point.tagPath = null;
 		}
@@ -138,7 +138,7 @@ public abstract class AbstractDataCollector  {
 			if( point.tagPath==null ) {
 				point.tagPath = path;
 				startSubscription(point);
-				positionMap.put(point.tagPath, new Integer(point.index));
+				positionMap.put(point.tagPath, point.index);
 				result = true;
 			}
 		}
@@ -171,7 +171,7 @@ public abstract class AbstractDataCollector  {
 				point.missedReads = 0;
 				point.badReads    = 0;
 				if( point.tagPath!=null ) {
-					positionMap.put(point.tagPath, new Integer(point.index));
+					positionMap.put(point.tagPath, point.index);
 					startSubscription(point);
 				}
 				if(log.isTraceEnabled()) {

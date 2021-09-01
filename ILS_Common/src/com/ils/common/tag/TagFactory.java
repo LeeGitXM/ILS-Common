@@ -198,8 +198,19 @@ public class TagFactory  {
 	 * @param type String version of datatype
 	 */
 	public void createTag(String providerName, String tagPath, String type) {
+		DataType dataType = dataTypeFromString(type);
+		createTag(providerName,tagPath,dataType);
+	}
+	/**
+	 * The TagPath attribute "source" actually refers to the provider name. A full tag path includes
+	 * the provider in brackets, a partial path does not. 
+	 * @param providerName
+	 * @param tagPath
+	 * @param type String version of datatype
+	 */
+	public void createTag(String providerName, String tagPath, DataType dataType) {
 		tagPath = stripProvider(tagPath);
-		log.debugf("%s.createTag [%s]%s (%s)",CLSS,providerName,tagPath,type);
+		log.debugf("%s.createTag [%s]%s (%s)",CLSS,providerName,tagPath,dataType.name());
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
@@ -212,7 +223,7 @@ public class TagFactory  {
 		//       show up in the designer SQLTagsBrowser. This is not the case when defining directly
 		//       through the tag manager. Here the calls appear to succeed, but the tags do not show up.
 		// In the cases where we need historical timestamps,  we use the simple tag provider.
-		DataType dataType = dataTypeFromString(type);
+		
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
 		if( provider != null ) {
 			try {

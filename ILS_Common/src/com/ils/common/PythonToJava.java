@@ -71,10 +71,10 @@ public class PythonToJava {
 					result.add(obj.toString());
 				}
 				else if( obj instanceof PyFloat ) {
-					result.add(new Double(((PyFloat)obj).getValue()));
+					result.add(((PyFloat)obj).getValue());
 				}
 				else if( obj instanceof PyInteger ) {
-					result.add(new Integer(((PyInteger)obj).getValue()));
+					result.add(((PyInteger)obj).getValue());
 				}
 				else { // unrecognized type, adding based on its toString value
 					log.debugf("%s: pyListToArrayList: %s (unrecognized list element type)",TAG,obj.getClass().getName());
@@ -127,10 +127,10 @@ public class PythonToJava {
 					result.add(obj.toString());
 				}
 				else if( obj instanceof PyFloat ) {
-					result.add(new Double(((PyFloat)obj).getValue()));
+					result.add(((PyFloat)obj).getValue());
 				}
 				else if( obj instanceof PyInteger ) {
-					result.add(new Integer(((PyInteger)obj).getValue()));
+					result.add(((PyInteger)obj).getValue());
 				}
 				else {
 					log.warnf("%s: pyTupleToArrayList: %s (unrecognized list element type)",TAG,obj.getClass().getName());

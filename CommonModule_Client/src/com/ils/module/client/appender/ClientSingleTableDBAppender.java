@@ -13,14 +13,10 @@
  */
 package com.ils.module.client.appender;
 
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Map;
 
-import org.slf4j.MDC;
-
 import com.ils.common.db.ClientDBUtility;
-import com.ils.common.log.LogMaker;
 import com.ils.logging.common.CommonProperties;
 import com.ils.logging.common.appender.AbstractSingleTableDBAppender;
 import com.inductiveautomation.ignition.client.model.AbstractClientContext;

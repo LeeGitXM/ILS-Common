@@ -13,8 +13,6 @@ import java.util.concurrent.TimeoutException;
 
 import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
-import com.inductiveautomation.ignition.common.sqltags.model.types.DataType;
-import com.inductiveautomation.ignition.common.sqltags.model.types.TagType;
 import com.inductiveautomation.ignition.common.tags.config.TagConfigurationModel;
 import com.inductiveautomation.ignition.common.tags.config.types.TagObjectType;
 import com.inductiveautomation.ignition.common.tags.model.TagPath;
