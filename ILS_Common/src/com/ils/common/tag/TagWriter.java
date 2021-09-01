@@ -1,9 +1,8 @@
 /**
- *   (c) 2015  ILS Automation. All rights reserved.
+ *   (c) 2015-2021  ILS Automation. All rights reserved.
  */
 package com.ils.common.tag;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ import com.inductiveautomation.ignition.common.sqltags.model.TagProp;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataType;
 import com.inductiveautomation.ignition.common.tags.config.TagConfigurationModel;
 import com.inductiveautomation.ignition.common.tags.model.SecurityContext;
-import com.inductiveautomation.ignition.common.tags.model.TagManager;
 import com.inductiveautomation.ignition.common.tags.model.TagPath;
 import com.inductiveautomation.ignition.common.tags.model.TagProvider;
 import com.inductiveautomation.ignition.common.tags.paths.parser.TagPathParser;

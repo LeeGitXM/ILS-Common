@@ -33,4 +33,25 @@ public class TagUtility
 		}
 		return tagPath;
 	}
+	// We expect the provider name to be bounded by brackets.
+	public static String replaceTagNameInPath(String name,String path) {
+		int pos = path.lastIndexOf("/");
+		if( pos<0 ) pos = path.lastIndexOf("]");
+		if( pos<0 ) {
+			path = name;
+		}
+		else {
+			path = path.substring(0,pos+1)+name;
+		}
+		return path;
+	}
+	/** If the tag path has a source (provider), strip it off.
+	 * This is for use with commands that explicitly specify
+	 * the provider.
+	 */
+	public static String stripProviderFromPath(String path) {
+		int pos = path.indexOf("]");
+		if(pos>0) path = path.substring(pos+1);
+		return path;
+	}
 }

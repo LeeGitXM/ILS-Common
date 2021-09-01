@@ -1,10 +1,9 @@
 /**
- *   (c) 2013-2015  ILS Automation. All rights reserved.
+ *   (c) 2013-2021  ILS Automation. All rights reserved.
  */
 package com.ils.common.tag;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import com.ils.common.ILSProperties;
 import com.ils.common.log.ILSLogger;
 import com.ils.common.log.LogMaker;
 import com.ils.common.persistence.ToolkitProperties;
@@ -34,10 +32,8 @@ import com.inductiveautomation.ignition.common.tags.config.TagConfiguration;
 import com.inductiveautomation.ignition.common.tags.config.TagConfigurationModel;
 import com.inductiveautomation.ignition.common.tags.config.types.TagObjectType;
 import com.inductiveautomation.ignition.common.tags.model.SecurityContext;
-import com.inductiveautomation.ignition.common.tags.model.TagManager;
 import com.inductiveautomation.ignition.common.tags.model.TagPath;
 import com.inductiveautomation.ignition.common.tags.model.TagProvider;
-import com.inductiveautomation.ignition.common.tags.model.TagStructureTree.TagNode;
 import com.inductiveautomation.ignition.common.tags.paths.BasicTagPath;
 import com.inductiveautomation.ignition.common.tags.paths.parser.TagPathParser;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
@@ -51,8 +47,6 @@ public class TagFactory  {
 	private static final String CLSS = "TagFactory";
 	private final ILSLogger log;
 	private final GatewayContext context;
-	private final SimpleDateFormat dateFormat;
-	private final TagManager tagManager;
 	private final List<TagPath> visitOrder;
 	
 	/**
@@ -60,8 +54,6 @@ public class TagFactory  {
 	 */
 	public TagFactory(GatewayContext ctxt) {
 		this.context = ctxt;
-		this.dateFormat = new SimpleDateFormat(ILSProperties.TIMESTAMP_FORMAT);
-		this.tagManager = context.getTagManager();
 		this.visitOrder = new ArrayList<>();   // For tag replication
 		log = LogMaker.getLogger(getClass().getPackage().getName());
 	}
@@ -191,6 +183,7 @@ public class TagFactory  {
 		}
 	}
 	/**
+	 * Create a simple tag. 
 	 * The TagPath attribute "source" actually refers to the provider name. A full tag path includes
 	 * the provider in brackets, a partial path does not. 
 	 * @param providerName
@@ -223,7 +216,6 @@ public class TagFactory  {
 		//       show up in the designer SQLTagsBrowser. This is not the case when defining directly
 		//       through the tag manager. Here the calls appear to succeed, but the tags do not show up.
 		// In the cases where we need historical timestamps,  we use the simple tag provider.
-		
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
 		if( provider != null ) {
 			try {
@@ -326,7 +318,43 @@ public class TagFactory  {
 			log.warnf("%s.deleteTag: Provider %s does not exist",CLSS,providerName);
 		}
 	}
-
+	/**
+	 * Rename a tag keeping the folder structure intact. If the tag does not
+	 * exist or the rename fails, then create the tag as a String.
+	 * @param provider name
+	 * @param name new name
+	 * @param path existing complete path. Any provider here will be ignored
+	 */
+	public void renameTag(String providerName,String name,String source) {
+		log.infof("%s.renameTag %s [%s]%s",CLSS,name,providerName,source);
+		String destination = TagUtility.replaceTagNameInPath(name,source);
+		TagValidator validator = new TagValidator(context);
+		if( validator.exists(source) ) {
+			TagPath tp = null;
+			try {
+				tp = TagPathParser.parse(providerName,source);
+				List<TagPath> tags = new ArrayList<>();
+				tags.add(tp);
+				TagPath destPath = TagPathParser.parse(providerName,destination);
+				CompletableFuture<List<QualityCode>> future = context.getTagManager().moveTagsAsync(tags, destPath, false, CollisionPolicy.Overwrite);
+				future.get();
+			}
+			catch(IOException ioe) {
+				log.warnf("%s: renameTag: Exception parsing tag [%s]%s (%s)",CLSS,providerName,source,ioe.getLocalizedMessage());
+				return;
+			}
+			catch(Exception ex) {
+				log.warnf("%s: renameTag: Exception renaming tag [%s]%s (%s)",CLSS,providerName,source,ex.getLocalizedMessage());
+				createTag(providerName,destination,DataType.String);
+				return;
+			}
+		}
+		else {
+			log.warnf("%s: renameTag: referenced tag [%s] did not exist. %s created",CLSS,source,destination);
+			createTag(providerName,destination,DataType.String);
+			return;
+		}
+	}
 	/**
 	 * Copy the specified provider. If the flag is set, the destination provider will be cleared 
 	 * before receiving the new tag definitions.
@@ -434,7 +462,6 @@ public class TagFactory  {
 				List<TagPath> paths = nodeMap.get(parent);
 				List<TagConfiguration>destinationTags = new ArrayList<>();
 				if( paths!=null )  {
-					List<TagNode> toAdd = new ArrayList<>();
 					CompletableFuture<List<TagConfigurationModel>> futureSource = sourceProvider.getTagConfigsAsync(paths, false, true);
 					List<TagConfigurationModel> sourceTags = futureSource.get();
 					// Convert the node to the target configuration
@@ -443,8 +470,8 @@ public class TagFactory  {
 						// Convert from source to destination tag path
 						tp = node.getPath();
 						String path = tp.toStringFull();
-						TagUtility.replaceProviderInPath(destination, path);
-						TagPath destPath = TagPathParser.parse(destination);
+						String destFullpath = TagUtility.replaceProviderInPath(destination, path);
+						TagPath destPath = TagPathParser.parse(destFullpath);
 						node.setPath(destPath);
 						// In the case of a SQL Query Expression, we may want to set the database
 						Object db = node.get(TagProp.SQLBindingDatasource);
