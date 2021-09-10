@@ -293,29 +293,31 @@ public class TagFactory  {
 	public void deleteTag(String providerName, String tagPath) {
 		tagPath = stripProvider(tagPath);
 		log.debugf("%s.deleteTag [%s]%s",CLSS,providerName,tagPath);
-		TagPath tp = null;
-		try {
-			tp = TagPathParser.parse(providerName,tagPath);
-		}
-		catch(IOException ioe) {
-			log.warnf("%s: deleteTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
-			return;
-		}
-
-		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null  ) {
-			List<TagPath> tags = new ArrayList<TagPath>();
-			tags.add(tp);
+		if( !tagPath.isBlank() ) {     // Requires Java 11
+			TagPath tp = null; 
 			try {
-				CompletableFuture<List<QualityCode>> future = provider.removeTagConfigsAsync(tags, SecurityContext.systemContext());
-				future.get();
+				tp = TagPathParser.parse(providerName,tagPath);
 			}
-			catch(Exception ex) {
-				log.warnf("%s: deleteTag: Exception deleting tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+			catch(IOException ioe) {
+				log.warnf("%s: deleteTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
+				return;
 			}
-		}
-		else {
-			log.warnf("%s.deleteTag: Provider %s does not exist",CLSS,providerName);
+
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			if( provider != null  ) {
+				List<TagPath> tags = new ArrayList<TagPath>();
+				tags.add(tp);
+				try {
+					CompletableFuture<List<QualityCode>> future = provider.removeTagConfigsAsync(tags, SecurityContext.systemContext());
+					future.get();
+				}
+				catch(Exception ex) {
+					log.warnf("%s: deleteTag: Exception deleting tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+				}
+			}
+			else {
+				log.warnf("%s.deleteTag: Provider %s does not exist",CLSS,providerName);
+			}
 		}
 	}
 	/**

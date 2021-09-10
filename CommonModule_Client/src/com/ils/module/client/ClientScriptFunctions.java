@@ -9,7 +9,6 @@ package com.ils.module.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.slf4j.MDC;
 import org.slf4j.LoggerFactory;
 
 import com.ils.common.log.ILSLogger;
