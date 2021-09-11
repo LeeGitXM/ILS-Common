@@ -230,17 +230,17 @@ public class TagWriter  {
 	 * @param qv, the new tag value. Use the time-stamp, but ignore the quality.
 	 */
 	public List<QualityCode> write(TagProvider provider,List<TagPath>paths, List<QualifiedValue> values) {
-		List<QualityCode> qualities = new ArrayList();
+		List<QualityCode> qualities = new ArrayList<>();
 		if( context==null) {
 			for(TagPath tp:paths) {
 				qualities.add(QualityCode.Bad_Failure);                   // Not initialized yet.
 			}
 		}
 		else {
-			QualityCode q = QualityCode.Good;
 			CompletableFuture<List<QualityCode>> future = provider.writeAsync(paths, values,SecurityContext.systemContext());
 			try {
 				qualities = future.get();
+				qualities.add(QualityCode.Good); 
 			}
 			catch (InterruptedException iex) {
 				log.warnf("%s.write: Interupted getting value for multiple paths",CLSS);
