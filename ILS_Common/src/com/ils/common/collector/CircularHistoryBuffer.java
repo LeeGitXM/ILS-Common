@@ -8,8 +8,8 @@ package com.ils.common.collector;
 import java.util.Date;
 import java.util.RandomAccess;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 /**
  *  A CircularHistoryBuffer is a storage area for Observation
  *  objects. The buffer has a specified capacity. As new points
@@ -19,7 +19,7 @@ import com.ils.common.log.LogMaker;
 public class CircularHistoryBuffer implements RandomAccess {
 	private final String TAG = "CircularHistoryBuffer: ";
 	private final static long DEFAULT_OBSERVATION_INTERVAL = 60000; // 1 minute
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private final int n;             // buffer length
 	private final Observation[] buf; // a List implementing RandomAccess
 	private int leader = 0;
@@ -33,7 +33,7 @@ public class CircularHistoryBuffer implements RandomAccess {
 	 * @param capacity - maximum number of observations retained
 	 */
 	public CircularHistoryBuffer(int capacity) {
-		log = LogMaker.getLogger(getClass().getPackage().getName());
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 		n = capacity + 1;
 		buf = new Observation[n];
 		size = 0;

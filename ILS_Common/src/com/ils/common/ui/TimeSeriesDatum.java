@@ -6,8 +6,8 @@ import java.io.Serializable;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  * Hold a new data point to be added to a TimeSeriesSparkChart.
@@ -19,7 +19,7 @@ import com.ils.common.log.LogMaker;
 public class TimeSeriesDatum implements Serializable {
 	private static final long serialVersionUID = 1415210930147352035L;
 	private final static String TAG = "TimeSeriesDatum";
-	private static final ILSLogger log = LogMaker.getLogger(TimeSeriesDatum.class.getPackage().getName());
+	private static final LoggerEx log = LogUtil.getLogger(TimeSeriesDatum.class.getPackage().getName());
 	private static final ObjectMapper mapper = new ObjectMapper();
 	private long timestamp;
 	private double average;

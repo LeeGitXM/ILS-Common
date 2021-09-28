@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 /**
  *  A KeyedCircularBuffer is a storage area for objects that are accompanied
  *  with a dictionary used for filtering. As with other circular buffers,
@@ -24,7 +24,7 @@ import com.ils.common.log.LogMaker;
  */
 public class KeyedCircularBuffer implements RandomAccess {
 	private final String TAG = "KeyedCircularBuffer: ";
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private final int n;             // buffer length
 	private final FilterableValue[] buf; // a List implementing RandomAccess
 	private int leader = 0;
@@ -38,7 +38,7 @@ public class KeyedCircularBuffer implements RandomAccess {
 	 * @param capacity - maximum number of observations retained
 	 */
 	public KeyedCircularBuffer(int capacity) {
-		log = LogMaker.getLogger(getClass().getPackage().getName());
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 		n = capacity + 1;
 		buf = new FilterableValue[n];
 		size = 0;

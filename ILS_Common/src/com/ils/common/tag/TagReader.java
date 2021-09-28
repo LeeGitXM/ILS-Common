@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.common.model.CommonContext;
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
 import com.inductiveautomation.ignition.common.tags.model.SecurityContext;
 import com.inductiveautomation.ignition.common.tags.model.TagManager;
 import com.inductiveautomation.ignition.common.tags.model.TagPath;
 import com.inductiveautomation.ignition.common.tags.paths.parser.TagPathParser;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  *  A Tag reader obtains the current value of a tag without
@@ -24,14 +24,14 @@ import com.inductiveautomation.ignition.common.tags.paths.parser.TagPathParser;
  */
 public class TagReader  {
 	private static final String CLSS = "TagReader";
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private final CommonContext context;
 	
 	/**
 	 * Constructor.
 	 */
 	public TagReader(CommonContext ctx) {
-		log = LogMaker.getLogger(this);
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 		this.context = ctx;
 	}
 

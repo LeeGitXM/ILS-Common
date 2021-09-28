@@ -9,8 +9,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  *  Perform a deep clone of a Hashtable or ArrayList that itself contains nested hashtables,
@@ -18,7 +18,7 @@ import com.ils.common.log.LogMaker;
  */
 public class Cloner {
 	private static final String CLSS = "Cloner";
-	private static ILSLogger log = LogMaker.getLogger(Cloner.class.getPackage().getName());
+	private static LoggerEx log = LogUtil.getLogger(Cloner.class.getPackage().getName());
 
 	/**
 	 * Assuming the contents of the hashtable are either simple objects, other hashtables objects, 

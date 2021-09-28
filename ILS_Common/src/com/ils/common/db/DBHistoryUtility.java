@@ -5,11 +5,11 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
 import com.inductiveautomation.ignition.common.sqltags.history.cache.TagHistoryCache;
-import com.inductiveautomation.ignition.common.sqltags.model.TagPath;
+import com.inductiveautomation.ignition.common.tags.model.TagPath;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.datasource.Datasource;
 import com.inductiveautomation.ignition.gateway.datasource.SRConnection;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
@@ -27,13 +27,13 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  */
 public class DBHistoryUtility {
 	private final static String TAG = "DBHistoryUtility";
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private final GatewayContext context;
 	private final SimpleDateFormat formatter = new SimpleDateFormat("YYYY/mm/dd HH:mm:ss");
 	
 	public DBHistoryUtility(GatewayContext ctx) {
 		this.context = ctx;
-		this.log = LogMaker.getLogger(getClass().getPackage().getName());
+		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 	
 	/**

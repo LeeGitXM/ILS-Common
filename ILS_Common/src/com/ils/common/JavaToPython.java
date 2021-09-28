@@ -17,8 +17,8 @@ import org.python.core.PyList;
 import org.python.core.PyObject;
 import org.python.core.PyString;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  *  JavaToPython is a class with methods for converting
@@ -28,7 +28,7 @@ import com.ils.common.log.LogMaker;
  */
 public class JavaToPython {
 	private static final String TAG = "JavaToPython";
-	private static ILSLogger log = LogMaker.getLogger(JavaToPython.class.getPackage().getName());
+	private static LoggerEx log = LogUtil.getLogger(JavaToPython.class.getPackage().getName());
 	
 	@SuppressWarnings("unchecked")
 	public PyObject objectToPy(Object obj) {

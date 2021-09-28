@@ -6,8 +6,8 @@ package com.ils.common.collector;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  *  This is a generic time-out timer for use with a classes that need to wait
@@ -20,7 +20,7 @@ import com.ils.common.log.LogMaker;
  */
 public class TimeoutTimer implements Runnable   {
 	private final static String TAG = "TimeoutTimer: ";
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private final int timeout;    // ~ msecs
 	private final List<TimeoutObserver> observers;
 	private boolean stopped = true;
@@ -31,7 +31,7 @@ public class TimeoutTimer implements Runnable   {
 	 * @param timeout
 	 */
 	public TimeoutTimer(int timeout)  {
-		log = LogMaker.getLogger(getClass().getPackage().getName());
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 		log.debug(TAG+"New timer with timout = "+timeout);
 		if (timeout < 1) {
 			throw new IllegalArgumentException("timeout must be greater than zero.");

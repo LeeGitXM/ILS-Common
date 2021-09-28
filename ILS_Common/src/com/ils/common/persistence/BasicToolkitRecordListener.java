@@ -3,8 +3,8 @@
  */
 package com.ils.common.persistence;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.localdb.persistence.IRecordListener;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 import com.inductiveautomation.ignition.gateway.web.models.KeyValue;
@@ -16,11 +16,11 @@ import com.inductiveautomation.ignition.gateway.web.models.KeyValue;
 public class BasicToolkitRecordListener implements IRecordListener<ToolkitRecord> {
 	private final static String TAG = "ToolkitRecordListener";
 	protected final GatewayContext context;
-	protected final ILSLogger log;
+	protected final LoggerEx log;
 	
 	public BasicToolkitRecordListener(GatewayContext ctx) {
 		this.context = ctx;
-		this.log = LogMaker.getLogger(getClass().getPackage().getName());
+		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 
 	@Override

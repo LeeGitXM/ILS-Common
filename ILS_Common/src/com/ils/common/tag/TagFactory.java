@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
 import com.ils.common.persistence.ToolkitProperties;
 import com.ils.common.persistence.ToolkitRecordHandler;
 import com.inductiveautomation.ignition.common.browsing.BrowseFilter;
@@ -36,6 +34,8 @@ import com.inductiveautomation.ignition.common.tags.model.TagPath;
 import com.inductiveautomation.ignition.common.tags.model.TagProvider;
 import com.inductiveautomation.ignition.common.tags.paths.BasicTagPath;
 import com.inductiveautomation.ignition.common.tags.paths.parser.TagPathParser;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 /**
@@ -45,7 +45,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  */
 public class TagFactory  {
 	private static final String CLSS = "TagFactory";
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private final GatewayContext context;
 	private final List<TagPath> visitOrder;
 	
@@ -55,7 +55,7 @@ public class TagFactory  {
 	public TagFactory(GatewayContext ctxt) {
 		this.context = ctxt;
 		this.visitOrder = new ArrayList<>();   // For tag replication
-		log = LogMaker.getLogger(getClass().getPackage().getName());
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 	
 	/**

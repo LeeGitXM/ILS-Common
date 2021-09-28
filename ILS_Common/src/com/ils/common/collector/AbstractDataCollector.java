@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 
 /**
@@ -31,7 +31,7 @@ import com.ils.common.log.LogMaker;
  */
 public abstract class AbstractDataCollector  {
 	private static final String TAG = "AbstractDataCollector";
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private List<DataCompleteListener> listenerList = new CopyOnWriteArrayList<DataCompleteListener>();
 	protected CollectorState state;
 	private final Observation prototype;
@@ -47,7 +47,7 @@ public abstract class AbstractDataCollector  {
 	 */
 	public AbstractDataCollector( Observation obs) {
 		this.prototype = obs;
-		this.log = LogMaker.getLogger(getClass().getPackage().getName());
+		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 		this.state = CollectorState.RESET;
 		this.positionMap = new Hashtable<String,Integer>();
 	}

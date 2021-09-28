@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 
 /**
@@ -28,7 +28,7 @@ import com.ils.common.log.LogMaker;
  */
 public class GeneralPurposeDataContainer implements Serializable, Cloneable {
 	private static final long serialVersionUID = 5499297358912286066L;
-	private final ILSLogger log = LogMaker.getLogger(getClass().getPackage().getName());
+	private final LoggerEx log = LogUtil.getLogger(getClass().getPackage().getName());
 	private Map<String,String> properties;
 	private Map<String,List<String>> lists;
 	private Map<String,List<Map<String,String>>> maplists;

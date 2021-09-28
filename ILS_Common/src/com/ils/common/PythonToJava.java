@@ -18,8 +18,8 @@ import org.python.core.PyObject;
 import org.python.core.PyString;
 import org.python.core.PyTuple;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  *  PythonToJava is a class with methods for converting
@@ -27,7 +27,7 @@ import com.ils.common.log.LogMaker;
  */
 public class PythonToJava {
 	private static final String TAG = "PythonToJava";
-	private static ILSLogger log = LogMaker.getLogger(PythonToJava.class.getPackage().getName());
+	private static LoggerEx log = LogUtil.getLogger(PythonToJava.class.getPackage().getName());
 	
 	/**
 	 * Assuming the contents of the PyList are PyDictionary, PyList, PyTuple or simple objects, recursively

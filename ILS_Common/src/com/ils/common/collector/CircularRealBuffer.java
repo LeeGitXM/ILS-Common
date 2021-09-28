@@ -5,8 +5,8 @@ package com.ils.common.collector;
 
 import java.util.RandomAccess;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 /**
  *  A CircularRealBuffer contains an array of doubles. It has a specified 
  *  capacity. As new points are added, the oldest points are discarded. 
@@ -14,7 +14,7 @@ import com.ils.common.log.LogMaker;
  */
 public class CircularRealBuffer implements RandomAccess {
 	private final String TAG = "CircularRealBuffer: ";
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private final int n;             // buffer length
 	private final double[] buf;
 	private int leader = 0;
@@ -29,7 +29,7 @@ public class CircularRealBuffer implements RandomAccess {
 	 */
 	public CircularRealBuffer(int capacity) {
 		if( capacity<0 ) capacity = 0;
-		log = LogMaker.getLogger(getClass().getPackage().getName());
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 		log.debug(String.format("%s create with capacity %d", TAG,capacity));
 		n = capacity + 1;
 		buf = new double[n];

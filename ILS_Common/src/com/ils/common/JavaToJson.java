@@ -5,8 +5,8 @@ package com.ils.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  *  JavaToJson is a class with static methods for converting
@@ -16,7 +16,7 @@ import com.ils.common.log.LogMaker;
  */
 public class JavaToJson {
 	private static final String CLSS = "JavaToJson";
-	private static ILSLogger log = LogMaker.getLogger(JavaToJson.class.getPackage().getName());
+	private static LoggerEx log = LogUtil.getLogger(JavaToJson.class.getPackage().getName());
 	private static ObjectMapper mapper = new ObjectMapper();
 	
 	/**

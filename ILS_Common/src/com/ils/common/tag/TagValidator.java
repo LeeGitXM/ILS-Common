@@ -11,13 +11,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.common.tags.config.TagConfigurationModel;
 import com.inductiveautomation.ignition.common.tags.config.types.TagObjectType;
 import com.inductiveautomation.ignition.common.tags.model.TagPath;
 import com.inductiveautomation.ignition.common.tags.model.TagProvider;
 import com.inductiveautomation.ignition.common.tags.paths.parser.TagPathParser;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 
@@ -28,7 +28,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 public class TagValidator  {
 	private static final String TAG = "TagValidator";
 	private static final long TIMEOUT = 100;
-	private final ILSLogger log;
+	private final LoggerEx log;
 	private final GatewayContext context;
 	
 	/**
@@ -36,7 +36,7 @@ public class TagValidator  {
 	 */
 	public TagValidator(GatewayContext ctx) {
 		this.context = ctx;
-		log = LogMaker.getLogger(getClass().getPackage().getName());
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 
 	/**

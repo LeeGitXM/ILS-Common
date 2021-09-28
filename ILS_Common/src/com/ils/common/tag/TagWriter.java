@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
 import com.inductiveautomation.ignition.common.model.values.BasicQualifiedValue;
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
 import com.inductiveautomation.ignition.common.model.values.QualityCode;
@@ -23,6 +21,8 @@ import com.inductiveautomation.ignition.common.tags.model.SecurityContext;
 import com.inductiveautomation.ignition.common.tags.model.TagPath;
 import com.inductiveautomation.ignition.common.tags.model.TagProvider;
 import com.inductiveautomation.ignition.common.tags.paths.parser.TagPathParser;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
 
@@ -33,14 +33,14 @@ public class TagWriter  {
 	protected static final String CLSS = "TagWriter";
 	private static final String DATETIME_FORMAT = "yyyy/MM/dd HH:mm:ss";
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT);
-	protected final ILSLogger log;
+	protected final LoggerEx log;
 	protected final GatewayContext context;
 	/**
 	 * Constructor.
 	 */
 	public TagWriter(GatewayContext ctxt) {
 		this.context = ctxt;
-		log = LogMaker.getLogger(getClass().getPackage().getName());
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 
 	/**

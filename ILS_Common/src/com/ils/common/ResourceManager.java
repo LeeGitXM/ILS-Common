@@ -13,8 +13,8 @@ import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  * This class is designed as a Singleton for easy access in the client/designer scopes.
@@ -34,7 +34,7 @@ public class ResourceManager  {
 	private ResourceBundle bundle;
 	private static boolean initialized = false;
 	private static ResourceManager instance = null;
-	private final ILSLogger log;
+	private final LoggerEx log;
 	
 	/**
 	 * This method is invoked once the ResourceManager has been 
@@ -58,7 +58,7 @@ public class ResourceManager  {
 	private ResourceManager(String root,String path)  {
 		this.root = root;
 		this.path = path;
-		this.log = LogMaker.getLogger(getClass().getPackage().getName());
+		this.log = LogUtil.getLogger(getClass().getPackage().getName());
 	    File file = new File(path);  
 	    try {
 	    	URL[] urls = {file.toURI().toURL()};  

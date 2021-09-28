@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import com.ils.common.log.ILSLogger;
-import com.ils.common.log.LogMaker;
+import com.inductiveautomation.ignition.common.util.LogUtil;
+import com.inductiveautomation.ignition.common.util.LoggerEx;
 
 /**
  *  Create a list of classes in the jar of a specified class. Filter out to
@@ -25,10 +25,10 @@ import com.ils.common.log.LogMaker;
  */
 public class ClassList {
 	private static final String TAG = "ClassList";
-	private final ILSLogger log; 
+	private final LoggerEx log; 
 	
 	public ClassList() {
-		log = LogMaker.getLogger(getClass().getPackage().getName());
+		log = LogUtil.getLogger(getClass().getPackage().getName());
 	}
 	
 	/** 
@@ -86,7 +86,8 @@ public class ClassList {
 				try {
 					// it is necessary to remove any URL encoded characters--e.g C:\Program%20Files
 					path = java.net.URLDecoder.decode(url.getFile(), "UTF-8");
-				} catch (UnsupportedEncodingException e) {
+				} 
+				catch (UnsupportedEncodingException e) {
 					log.error("UTF-8 encoding not supported");
 				}
 				log.debugf("%s: jarForPattern %s - found %s",TAG,pattern,path);
