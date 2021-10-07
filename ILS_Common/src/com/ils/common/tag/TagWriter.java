@@ -118,7 +118,7 @@ public class TagWriter  {
 			return write(provider,tagPath, tv);
 		}
 		else {
-			log.warnf("%s.write: Provider not found in path %s",CLSS,providerName);
+			log.warnf("%s.write: Provider not found in path %s",CLSS,tagPath.toStringFull());
 			return QualityCode.Error_InvalidPathSyntax;
 		}
 	}
@@ -131,7 +131,7 @@ public class TagWriter  {
 	 * @param tagPath
 	 * @param val, the new tag value.
 	 */
-	private QualifiedValue convertDatatype(TagProvider provider,TagPath tagPath, String val) {
+	private synchronized QualifiedValue convertDatatype(TagProvider provider,TagPath tagPath, String val) {
 		log.debugf("%s.convertDatatype: %s = %s",CLSS,tagPath.toStringFull(),val);
 		QualityCode q = QualityCode.Good;
 		List<TagPath> paths = new ArrayList<>();
@@ -211,12 +211,12 @@ public class TagWriter  {
 	 * @param tagPath
 	 * @param qv, the new tag value. Use the time-stamp, but ignore the quality.
 	 */
-	public QualityCode write(TagProvider provider,TagPath tagPath, QualifiedValue qv) {
+	public synchronized QualityCode write(TagProvider provider,TagPath tagPath, QualifiedValue qv) {
 		if(tagPath==null  ) return QualityCode.Error_InvalidPathSyntax;    // Path not set
 		List<TagPath> paths = new ArrayList<>();
 		paths.add(tagPath);
 		List<QualifiedValue> values = new ArrayList<>();
-		paths.add(tagPath);
+		values.add(qv);
 		List<QualityCode> codes = write(provider,paths,values);
 		QualityCode q = QualityCode.Bad;
 		if( codes!=null && codes.size()>0 ) q = codes.get(0);

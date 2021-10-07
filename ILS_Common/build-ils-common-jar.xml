@@ -20,7 +20,7 @@
 	</path>
 	
 	<!-- This target will build the ILS Common library and deploy it to the local filesystem -->
-	<target name="all" depends="clean, build, jar, deploy" />
+	<target name="all" depends="clean, build, deploy" />
 	
 	<!-- Remove the existing target -->
 	<target name="clean" description="Remove existing build products">
@@ -47,10 +47,6 @@
 		</copy>
 	</target>
 	
-	<!-- Create/copy the jar file into the current build area -->
-	<target name ="jar" description="Create a jar for the ILS Common library">
-    	<jar destfile="${jar.dir}/${jar.name}" includes="**/*.class,**/*.png" basedir="bin"/>
-	</target>
 	<!-- Copy the jar into the installation area for use by python -->
 	<target name="deploy" >
 		<echo message="Copying jar file into ${ignition.py.lib}/../../lib/core/common" />
