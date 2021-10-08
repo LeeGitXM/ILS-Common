@@ -85,6 +85,31 @@ public class JsonToJava {
 	 * @param json the incoming Json document
 	 * @return the equivalent object a Map
 	 */
+	public synchronized List<List<String>> jsonToListOfLists(String json) {
+		List<List<String>> result = null;
+		try {
+			result = mapper.readValue(json,new TypeReference<List<List<String>>>() { });
+		} 
+		catch (JsonParseException jpe) {
+			log.warn(TAG+".jsonToListOfMaps: parsing exception ("+jpe.getLocalizedMessage()+")",jpe);
+		} 
+		catch (JsonMappingException jme) {
+			log.warn(TAG+".jsonToListOfMaps: mapping exception("+jme.getLocalizedMessage()+")",jme);
+		} 
+		catch (IOException ioe) {
+			log.warn(TAG+".jsonToListOfMaps: io exception("+ioe.getLocalizedMessage()+")",ioe);
+		}
+		catch (Exception ue) {
+			log.warn(TAG+".jsonToListOfMaps: Unknown exception("+ue.getLocalizedMessage()+")",ue);
+		}
+		return result;
+	}
+	/**
+	 * Deserialize to a Map<String,String>. This is pretty restrictive.
+	 * 
+	 * @param json the incoming Json document
+	 * @return the equivalent object a Map
+	 */
 	public synchronized Map<String,?> jsonToMap(String json) {
 		Map<String,String> result = null;
 		try {
