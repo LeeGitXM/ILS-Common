@@ -33,6 +33,7 @@
             	<include name="**/*.png"/>
             </fileset>
         </delete>
+		<delete file="${ignition.py.lib}/../../lib/core/common/${jar.name}"/>
 	</target>
 	
 	<!-- Compile the library -->

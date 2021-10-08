@@ -237,13 +237,14 @@ public class TagWriter  {
 			}
 		}
 		else {
+			log.warnf("%s.write: Writing %d values",CLSS,values.size());
 			CompletableFuture<List<QualityCode>> future = provider.writeAsync(paths, values,SecurityContext.systemContext());
 			try {
 				qualities = future.get();
 				qualities.add(QualityCode.Good); 
 			}
 			catch (InterruptedException iex) {
-				log.warnf("%s.write: Interupted getting value for multiple paths",CLSS);
+				log.warnf("%s.write: Interrupted getting value for multiple paths",CLSS);
 				qualities.add(QualityCode.Bad_Failure);                   // Not initialized yet.
 			} 
 			catch (ExecutionException eex) {
