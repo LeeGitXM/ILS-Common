@@ -231,25 +231,26 @@ public class TagWriter  {
 	 */
 	public List<QualityCode> write(TagProvider provider,List<TagPath>paths, List<QualifiedValue> values) {
 		List<QualityCode> qualities = new ArrayList<>();
-		if( context==null) {
-			for(TagPath tp:paths) {
-				qualities.add(QualityCode.Bad_Failure);                   // Not initialized yet.
+		if( paths.size()>0) {
+			if( context==null) {
+				for(TagPath tp:paths) {
+					qualities.add(QualityCode.Bad_Failure);                   // Not initialized yet.
+				}
 			}
-		}
-		else {
-			log.warnf("%s.write: Writing %d values",CLSS,values.size());
-			CompletableFuture<List<QualityCode>> future = provider.writeAsync(paths, values,SecurityContext.systemContext());
-			try {
-				qualities = future.get();
-				qualities.add(QualityCode.Good); 
-			}
-			catch (InterruptedException iex) {
-				log.warnf("%s.write: Interrupted getting value for multiple paths",CLSS);
-				qualities.add(QualityCode.Bad_Failure);                   // Not initialized yet.
-			} 
-			catch (ExecutionException eex) {
-				log.warnf("%s.write: Execution exception for multiple paths (%s)",CLSS,eex.getLocalizedMessage());
-				qualities.add(QualityCode.Bad_Failure);                   // Not initialized yet.
+			else {
+				CompletableFuture<List<QualityCode>> future = provider.writeAsync(paths, values,SecurityContext.systemContext());
+				try {
+					qualities = future.get();
+					qualities.add(QualityCode.Good); 
+				}
+				catch (InterruptedException iex) {
+					log.warnf("%s.write: Interrupted getting value for multiple paths",CLSS);
+					qualities.add(QualityCode.Bad_Failure);                   // Not initialized yet.
+				} 
+				catch (ExecutionException eex) {
+					log.warnf("%s.write: Execution exception for multiple paths (%s)",CLSS,eex.getLocalizedMessage());
+					qualities.add(QualityCode.Bad_Failure);                   // Not initialized yet.
+				}
 			}
 		}
 		return qualities;
