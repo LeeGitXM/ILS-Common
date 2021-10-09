@@ -33,6 +33,7 @@
             	<include name="**/*.png"/>
             </fileset>
         </delete>
+		<delete file="~/.ignition/cache/platform/${jar.name}" />
 	</target>
 	
 	<!-- Compile the library and make the jar file -->
