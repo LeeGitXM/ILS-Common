@@ -49,7 +49,7 @@ import com.inductiveautomation.ignition.gateway.sqltags.TagProvider;
  *  possible.
  */
 public class TagFactory  {
-	private static final String TAG = "TagFactory";
+	private static final String CLSS = "TagFactory";
 	private final LoggerEx log;
 	private final GatewayContext context;
 	private final SimpleDateFormat dateFormat;
@@ -78,13 +78,13 @@ public class TagFactory  {
 	 */
 	public void createExpression(String providerName, String tagPath, String type, String expr) {
 		tagPath = stripProvider(tagPath);
-		log.infof("%s.createExpression: [%s] %s (%s) = %s",TAG,providerName,tagPath,type,expr);
+		log.infof("%s.createExpression: [%s] %s (%s) = %s",CLSS,providerName,tagPath,type,expr);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
 		}
 		catch(IOException ioe) {
-			log.warnf("%s.createExpression: Exception parsing tag %s (%s)",TAG,tagPath,ioe.getLocalizedMessage());
+			log.warnf("%s.createExpression: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
 			return;
 		}
 		
@@ -106,11 +106,11 @@ public class TagFactory  {
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
 			catch(Exception ex) {
-				log.warnf("%s.createExpression: Exception creating tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
+				log.warnf("%s.createExpression: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
 			}
 		}
 		else {
-			log.warnf("%s.createExpression: Provider %s does not exist",TAG,providerName);
+			log.warnf("%s.createExpression: Provider %s does not exist",CLSS,providerName);
 		}
 	}
 	
@@ -125,14 +125,14 @@ public class TagFactory  {
 	 * @param history
 	 */
 	public void createExpressionWithHistory(String providerName, String tagPath, String type, String expr,String historyProvider) {
-		log.infof("%s.createExpressionWithHistory: [%s]%s (%s) = %s (%s)",TAG,providerName,tagPath,type,expr,historyProvider);
+		log.infof("%s.createExpressionWithHistory: [%s]%s (%s) = %s (%s)",CLSS,providerName,tagPath,type,expr,historyProvider);
 		tagPath = stripProvider(tagPath);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
 		}
 		catch(IOException ioe) {
-			log.warnf("%s.createExpressionWithHistory: Exception parsing tag %s (%s)",TAG,tagPath,ioe.getLocalizedMessage());
+			log.warnf("%s.createExpressionWithHistory: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
 			return;
 		}
 		
@@ -158,11 +158,11 @@ public class TagFactory  {
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
 			catch(Exception ex) {
-				log.warnf("%s.createExpressionWithHistory: Exception creating tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
+				log.warnf("%s.createExpressionWithHistory: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
 			}
 		}
 		else {
-			log.warnf("%s.createExpressionWithHistory: Provider %s does not exist",TAG,providerName);
+			log.warnf("%s.createExpressionWithHistory: Provider %s does not exist",CLSS,providerName);
 		}
 	}
 
@@ -172,7 +172,7 @@ public class TagFactory  {
 		int seg = 1;
 		while(seg<segcount) {
 			TagPath tp = BasicTagPath.subPath(path,0, seg);
-			log.debugf("%s.createParents: Subpath = %s",TAG,tp.toStringFull());
+			log.debugf("%s.createParents: Subpath = %s",CLSS,tp.toStringFull());
 			TagDefinition tag = new TagDefinition(tp.getItemName(),TagType.Folder);
 			try {
 				List<TagNode> toAdd = new ArrayList<>();
@@ -180,7 +180,7 @@ public class TagFactory  {
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Ignore);
 			}
 			catch(Exception ex) {
-				log.warnf("%s.createParents: Exception creating tag folder %s (%s)",TAG,tp,ex.getLocalizedMessage());
+				log.warnf("%s.createParents: Exception creating tag folder %s (%s)",CLSS,tp,ex.getLocalizedMessage());
 			}
 			seg++;
 		}
@@ -194,13 +194,13 @@ public class TagFactory  {
 	 */
 	public void createTag(String providerName, String tagPath, String type) {
 		tagPath = stripProvider(tagPath);
-		log.debugf("%s.createTag [%s]%s (%s)",TAG,providerName,tagPath,type);
+		log.debugf("%s.createTag [%s]%s (%s)",CLSS,providerName,tagPath,type);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
 		}
 		catch(IOException ioe) {
-			log.warnf("%s.createTag: Exception parsing tag %s (%s)",TAG,tagPath,ioe.getLocalizedMessage());
+			log.warnf("%s.createTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
 			return;
 		}
 		// NOTE: Our experience here is that if the simple data provider, then the tags 
@@ -223,11 +223,11 @@ public class TagFactory  {
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
 			catch(Exception ex) {
-				log.warnf("%s.createTag: Exception creating tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
+				log.warnf("%s.createTag: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
 			}
 		}
 		else {
-			log.warnf("%s.createTag: Provider %s does not exist",TAG,providerName);
+			log.warnf("%s.createTag: Provider %s does not exist",CLSS,providerName);
 		}
 	}
 
@@ -240,13 +240,13 @@ public class TagFactory  {
 	 */
 	public void createTagWithHistory(String providerName, String tagPath, String type,String historyProvider) {
 		tagPath = stripProvider(tagPath);
-		log.infof("%s.createTagWithHistory [%s]%s (%s) on %s",TAG,providerName,tagPath,type,historyProvider);
+		log.infof("%s.createTagWithHistory [%s]%s (%s) on %s",CLSS,providerName,tagPath,type,historyProvider);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
 		}
 		catch(IOException ioe) {
-			log.warnf("%s.createTagWithHistory: Exception parsing tag %s (%s)",TAG,tagPath,ioe.getLocalizedMessage());
+			log.warnf("%s.createTagWithHistory: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
 			return;
 		}
 		DataType dataType = dataTypeFromString(type);
@@ -269,22 +269,22 @@ public class TagFactory  {
 				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 			}
 			catch(Exception ex) {
-				log.warnf("%s.createTagWithHistory: Exception creating tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
+				log.warnf("%s.createTagWithHistory: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
 			}
 		}
 		else {
-			log.warnf("%s.createTagWithHistory: Provider %s does not exist",TAG,providerName);
+			log.warnf("%s.createTagWithHistory: Provider %s does not exist",CLSS,providerName);
 		}
 	}
 	public void deleteTag(String providerName, String tagPath) {
 		tagPath = stripProvider(tagPath);
-		log.debugf("%s.deleteTag [%s]%s",TAG,providerName,tagPath);
+		log.debugf("%s.deleteTag [%s]%s",CLSS,providerName,tagPath);
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
 		}
 		catch(IOException ioe) {
-			log.warnf("%s: deleteTag: Exception parsing tag %s (%s)",TAG,tagPath,ioe.getLocalizedMessage());
+			log.warnf("%s: deleteTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
 			return;
 		}
 
@@ -296,14 +296,52 @@ public class TagFactory  {
 				context.getTagManager().removeTags(tags);
 			}
 			catch(Exception ex) {
-				log.warnf("%s: deleteTag: Exception deleting tag %s (%s)",TAG,tagPath,ex.getLocalizedMessage());
+				log.warnf("%s: deleteTag: Exception deleting tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
 			}
 		}
 		else {
-			log.warnf("%s.deleteTag: Provider %s does not exist",TAG,providerName);
+			log.warnf("%s.deleteTag: Provider %s does not exist",CLSS,providerName);
 		}
 	}
-
+	/**
+	 * Rename a tag keeping the folder structure intact. If the tag does not
+	 * exist or the rename fails, then create the tag as a String.
+	 * @param provider name
+	 * @param name new name
+	 * @param path existing complete path. Any provider here will be ignored
+	 */
+	public void renameTag(String providerName,String name,String fullpath) {
+		String path = stripProvider(fullpath);
+		log.infof("%s.renameTag %s [%s]%s",CLSS,name,providerName,path);
+		TagValidator validator = new TagValidator(context);
+		if( validator.exists(path) ) {
+			TagPath tp = null;
+			try {
+				tp = TagPathParser.parse(providerName,path);
+				TagDiff diff = new TagDiff();
+				diff.setName(name);
+				List<TagPath> tags = new ArrayList<>();
+				tags.add(tp);
+				context.getTagManager().editTags(tags,diff);
+			}
+			catch(IOException ioe) {
+				log.warnf("%s: renameTag: Exception parsing tag [%s]%s (%s)",CLSS,providerName,path,ioe.getLocalizedMessage());
+				return;
+			}
+			catch(Exception ex) {
+				log.warnf("%s: renameTag: Exception renaming tag [%s]%s (%s)",CLSS,providerName,path,ex.getLocalizedMessage());
+				path = replaceTagNameInPath(name,fullpath);
+				createTag(providerName,DataType.String.toString(),path);
+				return;
+			}
+		}
+		else {
+			path = replaceTagNameInPath(name,fullpath);
+			log.warnf("%s: renameTag: referenced tag [%s] did not exist. %s created",CLSS,fullpath,path);
+			createTag(providerName,DataType.String.toString(),path);
+			return;
+		}
+	}
 	/**
 	 * Copy the specified provider. If the flag is set, the destination provider will be cleared 
 	 * before receiving the new tag definitions.
@@ -318,7 +356,19 @@ public class TagFactory  {
 		// The map contains a list of children keyed by parent path
 		Map<TagPath, List<TagPath>> nodeMap = findNodesUnderProvider(sourceProvider);
 		copyTagsToNewProvider(sourceProvider,destProvider,nodeMap);
-		log.infof("%s.replicate: ========== Complete =================", TAG);
+		log.infof("%s.replicate: ========== Complete =================", CLSS);
+	}
+	// We expect the provider name to be bounded by brackets.
+	private String replaceTagNameInPath(String name,String path) {
+		int pos = path.lastIndexOf("/");
+		if( pos<0 ) pos = path.lastIndexOf("]");
+		if( pos<0 ) {
+			path = name;
+		}
+		else {
+			path = path.substring(0,pos+1)+name;
+		}
+		return path;
 	}
 	/**
 	 * Update a tag expression. If the tag was created by a simple provider, then we use that interface.
@@ -331,7 +381,7 @@ public class TagFactory  {
 	 */
 	public synchronized void updateExpression(String providerName, String tagPath, String expr) {
 		tagPath = stripProvider(tagPath);
-		log.debugf("%s: updateExpression %s to %s",TAG,tagPath,expr);
+		log.debugf("%s: updateExpression %s to %s",CLSS,tagPath,expr);
 		if(providerName==null || tagPath==null) return;
 
 		TagPath tp = null;
@@ -343,12 +393,12 @@ public class TagFactory  {
 				tag = provider.getTag(tp);
 			}
 			catch(IOException ioe) {
-				log.warnf(TAG+"%s: updateExpression: Exception parsing tag name (%s)",TAG,ioe.getLocalizedMessage());
+				log.warnf(CLSS+"%s: updateExpression: Exception parsing tag name (%s)",CLSS,ioe.getLocalizedMessage());
 				return;
 			}
 		}
 		else {
-			log.warn(TAG+"updateExpression: Provider "+providerName+" does not exist");
+			log.warn(CLSS+"updateExpression: Provider "+providerName+" does not exist");
 			return;
 		}
 
@@ -364,7 +414,7 @@ public class TagFactory  {
 				context.getTagManager().editTags(tags, diff);
 			}
 			catch(Exception ex) {
-				log.warnf("%s: updateTag: Exception updating %s (%s)",TAG,tp.toStringFull(),ex.getLocalizedMessage());
+				log.warnf("%s: updateTag: Exception updating %s (%s)",CLSS,tp.toStringFull(),ex.getLocalizedMessage());
 			}
 		}
 	}
@@ -384,7 +434,7 @@ public class TagFactory  {
 			tagManager.removeTags(pathsToDelete);
 		} 
 		catch (Exception ex) {
-			log.warnf("%s.clearTagsUnderProvider: Unsuccessful (%s)", TAG,ex.getMessage());
+			log.warnf("%s.clearTagsUnderProvider: Unsuccessful (%s)", CLSS,ex.getMessage());
 		}
 
 
@@ -470,7 +520,7 @@ public class TagFactory  {
 					}
 
 					if (log.isTraceEnabled()) {
-						log.tracef("%s.copyTagstoNewProvider: tag=%s", TAG, path);
+						log.tracef("%s.copyTagstoNewProvider: tag=%s", CLSS, path);
 					}
 				}
 
@@ -479,18 +529,18 @@ public class TagFactory  {
 						parent = new SourceAlteredTagPath(parent, destination);
 						tagManager.addTags(parent, toAdd, CollisionPolicy.Overwrite);
 						log.debugf("%s.copyTagstoNewProvider: copied folder=%s",
-								TAG, parent.toStringFull());
+								CLSS, parent.toStringFull());
 					}
 				} 
 				catch (Exception ex) {
 					log.warnf("%s.copyTagstoNewProvider: %s unsuccessful (%s)",
-							TAG, parent.toString(), ex.getMessage());
+							CLSS, parent.toString(), ex.getMessage());
 				}
 			}
 			else {
 				// This is normal if we've cleared folders first
 				log.debugf("%s.copyTagstoNewProvider: No nodes found under parent=%s",
-						TAG, parent.toStringFull());
+						CLSS, parent.toStringFull());
 			}
 		}
 	}
@@ -518,7 +568,7 @@ public class TagFactory  {
 	 * @param nodes
 	 */
 	private void recursivelyBrowse(TagPath rootPath,TagProvider provider, Map<TagPath, List<TagPath>> nodeMap) {
-		log.tracef("%s.recursivelyBrowse %s", TAG, rootPath.toStringFull()); 
+		log.tracef("%s.recursivelyBrowse %s", CLSS, rootPath.toStringFull()); 
 		List<Tag> children = provider.browse(rootPath);
 		if (children != null && !children.isEmpty() ) {
 			// Only add to the folder list if there are some children
@@ -527,12 +577,12 @@ public class TagFactory  {
 				nodes = new ArrayList<TagPath>();
 				nodeMap.put(rootPath, nodes);
 				visitOrder.add(rootPath);
-				log.debugf("%s.recursivelyBrowse: added to visit order %s", TAG,rootPath.toStringFull());
+				log.debugf("%s.recursivelyBrowse: added to visit order %s", CLSS,rootPath.toStringFull());
 			}
 
 			for (Tag child:children) {
 				TagPath childPath = rootPath.getChildPath(child.getName());
-				log.tracef("%s.recursivelyBrowse: added child %s", TAG,childPath.toStringFull());
+				log.tracef("%s.recursivelyBrowse: added child %s", CLSS,childPath.toStringFull());
 				nodes.add(childPath);
 				recursivelyBrowse(childPath, provider,nodeMap);
 			}
