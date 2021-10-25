@@ -81,7 +81,7 @@ public class TagFactory  {
 		
 		DataType dataType = dataTypeFromString(type);
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null ) {
+		if( provider != null && dataType!=null ) {
 			try {
 				// Guarantee that parent paths exist
 				createParents(provider,tp);
@@ -103,7 +103,7 @@ public class TagFactory  {
 			}
 		}
 		else {
-			log.warnf("%s.createExpression: Provider %s does not exist",CLSS,providerName);
+			log.warnf("%s.createExpression: Tag %s provider %s does not exist or datatype %s not supported ",CLSS,tagPath,providerName,type);;
 		}
 	}
 	
@@ -131,7 +131,7 @@ public class TagFactory  {
 		
 		DataType dataType = dataTypeFromString(type);
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null ) {
+		if( provider != null && dataType!=null ) {
 			try {
 				// Guarantee that parent paths exist
 				createParents(provider,tp);
@@ -157,7 +157,7 @@ public class TagFactory  {
 			}
 		}
 		else {
-			log.warnf("%s.createExpressionWithHistory: Provider %s does not exist",CLSS,providerName);
+			log.warnf("%s.createExpressionWithHistory: Tag %s provider %s does not exist or datatype %s not supported ",CLSS,tagPath,providerName,type);
 		}
 	}
 
@@ -217,7 +217,7 @@ public class TagFactory  {
 		//       through the tag manager. Here the calls appear to succeed, but the tags do not show up.
 		// In the cases where we need historical timestamps,  we use the simple tag provider.
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null ) {
+		if( provider != null && dataType!=null ) {
 			try {
 				// Guarantee that parent paths exist
 				createParents(provider,tp);
@@ -262,7 +262,7 @@ public class TagFactory  {
 		}
 		DataType dataType = dataTypeFromString(type);
 		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null ) {
+		if( provider != null && dataType!=null) {
 			try {
 				// Guarantee that parent paths exist
 				createParents(provider,tp);
@@ -287,7 +287,7 @@ public class TagFactory  {
 			}
 		}
 		else {
-			log.warnf("%s.createTagWithHistory: Provider %s does not exist",CLSS,providerName);
+			log.warnf("%s.createTagWithHistory: Tag %s provider %s does not exist or datatype %s not supported ",CLSS,tagPath,providerName,type);
 		}
 	}
 	public void deleteTag(String providerName, String tagPath) {
@@ -522,7 +522,13 @@ public class TagFactory  {
 	 * Convert a string data type into a data type object
 	 */
 	private DataType dataTypeFromString( String type ) {
-		DataType result = DataType.valueOf(type);
+		DataType result = null;
+		try {
+			result = DataType.valueOf(type);
+		}
+		catch(IllegalArgumentException iae) {
+			log.warnf("%s.dataTypeFromString: DataType %s not recognized (%s)",CLSS, type,iae.getMessage());
+		}
 		return result;
 	}
 
