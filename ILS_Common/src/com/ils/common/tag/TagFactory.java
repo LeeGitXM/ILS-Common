@@ -78,39 +78,44 @@ public class TagFactory  {
 	 */
 	public void createExpression(String providerName, String tagPath, String type, String expr) {
 		tagPath = stripProvider(tagPath);
-		log.infof("%s.createExpression: [%s] %s (%s) = %s",CLSS,providerName,tagPath,type,expr);
-		TagPath tp = null;
-		try {
-			tp = TagPathParser.parse(providerName,tagPath);
-		}
-		catch(IOException ioe) {
-			log.warnf("%s.createExpression: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
-			return;
-		}
-		
-		DataType dataType = dataTypeFromString(type);
-		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null && dataType!=null ) {
+		if( tagPath!=null && !tagPath.isEmpty() ) {
+			log.infof("%s.createExpression: [%s] %s (%s) = %s",CLSS,providerName,tagPath,type,expr);
+			TagPath tp = null;
 			try {
-				// Guarantee that parent paths exist
-				createParents(tp);
-				List<TagNode> toAdd = new ArrayList<>();
-				
-				TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
-				node.setDataType(dataType);
-				node.setAttribute(TagProp.ExpressionType, new BasicTagValue(ExpressionType.Expression));
-				node.setAttribute(TagProp.Expression, new BasicTagValue(expr));
-				node.setEnabled(true);
-				node.setAccessRights(AccessRightsType.Read_Write);
-				toAdd.add(node);
-				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+				tp = TagPathParser.parse(providerName,tagPath);
 			}
-			catch(Exception ex) {
-				log.warnf("%s.createExpression: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+			catch(IOException ioe) {
+				log.warnf("%s.createExpression: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
+				return;
+			}
+
+			DataType dataType = dataTypeFromString(type);
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			if( provider != null && dataType!=null ) {
+				try {
+					// Guarantee that parent paths exist
+					createParents(tp);
+					List<TagNode> toAdd = new ArrayList<>();
+
+					TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
+					node.setDataType(dataType);
+					node.setAttribute(TagProp.ExpressionType, new BasicTagValue(ExpressionType.Expression));
+					node.setAttribute(TagProp.Expression, new BasicTagValue(expr));
+					node.setEnabled(true);
+					node.setAccessRights(AccessRightsType.Read_Write);
+					toAdd.add(node);
+					context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+				}
+				catch(Exception ex) {
+					log.warnf("%s.createExpression: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+				}
+			}
+			else {
+				log.warnf("%s.createExpression: for %s, provider (%s) does not exist or datatype (%s) not supported",CLSS,tagPath,providerName,type);
 			}
 		}
 		else {
-			log.warnf("%s.createExpression: for %s, provider (%s) does not exist or datatype (%s) not supported",CLSS,tagPath,providerName,type);
+			log.warnf("%s.createExpression: Attempted to create expression %s, provider (%s), datatype (%s) with an empty tagpath, ignored",CLSS,expr,providerName,type);
 		}
 	}
 	
@@ -127,47 +132,51 @@ public class TagFactory  {
 	public void createExpressionWithHistory(String providerName, String tagPath, String type, String expr,String historyProvider) {
 		log.infof("%s.createExpressionWithHistory: [%s]%s (%s) = %s (%s)",CLSS,providerName,tagPath,type,expr,historyProvider);
 		tagPath = stripProvider(tagPath);
-		TagPath tp = null;
-		try {
-			tp = TagPathParser.parse(providerName,tagPath);
-		}
-		catch(IOException ioe) {
-			log.warnf("%s.createExpressionWithHistory: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
-			return;
-		}
-		
-		DataType dataType = dataTypeFromString(type);
-		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null&& dataType!=null ) {
+		if( tagPath!=null && !tagPath.isEmpty() ) {
+			TagPath tp = null;
 			try {
-				// Guarantee that parent paths exist
-				createParents(tp);
-				List<TagNode> toAdd = new ArrayList<>();
-			
-				TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
-				node.setDataType(dataType);
-				node.setEnabled(true);
-				node.setAttribute(TagProp.ExpressionType, new BasicTagValue(ExpressionType.Expression));
-				node.setAttribute(TagProp.Expression, new BasicTagValue(expr));
-				node.setAccessRights(AccessRightsType.Read_Write); 
-				node.setAttribute(TagProp.HistoryEnabled, new BasicTagValue(Boolean.TRUE));
-				node.setAttribute(TagProp.PrimaryHistoryProvider, new BasicTagValue(historyProvider));
-				node.setAttribute(TagProp.HistoricalScanclass, new BasicTagValue("Default"));
-				node.setAttribute(TagProp.ScanClass, new BasicTagValue("Default"));
-				toAdd.add(node);
-				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+				tp = TagPathParser.parse(providerName,tagPath);
 			}
-			catch(Exception ex) {
-				log.warnf("%s.createExpressionWithHistory: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+			catch(IOException ioe) {
+				log.warnf("%s.createExpressionWithHistory: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
+				return;
+			}
+
+			DataType dataType = dataTypeFromString(type);
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			if( provider != null && dataType!=null ) {
+				try {
+					// Guarantee that parent paths exist
+					createParents(tp);
+					List<TagNode> toAdd = new ArrayList<>();
+
+					TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
+					node.setDataType(dataType);
+					node.setEnabled(true);
+					node.setAttribute(TagProp.ExpressionType, new BasicTagValue(ExpressionType.Expression));
+					node.setAttribute(TagProp.Expression, new BasicTagValue(expr));
+					node.setAccessRights(AccessRightsType.Read_Write); 
+					node.setAttribute(TagProp.HistoryEnabled, new BasicTagValue(Boolean.TRUE));
+					node.setAttribute(TagProp.PrimaryHistoryProvider, new BasicTagValue(historyProvider));
+					node.setAttribute(TagProp.HistoricalScanclass, new BasicTagValue("Default"));
+					node.setAttribute(TagProp.ScanClass, new BasicTagValue("Default"));
+					toAdd.add(node);
+					context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+				}
+				catch(Exception ex) {
+					log.warnf("%s.createExpressionWithHistory: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+				}
+			}
+			else {
+				log.warnf("%s.createExpressionWithHistory: for %s, provider (%s) does not exist or datatype (%s) not supported",CLSS,tagPath,providerName,type);
 			}
 		}
 		else {
-			log.warnf("%s.createExpressionWithHistory: for %s, provider (%s) does not exist or datatype (%s) not supported",CLSS,tagPath,providerName,type);
+			log.warnf("%s.createExpressionWithHistory: Attempted to create expression %s, provider (%s), datatype (%s) with an empty tagpath, ignored",CLSS,expr,providerName,type);
 		}
 	}
 
 	private void createParents(TagPath path) {
-		
 		int segcount = path.getPathLength();
 		int seg = 1;
 		while(seg<segcount) {
@@ -193,41 +202,42 @@ public class TagFactory  {
 	 * @param type String version of datatype
 	 */
 	public void createTag(String providerName, String tagPath, String type) {
-		tagPath = stripProvider(tagPath);
-		log.debugf("%s.createTag [%s]%s (%s)",CLSS,providerName,tagPath,type);
-		TagPath tp = null;
-		try {
-			tp = TagPathParser.parse(providerName,tagPath);
-		}
-		catch(IOException ioe) {
-			log.warnf("%s.createTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
-			return;
-		}
-		// NOTE: Our experience here is that if the simple data provider, then the tags 
-		//       show up in the designer SQLTagsBrowser. This is not the case when defining directly
-		//       through the tag manager. Here the calls appear to succeed, but the tags do not show up.
-		// In the cases where we need historical timestamps,  we use the simple tag provider.
-		DataType dataType = dataTypeFromString(type);
-		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null && dataType!=null  ) {
+		if( tagPath!=null && !tagPath.isEmpty() ) {
+			log.infof("%s.createTag [%s]%s (%s)",CLSS,providerName,tagPath,type);
+			TagPath tp = null;
 			try {
-				// Guarantee that parent paths exist
-				createParents(tp);
-				List<TagNode> toAdd = new ArrayList<>();
-
-				TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
-				node.setDataType(dataType);
-				node.setEnabled(true);
-				node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
-				toAdd.add(node);
-				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+				tp = TagPathParser.parse(providerName,tagPath);
 			}
-			catch(Exception ex) {
-				log.warnf("%s.createTag: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+			catch(IOException ioe) {
+				log.warnf("%s.createTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
+				return;
+			}
+			// In the cases where we need historical timestamps,  we use a simple tag provider.
+			DataType dataType = dataTypeFromString(type);
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			if( provider != null && dataType!=null  ) {
+				try {
+					// Guarantee that parent paths exist
+					createParents(tp);
+					List<TagNode> toAdd = new ArrayList<>();
+
+					TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
+					node.setDataType(dataType);
+					node.setEnabled(true);
+					node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
+					toAdd.add(node);
+					context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+				}
+				catch(Exception ex) {
+					log.warnf("%s.createTag: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+				}
+			}
+			else {
+				log.warnf("%s.createTag: for %s, provider (%s) does not exist or datatype (%s) not supported",CLSS,tagPath,providerName,type);
 			}
 		}
 		else {
-			log.warnf("%s.createTag: for %s, provider (%s) does not exist or datatype (%s) not supported",CLSS,tagPath,providerName,type);
+			log.warnf("%s.createTag: Attempted to create tag with provider (%s), datatype (%s) with an empty tagpath, ignored",CLSS,providerName,type);
 		}
 	}
 
@@ -239,68 +249,78 @@ public class TagFactory  {
 	 * @param historyProvider the datasource containing the history
 	 */
 	public void createTagWithHistory(String providerName, String tagPath, String type,String historyProvider) {
-		tagPath = stripProvider(tagPath);
-		log.infof("%s.createTagWithHistory [%s]%s (%s) on %s",CLSS,providerName,tagPath,type,historyProvider);
-		TagPath tp = null;
-		try {
-			tp = TagPathParser.parse(providerName,tagPath);
-		}
-		catch(IOException ioe) {
-			log.warnf("%s.createTagWithHistory: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
-			return;
-		}
-		DataType dataType = dataTypeFromString(type);
-		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null && dataType!=null ) {
+		if( tagPath!=null && !tagPath.isEmpty() ) {
+			tagPath = stripProvider(tagPath);
+			log.infof("%s.createTagWithHistory [%s]%s (%s) on %s",CLSS,providerName,tagPath,type,historyProvider);
+			TagPath tp = null;
 			try {
-				// Guarantee that parent paths exist
-				createParents(tp);
-				List<TagNode> toAdd = new ArrayList<>();
-				
-				TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
-				node.setDataType(dataType);
-				node.setEnabled(true);
-				node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
-				node.setAttribute(TagProp.HistoryEnabled, new BasicTagValue(Boolean.TRUE));
-				node.setAttribute(TagProp.PrimaryHistoryProvider, new BasicTagValue(historyProvider));
-				node.setAttribute(TagProp.HistoricalScanclass, new BasicTagValue("Default"));
-				node.setAttribute(TagProp.ScanClass, new BasicTagValue("Default"));
-				toAdd.add(node);
-				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+				tp = TagPathParser.parse(providerName,tagPath);
 			}
-			catch(Exception ex) {
-				log.warnf("%s.createTagWithHistory: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+			catch(IOException ioe) {
+				log.warnf("%s.createTagWithHistory: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
+				return;
+			}
+			DataType dataType = dataTypeFromString(type);
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			if( provider != null && dataType!=null ) {
+				try {
+					// Guarantee that parent paths exist
+					createParents(tp);
+					List<TagNode> toAdd = new ArrayList<>();
+
+					TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
+					node.setDataType(dataType);
+					node.setEnabled(true);
+					node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
+					node.setAttribute(TagProp.HistoryEnabled, new BasicTagValue(Boolean.TRUE));
+					node.setAttribute(TagProp.PrimaryHistoryProvider, new BasicTagValue(historyProvider));
+					node.setAttribute(TagProp.HistoricalScanclass, new BasicTagValue("Default"));
+					node.setAttribute(TagProp.ScanClass, new BasicTagValue("Default"));
+					toAdd.add(node);
+					context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
+				}
+				catch(Exception ex) {
+					log.warnf("%s.createTagWithHistory: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+				}
+			}
+			else {
+				log.warnf("%s.createTagWithHistory: for %s, provider (%s) does not exist or datatype (%s) not supported",CLSS,tagPath,providerName,type);
 			}
 		}
 		else {
-			log.warnf("%s.createTagWithHistory: for %s, provider (%s) does not exist or datatype (%s) not supported",CLSS,tagPath,providerName,type);
+			log.warnf("%s.createTagWithHistory: Attempted to create tag with provider (%s), datatype (%s) with an empty tagpath, ignored",CLSS,providerName,type);
 		}
 	}
 	public void deleteTag(String providerName, String tagPath) {
 		tagPath = stripProvider(tagPath);
-		log.debugf("%s.deleteTag [%s]%s",CLSS,providerName,tagPath);
-		TagPath tp = null;
-		try {
-			tp = TagPathParser.parse(providerName,tagPath);
-		}
-		catch(IOException ioe) {
-			log.warnf("%s: deleteTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
-			return;
-		}
-
-		TagProvider provider = context.getTagManager().getTagProvider(providerName);
-		if( provider != null  ) {
-			List<TagPath> tags = new ArrayList<TagPath>();
-			tags.add(tp);
+		if( tagPath!=null && !tagPath.isEmpty() ) {
+			log.debugf("%s.deleteTag [%s]%s",CLSS,providerName,tagPath);
+			TagPath tp = null;
 			try {
-				context.getTagManager().removeTags(tags);
+				tp = TagPathParser.parse(providerName,tagPath);
 			}
-			catch(Exception ex) {
-				log.warnf("%s: deleteTag: Exception deleting tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+			catch(IOException ioe) {
+				log.warnf("%s: deleteTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
+				return;
+			}
+
+			TagProvider provider = context.getTagManager().getTagProvider(providerName);
+			if( provider != null  ) {
+				List<TagPath> tags = new ArrayList<TagPath>();
+				tags.add(tp);
+				try {
+					context.getTagManager().removeTags(tags);
+				}
+				catch(Exception ex) {
+					log.warnf("%s: deleteTag: Exception deleting tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+				}
+			}
+			else {
+				log.warnf("%s.deleteTag: Provider %s does not exist",CLSS,providerName);
 			}
 		}
 		else {
-			log.warnf("%s.deleteTag: Provider %s does not exist",CLSS,providerName);
+			log.warnf("%s.deleteTag: Attempted to delete tag with provider (%s) with an empty tagpath, ignored",CLSS,providerName);
 		}
 	}
 	/**
@@ -599,8 +619,10 @@ public class TagFactory  {
 	// This is for use with commands that explicitly specify
 	// the provider.
 	private String stripProvider(String path) {
-		int pos = path.indexOf("]");
-		if(pos>0) path = path.substring(pos+1);
+		if( path!=null ) {
+			int pos = path.indexOf("]");
+			if(pos>0) path = path.substring(pos+1);
+		}
 		return path;
 	}
 	
