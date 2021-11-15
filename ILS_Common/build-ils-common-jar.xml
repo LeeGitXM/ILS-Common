@@ -8,6 +8,7 @@
 	<property name="src.dir" value="src" />
 	<property name="ant.build.javac.source" value="11"/>
 	<property name="ant.build.javac.target" value="11"/>
+	<property name="external.dir" value="${basedir}/../../external/lib" />
 	
 	<path id="ils-classpath">
 		<fileset dir="${sdk.dir}">
@@ -16,6 +17,9 @@
 		 <fileset dir="${jar.dir}">
 		    <include name="*.jar"/>
 		  </fileset>
+		<fileset dir="${external.dir}">
+			<include name="*.jar"/>
+		</fileset>
 	   <pathelement path="${build.dir}"/>
 	</path>
 	
