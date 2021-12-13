@@ -3,9 +3,9 @@ package com.ils.common.ui;
 import java.io.IOException;
 import java.io.Serializable;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inductiveautomation.ignition.common.gson.JsonParseException;
 import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 
