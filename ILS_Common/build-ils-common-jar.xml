@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Build ils-common.jar directly into the Ignition installation area.   -->
 <project name="ils.makejar" default="all" basedir=".">
+	<!--
 	<property name="jar.dir" value="${ignition.py.lib}/../../lib/core/common" />
+	-->
+	<property name="jar.dir" value="jars" />
 	<property name="sdk.dir" value="${basedir}/../../ignition-80/lib" />
 	<property name="jar.name" value="ils-common.jar" />
 	<property name="build.dir" value="bin" />
@@ -30,14 +33,12 @@
 	<target name="clean" description="Remove existing build products">
 		<mkdir dir="${jar.dir}"/>
 		<mkdir dir="${build.dir}"/>
-		<delete file="${jar.dir}/${jar.name}" />
-        <delete>
+		<delete file="${jar.dir}/${jar.name}" failonerror="false">
             <fileset dir="${build.dir}">
                 <include name="**/*.class"/>
             	<include name="**/*.png"/>
             </fileset>
         </delete>
-		<delete file="~/.ignition/cache/platform/${jar.name}" />
 	</target>
 	
 	<!-- Compile the library and make the jar file -->
@@ -57,7 +58,18 @@
 	<target name="deploy" >
 		<echo message="Copying jar file into ${ignition.py.lib}/../../lib/core/common" />
 		<copy todir="${ignition.py.lib}/../../lib/core/common">
+			<!--
 			<fileset dir="${ignition.py.lib}/../../lib/core/common/">
+			-->
+			<fileset dir="${jar.dir}">
+				<include name="${jar.name}" />
+			</fileset>
+		</copy>
+		
+		<!-- Put the jars into external so that other modules will build --> 
+		<echo message="Copying jar file into ${external.dir}" />
+		<copy todir="${external.dir}">
+			<fileset dir="${jar.dir}">
 				<include name="${jar.name}" />
 			</fileset>
 		</copy>

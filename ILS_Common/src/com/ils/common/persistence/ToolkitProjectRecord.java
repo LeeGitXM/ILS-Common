@@ -20,12 +20,20 @@ public class ToolkitProjectRecord extends PersistentRecord {
 
 	public static final String TABLE_NAME = "ILS_Toolkit_Project_Properties";
 	
+	/*
 	public static final RecordMeta<ToolkitProjectRecord> META = new RecordMeta<>(ToolkitProjectRecord.class, TABLE_NAME);
 	static SFieldFlags[] primary = {SFieldFlags.SPRIMARY_KEY,SFieldFlags.SMANDATORY};
 	static SFieldFlags[] secondary = {SFieldFlags.SMANDATORY};
 	public static final StringField Project = new StringField(META, "Project",primary );
 	public static final StringField Name = new StringField(META, "Name",primary );
 	public static final StringField Value = new StringField(META, "Value",secondary).setDefault("");
+	*/
+	
+	public static final RecordMeta<ToolkitProjectRecord> META = new RecordMeta<>(ToolkitProjectRecord.class, TABLE_NAME);
+	
+	public static final StringField Project = new StringField(META, "Project", SFieldFlags.SPRIMARY_KEY );
+	public static final StringField Name = new StringField(META, "Name", SFieldFlags.SPRIMARY_KEY );
+	public static final StringField Value = new StringField(META, "Value", SFieldFlags.SMANDATORY).setDefault("");
 	
 	public RecordMeta<?> getMeta() {return META; }
 	
