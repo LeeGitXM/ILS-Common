@@ -65,13 +65,5 @@
 				<include name="${jar.name}" />
 			</fileset>
 		</copy>
-		
-		<!-- Put the jars into external so that other modules will build --> 
-		<echo message="Copying jar file into ${external.dir}" />
-		<copy todir="${external.dir}">
-			<fileset dir="${jar.dir}">
-				<include name="${jar.name}" />
-			</fileset>
-		</copy>
 	</target>	
 </project>

@@ -25,7 +25,6 @@ import com.inductiveautomation.ignition.common.util.LogUtil;
 import com.inductiveautomation.ignition.common.util.LoggerEx;
 import com.inductiveautomation.ignition.gateway.model.GatewayContext;
 
-
 /**
  *  Update a SQLTag.
  */
@@ -242,6 +241,7 @@ public class TagWriter  {
 				try {
 					qualities = future.get();
 					qualities.add(QualityCode.Good); 
+
 				}
 				catch (InterruptedException iex) {
 					log.warnf("%s.write: Interrupted getting value for multiple paths",CLSS);

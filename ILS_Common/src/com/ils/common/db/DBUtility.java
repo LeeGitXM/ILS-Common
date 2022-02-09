@@ -67,6 +67,7 @@ public class DBUtility {
 			try {
 				Statement stmt = cxn.createStatement();
 				stmt.executeUpdate(sql);
+				stmt.close();
 			}
 			catch(SQLException sqle) {
 				log.warnf("%s.executeSQL: Exception executing %s (%s)",TAG,sql,sqle.getMessage());

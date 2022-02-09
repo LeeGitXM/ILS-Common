@@ -1,13 +1,8 @@
 <configuration scan="true" scanPeriod="60 seconds">
   <!--  
 		This configuration file is invoked only when the ils-common module is loaded into Ignition.
-<<<<<<< HEAD
 		This module features log messages loaded into a database table for easy searching and sorting.
 		The version here also sifts messages into directories based on project name.
-=======
-		This configuration file configures project sifters to sift messages to project specific log files.
-		It does NOT use the custom database logging feature.
->>>>>>> master
 
   		See  https://logback.qos.ch/manual/configuration.html for hints on the makeup of this file
         NOTE: Any com.ils.common.log classes must be inserted into catapult.jar as logging is
@@ -55,11 +50,7 @@
   <property name="RETENTION_TIME_INFO" value="14." />
   <property name="RETENTION_TIME_DEBUG" value="1." />
   <property name="RETENTION_TIME_TRACE" value="1." />
-<<<<<<< HEAD
   <property name="USE_DATABASE_APPENDER" value="TRUE" />
-=======
-  <property name="USE_DATABASE_APPENDER" value="FALSE" />
->>>>>>> master
 
   <!-- Sample appender for daily rollover.  Path must match the one in the file element or else
        the rollover logs are placed in the working directory. 
@@ -75,11 +66,7 @@
             <maxHistory>1</maxHistory>
 	</rollingPolicy>
     <encoder>
-<<<<<<< HEAD
-          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
-=======
           <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
->>>>>>> master
     </encoder>
   </appender>
   -->
@@ -94,24 +81,8 @@
 	<key>project</key>
     </discriminator>
     <sift>
-<<<<<<< HEAD
-      <appender name="FILE-${project}" class="ch.qos.logback.core.FileAppender">
-        <file>logs/${project}.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>log_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-                <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                    <maxFileSize>5MB</maxFileSize>
-                </timeBasedFileNamingAndTriggeringPolicy>
-                <maxHistory>3</maxHistory>
-        </rollingPolicy>
-        <prudent>true</prudent>
-        <encoder>
-          <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
-         </encoder>
-      </appender>
-=======
-
-	  <appender name="FILE-${project}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+	
+	<appender name="FILE-${project}" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/${project}.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
 			  <fileNamePattern>logs/${project}_%i.log</fileNamePattern>
@@ -128,8 +99,7 @@
           <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
          </encoder>
       </appender>
- 
->>>>>>> master
+	
      </sift>
    </appender>
 

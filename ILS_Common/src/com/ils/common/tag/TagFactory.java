@@ -319,7 +319,11 @@ public class TagFactory  {
 				log.warnf("%s.deleteTag: Provider %s does not exist",CLSS,providerName);
 			}
 		}
+		else {
+			log.warnf("%s.deleteTag: Attempted to delete tag with provider (%s) with an empty tagpath, ignored",CLSS,providerName);
+		}
 	}
+
 	/**
 	 * Rename a tag keeping the folder structure intact. If the tag does not
 	 * exist or the rename fails, then create the tag as a String.
@@ -519,7 +523,7 @@ public class TagFactory  {
 	}
 
 	/**
-	 * Convert a string data type into a data type object
+	 * Convert a string data type into a data type object. If the dataType is not recognized, return NULL
 	 */
 	private DataType dataTypeFromString( String type ) {
 		DataType result = null;
@@ -582,8 +586,10 @@ public class TagFactory  {
 	// This is for use with commands that explicitly specify
 	// the provider.
 	private String stripProvider(String path) {
-		int pos = path.indexOf("]");
-		if(pos>0) path = path.substring(pos+1);
+		if( path!=null ) {
+			int pos = path.indexOf("]");
+			if(pos>0) path = path.substring(pos+1);
+		}
 		return path;
 	}
 	

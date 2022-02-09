@@ -90,8 +90,18 @@ public class WatchdogTimer implements Runnable   {
 	}
 
 	/**
+	 * Clear the kennel, remove the dogs
+	 * @return
+	 */
+	public void reset() {
+		dogs.clear();
+		dogs.push(idleDog);
+		return;
+	}
+
+	/**
 	 * Remove the specified watchdog from the list.
-	 * If this is the fist dog in the list, then restart
+	 * If this is the first dog in the list, then restart
 	 * the timer. We assume that the IDLE dog will never
 	 * be removed. 
 	 * @param dog to be removed
@@ -166,6 +176,16 @@ public class WatchdogTimer implements Runnable   {
 			dog.setActive(false);
 			threadPool.execute(new WatchdogExpirationTask(dog));
 		}
+	}
+
+	/**
+	 * If top dog is the IDLE dog, then simply "pet" it.
+	 * Otherwise pop the top dog and inform its observer of the expiration. 
+	 * Run the observer in its own thread. 
+	 */
+	public Watchdog getTopDog() {
+		Watchdog dog = dogs.peek();
+		return dog;
 	}
 
 	/**

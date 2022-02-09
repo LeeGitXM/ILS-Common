@@ -2,3 +2,6 @@
 bin/
 lib/
 .metadata
+.classpath
+.project
+/.recommenders/

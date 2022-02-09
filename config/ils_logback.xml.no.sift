@@ -65,7 +65,11 @@
             <maxHistory>5</maxHistory>
 	</rollingPolicy>
     <encoder>
+<<<<<<< HEAD
           <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+=======
+          <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+>>>>>>> master
     </encoder>
   </appender>
 
@@ -92,7 +96,11 @@
         </rollingPolicy>
         <prudent>true</prudent>
         <encoder>
+<<<<<<< HEAD
           <pattern>%d{HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+=======
+          <pattern>%d{yyyy/MM/dd HH:mm:ss.SSS} %level %logger{35} %msg%n</pattern>
+>>>>>>> master
          </encoder>
       </appender>
      </sift>
