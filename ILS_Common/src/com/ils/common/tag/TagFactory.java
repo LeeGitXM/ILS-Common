@@ -181,15 +181,17 @@ public class TagFactory  {
 		int seg = 1;
 		while(seg<segcount) {
 			TagPath tp = BasicTagPath.subPath(path,0, seg);
-			log.debugf("%s.createParents: Subpath = %s",CLSS,tp.toStringFull());
-			TagDefinition tag = new TagDefinition(tp.getItemName(),TagType.Folder);
-			try {
-				List<TagNode> toAdd = new ArrayList<>();
-				toAdd.add(tag);
-				context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Ignore);
-			}
-			catch(Exception ex) {
-				log.warnf("%s.createParents: Exception creating tag folder %s (%s)",CLSS,tp,ex.getLocalizedMessage());
+			if( context.getTagManager().getTag(tp)==null ) {
+				log.infof("%s.createParents: Subpath = %s",CLSS,tp.toStringFull());
+				TagDefinition tag = new TagDefinition(tp.getItemName(),TagType.Folder);
+				try {
+					List<TagNode> toAdd = new ArrayList<>();
+					toAdd.add(tag);
+					context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Ignore);
+				}
+				catch(Exception ex) {
+					log.warnf("%s.createParents: Exception creating tag folder %s (%s)",CLSS,tp,ex.getLocalizedMessage());
+				}
 			}
 			seg++;
 		}
