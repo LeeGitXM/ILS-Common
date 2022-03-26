@@ -1,5 +1,5 @@
 /**
- *   (c) 2013-2015  ILS Automation. All rights reserved.
+ *   (c) 2013-2022  ILS Automation. All rights reserved.
  */
 package com.ils.common.tag;
 
@@ -130,7 +130,7 @@ public class TagFactory  {
 	 * @param history
 	 */
 	public void createExpressionWithHistory(String providerName, String tagPath, String type, String expr,String historyProvider) {
-		log.infof("%s.createExpressionWithHistory: [%s]%s (%s) = %s (%s)",CLSS,providerName,tagPath,type,expr,historyProvider);
+		log.debugf("%s.createExpressionWithHistory: [%s]%s (%s) = %s (%s)",CLSS,providerName,tagPath,type,expr,historyProvider);
 		tagPath = stripProvider(tagPath);
 		if( tagPath!=null && !tagPath.isEmpty() ) {
 			TagPath tp = null;
@@ -182,7 +182,7 @@ public class TagFactory  {
 		while(seg<segcount) {
 			TagPath tp = BasicTagPath.subPath(path,0, seg);
 			if( context.getTagManager().getTag(tp)==null ) {
-				log.infof("%s.createParents: Subpath = %s",CLSS,tp.toStringFull());
+				log.debugf("%s.createParents: Subpath = %s",CLSS,tp.toStringFull());
 				TagDefinition tag = new TagDefinition(tp.getItemName(),TagType.Folder);
 				try {
 					List<TagNode> toAdd = new ArrayList<>();
@@ -205,7 +205,9 @@ public class TagFactory  {
 	 */
 	public void createTag(String providerName, String tagPath, String type) {
 		if( tagPath!=null && !tagPath.isEmpty() ) {
-			log.infof("%s.createTag [%s]%s (%s)",CLSS,providerName,tagPath,type);
+			tagPath = stripProvider(tagPath);
+			tagPath = String.format("[%s]%s", providerName,tagPath);
+			log.debugf("%s.createTag %s (%s)",CLSS,tagPath,type);
 			TagPath tp = null;
 			try {
 				tp = TagPathParser.parse(providerName,tagPath);
@@ -226,12 +228,15 @@ public class TagFactory  {
 					TagDefinition node = new TagDefinition(tp.getItemName(),TagType.DB);
 					node.setDataType(dataType);
 					node.setEnabled(true);
+					node.setType(TagType.DB);
 					node.setAccessRights(AccessRightsType.Read_Write);    // Or Custom?
 					toAdd.add(node);
 					context.getTagManager().addTags(tp.getParentPath(), toAdd, TagManagerBase.CollisionPolicy.Overwrite);
 				}
 				catch(Exception ex) {
-					log.warnf("%s.createTag: Exception creating tag %s (%s)",CLSS,tagPath,ex.getLocalizedMessage());
+					String msg = String.format("%s.createTag: Exception creating %s tag [%s]%s/%s", CLSS,type,tp.getSource(),tp.getParentPath().toStringFull(),
+							tp.getItemName());
+					log.warn(msg,ex);
 				}
 			}
 			else {
@@ -253,7 +258,7 @@ public class TagFactory  {
 	public void createTagWithHistory(String providerName, String tagPath, String type,String historyProvider) {
 		if( tagPath!=null && !tagPath.isEmpty() ) {
 			tagPath = stripProvider(tagPath);
-			log.infof("%s.createTagWithHistory [%s]%s (%s) on %s",CLSS,providerName,tagPath,type,historyProvider);
+			log.debugf("%s.createTagWithHistory [%s]%s (%s) on %s",CLSS,providerName,tagPath,type,historyProvider);
 			TagPath tp = null;
 			try {
 				tp = TagPathParser.parse(providerName,tagPath);
