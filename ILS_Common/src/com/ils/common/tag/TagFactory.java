@@ -15,19 +15,21 @@ import com.ils.common.persistence.ToolkitProperties;
 import com.ils.common.persistence.ToolkitRecordHandler;
 import com.inductiveautomation.ignition.common.browsing.BrowseFilter;
 import com.inductiveautomation.ignition.common.browsing.Results;
+import com.inductiveautomation.ignition.common.config.BasicBoundPropertySet;
+import com.inductiveautomation.ignition.common.config.BoundPropertySet;
 import com.inductiveautomation.ignition.common.model.values.BasicQualifiedValue;
 import com.inductiveautomation.ignition.common.model.values.QualifiedValue;
 import com.inductiveautomation.ignition.common.model.values.QualityCode;
 import com.inductiveautomation.ignition.common.sqltags.TagDefinition;
 import com.inductiveautomation.ignition.common.sqltags.model.TagProp;
-import com.inductiveautomation.ignition.common.sqltags.model.types.AccessRightsType;
 import com.inductiveautomation.ignition.common.sqltags.model.types.DataType;
-import com.inductiveautomation.ignition.common.sqltags.model.types.ExpressionType;
 import com.inductiveautomation.ignition.common.tags.browsing.NodeDescription;
 import com.inductiveautomation.ignition.common.tags.config.BasicTagConfiguration;
 import com.inductiveautomation.ignition.common.tags.config.CollisionPolicy;
 import com.inductiveautomation.ignition.common.tags.config.TagConfiguration;
 import com.inductiveautomation.ignition.common.tags.config.TagConfigurationModel;
+import com.inductiveautomation.ignition.common.tags.config.properties.WellKnownTagProps;
+import com.inductiveautomation.ignition.common.tags.config.types.ExpressionTypeProperties;
 import com.inductiveautomation.ignition.common.tags.config.types.TagObjectType;
 import com.inductiveautomation.ignition.common.tags.model.SecurityContext;
 import com.inductiveautomation.ignition.common.tags.model.TagPath;
@@ -45,6 +47,7 @@ import com.inductiveautomation.ignition.gateway.model.GatewayContext;
  */
 public class TagFactory  {
 	private static final String CLSS = "TagFactory";
+	private static boolean DEBUG = false;
 	private final LoggerEx log;
 	private final GatewayContext context;
 	private final List<TagPath> visitOrder;
@@ -85,16 +88,15 @@ public class TagFactory  {
 			try {
 				// Guarantee that parent paths exist
 				createParents(provider,tp);
+				BoundPropertySet tag = new BasicBoundPropertySet();
+				tag.set(WellKnownTagProps.Name, tp.getLastPathComponent());
+				tag.set(WellKnownTagProps.TagType, TagObjectType.AtomicTag);
+				tag.set(WellKnownTagProps.DataType, dataType);
+				tag.set(WellKnownTagProps.ValueSource, ExpressionTypeProperties.TAG_TYPE);
+				tag.set(ExpressionTypeProperties.Expression, expr);
+				BasicTagConfiguration cfg = BasicTagConfiguration.createNew(tp, tag);
 				List<TagConfiguration> toAdd = new ArrayList<>();	
-				BasicTagConfiguration node = new BasicTagConfiguration();
-				node.setPath(tp);
-				node.setType(TagObjectType.AtomicTag);
-				node.set(TagProp.DataType,dataType);
-				node.set(TagProp.ExpressionType, new BasicQualifiedValue(ExpressionType.Expression));
-				node.set(TagProp.Expression, new BasicQualifiedValue(expr));
-				node.set(TagProp.Enabled,true);
-				node.set(TagProp.AccessRights,AccessRightsType.Read_Write);
-				toAdd.add(node);
+				toAdd.add(cfg);
 				CompletableFuture<List<QualityCode>> future = provider.saveTagConfigsAsync(toAdd,CollisionPolicy.Overwrite,SecurityContext.systemContext());
 				future.get();
 			}
@@ -136,19 +138,18 @@ public class TagFactory  {
 				// Guarantee that parent paths exist
 				createParents(provider,tp);
 				List<TagConfiguration> toAdd = new ArrayList<>();
-				BasicTagConfiguration node = new BasicTagConfiguration();
-				node.setPath(tp);
-				node.setType(TagObjectType.AtomicTag);
-				node.set(TagProp.DataType,dataType);
-				node.set(TagProp.Enabled,true);
-				node.set(TagProp.AccessRights,AccessRightsType.Read_Write);
-				node.set(TagProp.ExpressionType, new BasicQualifiedValue(ExpressionType.Expression));
-				node.set(TagProp.Expression, new BasicQualifiedValue(expr)); 
-				node.set(TagProp.HistoryEnabled, new BasicQualifiedValue(Boolean.TRUE));
-				node.set(TagProp.PrimaryHistoryProvider, new BasicQualifiedValue(historyProvider));
-				node.set(TagProp.HistoricalScanclass, new BasicQualifiedValue("Default"));
-				node.set(TagProp.ScanClass, new BasicQualifiedValue("Default"));
-				toAdd.add(node);
+				BoundPropertySet tag = new BasicBoundPropertySet();
+				tag.set(WellKnownTagProps.Name, tp.getLastPathComponent());
+				tag.set(WellKnownTagProps.TagType, TagObjectType.AtomicTag);
+				tag.set(WellKnownTagProps.DataType, dataType);
+				tag.set(WellKnownTagProps.Enabled, Boolean.TRUE);
+				tag.set(WellKnownTagProps.ValueSource, ExpressionTypeProperties.TAG_TYPE);
+				tag.set(ExpressionTypeProperties.Expression, expr); 
+				tag.set(WellKnownTagProps.HistoryEnabled, Boolean.TRUE);
+				tag.set(WellKnownTagProps.HistoryProvider, historyProvider);
+				tag.set(WellKnownTagProps.TagGroup, "Default");
+				BasicTagConfiguration cfg = BasicTagConfiguration.createNew(tp, tag);	
+				toAdd.add(cfg);
 				CompletableFuture<List<QualityCode>> future = provider.saveTagConfigsAsync(toAdd,CollisionPolicy.Overwrite,SecurityContext.systemContext());
 				future.get();
 			}
@@ -166,14 +167,14 @@ public class TagFactory  {
 		int seg = 1;
 		while(seg<segcount) {
 			TagPath tp = BasicTagPath.subPath(path,0, seg);
-			log.debugf("%s.createParents: Subpath = %s",CLSS,tp.toStringFull());
+			if(DEBUG) log.infof("%s.createParents: Subpath = %s",CLSS,tp.toStringFull());
 			BasicTagConfiguration tag = new BasicTagConfiguration();
 			tag.setPath(tp);
 			tag.setType(TagObjectType.Folder);
 			try {
 				List<TagConfiguration> toAdd = new ArrayList<>();
 				toAdd.add(tag);
-				CompletableFuture<List<QualityCode>> future = provider.saveTagConfigsAsync(toAdd,CollisionPolicy.Overwrite,SecurityContext.systemContext());
+				CompletableFuture<List<QualityCode>> future = provider.saveTagConfigsAsync(toAdd,CollisionPolicy.Ignore,SecurityContext.systemContext());
 				future.get();
 			}
 			catch(Exception ex) {
@@ -201,9 +202,9 @@ public class TagFactory  {
 	 * @param tagPath
 	 * @param type String version of datatype
 	 */
-	public void createTag(String providerName, String tagPath, DataType dataType) {
+	public synchronized void createTag(String providerName, String tagPath, DataType dataType) {
 		tagPath = stripProvider(tagPath);
-		log.debugf("%s.createTag [%s]%s (%s)",CLSS,providerName,tagPath,dataType.name());
+		if(DEBUG) log.infof("%s.createTag [%s]%s (%s)",CLSS,providerName,tagPath,dataType.name());
 		TagPath tp = null;
 		try {
 			tp = TagPathParser.parse(providerName,tagPath);
@@ -222,14 +223,13 @@ public class TagFactory  {
 				// Guarantee that parent paths exist
 				createParents(provider,tp);
 				List<TagConfiguration> toAdd = new ArrayList<>();
-
-				BasicTagConfiguration node = new BasicTagConfiguration();
-				node.setPath(tp);
-				node.setType(TagObjectType.AtomicTag);
-				node.set(TagProp.DataType,dataType);
-				node.set(TagProp.Enabled,true);
-				node.set(TagProp.AccessRights,AccessRightsType.Read_Write);
-				toAdd.add(node);
+				BoundPropertySet tag = new BasicBoundPropertySet();
+				tag.set(WellKnownTagProps.Name, tp.getLastPathComponent());
+				tag.set(WellKnownTagProps.TagType, TagObjectType.AtomicTag);
+				tag.set(WellKnownTagProps.Enabled, Boolean.TRUE);
+				tag.set(WellKnownTagProps.DataType, dataType);
+				BasicTagConfiguration cfg = BasicTagConfiguration.createNew(tp, tag);	
+				toAdd.add(cfg);
 				CompletableFuture<List<QualityCode>> future = provider.saveTagConfigsAsync(toAdd,CollisionPolicy.Overwrite,SecurityContext.systemContext());
 				future.get();
 			}
@@ -267,18 +267,14 @@ public class TagFactory  {
 				// Guarantee that parent paths exist
 				createParents(provider,tp);
 				List<TagConfiguration> toAdd = new ArrayList<>();
-				
-				BasicTagConfiguration node = new BasicTagConfiguration();
-				node.setPath(tp);
-				node.setType(TagObjectType.AtomicTag);
-				node.set(TagProp.DataType,dataType);
-				node.set(TagProp.Enabled,true);;
-				node.set(TagProp.AccessRights,AccessRightsType.Read_Write);
-				node.set(TagProp.HistoryEnabled, new BasicQualifiedValue(Boolean.TRUE));
-				node.set(TagProp.PrimaryHistoryProvider, new BasicQualifiedValue(historyProvider));
-				node.set(TagProp.HistoricalScanclass, new BasicQualifiedValue("Default"));
-				node.set(TagProp.ScanClass, new BasicQualifiedValue("Default"));
-				toAdd.add(node);
+				BoundPropertySet tag = new BasicBoundPropertySet();
+				tag.set(WellKnownTagProps.Name, "Name");
+				tag.set(WellKnownTagProps.TagType, TagObjectType.AtomicTag);
+				tag.set(WellKnownTagProps.Enabled, Boolean.TRUE);
+				tag.set(WellKnownTagProps.DataType, dataType);
+				tag.set(WellKnownTagProps.ValueSource, ExpressionTypeProperties.TAG_TYPE);
+				BasicTagConfiguration cfg = BasicTagConfiguration.createNew(tp, tag);	
+				toAdd.add(cfg);
 				CompletableFuture<List<QualityCode>> future = provider.saveTagConfigsAsync(toAdd,CollisionPolicy.Overwrite,SecurityContext.systemContext());
 				future.get();
 			}
