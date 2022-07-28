@@ -34,7 +34,7 @@ public class ToolkitProjectRecordHandler  {
 	public String getToolkitProjectProperty(String projectName,String propertyName) {
 		String value = "";
 		try {
-			log.infof("%s.getToolkitProperty: getting %s - %s", CLSS, projectName,propertyName);
+			log.tracef("%s.getToolkitProperty: getting %s - %s", CLSS, projectName,propertyName);
 			ToolkitProjectRecord record = context.getPersistenceInterface().find(ToolkitProjectRecord.META, projectName,propertyName);
 			if( record!=null) value =  record.getValue();
 		}
