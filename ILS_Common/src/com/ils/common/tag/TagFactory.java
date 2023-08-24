@@ -213,6 +213,18 @@ public class TagFactory  {
 			log.warnf("%s.createTag: Exception parsing tag %s (%s)",CLSS,tagPath,ioe.getLocalizedMessage());
 			return;
 		}
+		
+		if(DEBUG) log.infof("%s tp.getSource(): %s", CLSS, tp.getSource());
+		if(DEBUG) log.infof("%s tp.toString(): %s", CLSS, tp.toString());
+		if(DEBUG) log.infof("%s tp.toStringFull(): %s", CLSS, tp.toStringFull());
+		
+		
+		TagValidator validator = new TagValidator(context);
+		if( validator.exists(tp.toString()) ) {
+			if(DEBUG) log.infof("%s.createTag() - the tag already exists!", CLSS);
+			return;
+		}
+		
 		// NOTE: Our experience here is that if the simple data provider, then the tags 
 		//       show up in the designer SQLTagsBrowser. This is not the case when defining directly
 		//       through the tag manager. Here the calls appear to succeed, but the tags do not show up.
@@ -228,6 +240,7 @@ public class TagFactory  {
 				tag.set(WellKnownTagProps.TagType, TagObjectType.AtomicTag);
 				tag.set(WellKnownTagProps.Enabled, Boolean.TRUE);
 				tag.set(WellKnownTagProps.DataType, dataType);
+				if(DEBUG) log.infof("%s.createTag Really creating it!",CLSS);
 				BasicTagConfiguration cfg = BasicTagConfiguration.createNew(tp, tag);	
 				toAdd.add(cfg);
 				CompletableFuture<List<QualityCode>> future = provider.saveTagConfigsAsync(toAdd,CollisionPolicy.Overwrite,SecurityContext.systemContext());
